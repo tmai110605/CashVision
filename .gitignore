@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Datasets
+train/
+valid/
+test/
+
+# YOLO results
+runs/
+resultsv8n/
+resultsv11n/
+
+# Model weights
+*.pt
+*.pth
+
+# Virtual environments
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/

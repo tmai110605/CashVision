@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 7
+names: ['10', '100', '20', '200', '50', '500', 'torn']
+
+roboflow:
+  workspace: minam-66jby
+  project: bank_notes-1plen
+  version: dataset
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/minam-66jby/bank_notes-1plen/dataset/dataset
