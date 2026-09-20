@@ -1,6 +1,6 @@
 ﻿# Seeing Through the Glare: A Real-Time, Energy-Efficient Mobile Banknote Inspector for Visually Impaired Assistance
 
-<iframe src="graphic.pdf" width="100%" height="600px"></iframe>
+![Architectur](graphic.png)
 
 A real-time, illumination-robust, and energy-efficient mobile computer vision system for joint denomination recognition and tear defect localization of Vietnamese polymer banknotes on handheld devices to assist visually impaired individuals.
 
@@ -22,11 +22,13 @@ A real-time, illumination-robust, and energy-efficient mobile computer vision sy
 Polymer banknotes (BOPP substrate) feature smooth, non-porous surfaces and transparent diffractive optical windows that reflect intense specular flash glare, blinding camera sensors and obliterating denomination numerals and tactile security features. In everyday circulation, banknotes also suffer mechanical tear fractures along fold lines.
 
 **CashVision** resolves these challenges through an integrated, energy-aware mobile architecture:
-***MQTone (Micro-scale Quality Tone-mapping Network):** An ultra-lightweight dual-branch tone-mapping neural module ($19{,}686$ parameters, $<0.1$\,MB footprint) that selectively suppresses localized specular glare and recovers obscured contrast in $1.25$\,ms (GPU) / $23.2$\,ms (mobile CPU).
+* **MQTone (Micro-scale Quality Tone-mapping Network):** An ultra-lightweight dual-branch tone-mapping neural module ($19{,}686$ parameters, $<0.1$\,MB footprint) that selectively suppresses localized specular glare and recovers obscured contrast in $1.25$\,ms (GPU) / $23.2$\,ms (mobile CPU).
+![MQTone](mqtone.png)
 * **Quality-Gate:** A 2-tier optical monitoring module (Tier-1 Spatial Texture Filter $\sigma_{\text{gray}} > 15.0$ in $<0.05$\,ms + Tier-2 photometric CNN classifier in $1.70$\,ms) that filters incoming video frames before triggering heavy inference.
+![Quality-Gate](quality.png)
 * **Dual-Task Detector (YOLOv8n):** Simultaneously predicts 6 banknote denominations ($10\text{k}, 20\text{k}, 50\text{k}, 100\text{k}, 200\text{k}, 500\text{k}$ VND) and localizes physical tear defect bounding boxes.
 * **Temporal Consensus FSM:** A 3-state finite state machine that accumulates candidate detections across consecutive frames ($K_{\text{con}} = 3$), eliminating single-frame transient errors and saving battery power.
-
+![FSM](joint.png)
 ```
 Camera Stream (30 FPS)
          │
