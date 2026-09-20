@@ -1,5 +1,5 @@
 ﻿# Seeing Through the Glare: A Real-Time, Energy-Efficient Mobile Banknote Inspector for Visually Impaired Assistance
-
+Abstract -
 ![Architectur](graphic.png)
 
 A real-time, illumination-robust, and energy-efficient mobile computer vision system for joint denomination recognition and tear defect localization of Vietnamese polymer banknotes on handheld devices to assist visually impaired individuals.
