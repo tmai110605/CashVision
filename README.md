@@ -108,9 +108,6 @@ Quantify the baseline performance degradation of standard detectors (YOLOv8n, YO
 ```bash
 # Run 5-fold cross-validation on YOLOv8n and YOLO11n
 python run_e1.py --models yolov8n yolo11n --n_splits 5 --epochs 100 --batch 16 --device 0
-
-# Run on CPU
-python run_e1.py --models yolov8n --n_splits 5 --epochs 100 --batch 16 --device cpu
 ```
 
 Summary metrics (denomination recognition accuracy, tear mAP@50, and miss rates) are automatically recorded in `resultsc1/`.
