@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-augment.py — Script tăng cường dữ liệu ảnh tiền polymer (YOLO format)
+augment.py — Polymer banknote data augmentation pipeline (YOLO format)
 
-3 loại augmentation được nâng cấp:
-  1. Photometric augmentation (toàn bộ train set, kết hợp biến đổi toàn cục và cục bộ)
-  2. Light/Dark pair (cho consistency loss: 50% toàn cục + 50% chói sáng / bóng đổ cục bộ)
-  3. Oversampling lớp rách (torn class, kết hợp chói sáng cục bộ mô phỏng torn_bright)
+3 augmentation categories:
+  1. Photometric augmentation (global tone shifts and local perturbations)
+  2. Light/Dark pair (for consistency supervision: global + localized glare/shadow)
+  3. Tear class oversampling (simulating glare-degraded physical tears)
 
-Hỗ trợ chạy độc lập qua CLI hoặc import trực tiếp từ run_c2.py cho từng fold.
+Supports standalone CLI execution or programmatic import per fold.
 """
 
 import argparse
@@ -37,7 +37,7 @@ TORN_TARGET_PER_DENOM = 70
 
 
 def _make_ellipse_mask(h: int, w: int) -> np.ndarray:
-    """Tạo 1 mask elip mềm ngẫu nhiên (dùng chung cho glare/shadow)."""
+    """Generate random soft elliptical mask for glare/shadow effects."""
     cx = np.random.randint(int(w * 0.15), int(w * 0.85))
     cy = np.random.randint(int(h * 0.15), int(h * 0.85))
     rx = np.random.randint(int(w * 0.10), int(w * 0.35))
@@ -53,10 +53,10 @@ def _make_ellipse_mask(h: int, w: int) -> np.ndarray:
 
 def apply_specular_glare(img_bgr: np.ndarray, seed: int = None, n_spots: int = None) -> np.ndarray:
     """
-    Mô phỏng vệt chói sáng cục bộ (Specular Glare) trên chất liệu tiền polymer:
-    Tạo 1 hoặc nhiều vệt sáng hình elip với tâm ngẫu nhiên, bán kính biến thiên và
-    suy giảm Gaussian mượt mà. n_spots=None -> ngẫu nhiên 1-2 vệt (đa dạng hoá hơn
-    bản 1-vệt-cố-định trước đây, để Local Grid Head học được nhiều pattern hơn).
+    Simulate localized specular glare on BOPP polymer substrates:
+    Generates elliptical highlight patches with random center, variable radius, and
+    smooth Gaussian roll-off. n_spots=None selects 1-2 highlight centers to expose
+    the Local Grid Head to diverse spatial illumination patterns.
     """
     if seed is not None:
         np.random.seed(seed)
@@ -69,7 +69,7 @@ def apply_specular_glare(img_bgr: np.ndarray, seed: int = None, n_spots: int = N
     for _ in range(n_spots):
         combined_mask = np.maximum(combined_mask, _make_ellipse_mask(h, w))
 
-    # Cường độ chói (+70 đến +160 pixel)
+    # Glare intensity boost (+70 to +160 pixel values)
     intensity = np.random.uniform(70.0, 160.0)
     glare = (combined_mask[:, :, np.newaxis] * intensity).astype(np.float32)
 
@@ -79,9 +79,9 @@ def apply_specular_glare(img_bgr: np.ndarray, seed: int = None, n_spots: int = N
 
 def apply_local_shadow(img_bgr: np.ndarray, seed: int = None, n_spots: int = None) -> np.ndarray:
     """
-    Mô phỏng bóng đổ cục bộ dạng ELIP (Local Shadow):
-    Tạo 1-2 vùng tối cục bộ có cạnh suy giảm mượt mà để mô phỏng góc khuất ánh sáng /
-    bàn tay che. n_spots=None -> ngẫu nhiên 1-2 vùng.
+    Simulate localized elliptical shadows:
+    Generates smooth localized attenuation regions simulating partial hand occlusion /
+    shadow casting. n_spots=None selects 1-2 shadow regions.
     """
     if seed is not None:
         np.random.seed(seed)
@@ -103,7 +103,7 @@ def apply_local_shadow(img_bgr: np.ndarray, seed: int = None, n_spots: int = Non
         m = cv2.GaussianBlur(m, (ksize, ksize), 0)
         combined_mask = np.maximum(combined_mask, m)
 
-    # Hệ số giảm sáng (giảm 35% - 65%)
+    # Attenuation factor (35% - 65% luminance reduction)
     drop_factor = np.random.uniform(0.35, 0.65)
     shadow_map = 1.0 - (combined_mask[:, :, np.newaxis] * drop_factor)
     img_out = np.clip(img_bgr.astype(np.float32) * shadow_map, 0, 255).astype(np.uint8)
@@ -112,19 +112,19 @@ def apply_local_shadow(img_bgr: np.ndarray, seed: int = None, n_spots: int = Non
 
 def apply_directional_shadow(img_bgr: np.ndarray, seed: int = None) -> np.ndarray:
     """
-    Mô phỏng bóng đổ CÓ HƯỚNG (Directional/Gradient Shadow):
-    Backlight thật thường không phải 1 đốm tối tròn ở giữa mà là một dải tối chạy dọc
-    theo 1 cạnh của ảnh và mờ dần vào giữa (do nguồn sáng chiếu từ phía sau/1 bên chủ
-    thể). Hàm này tạo gradient tuyến tính theo 1 hướng ngẫu nhiên (trên/dưới/trái/phải)
-    thay vì luôn dùng elip đối xứng tâm -- giúp Local Grid Head thấy thêm 1 dạng suy
-    hao không gian khác với apply_local_shadow, sát với backlight/torn_bright thật hơn.
+    Simulate directional / gradient shadows:
+    Authentic backlighting presents as directional linear attenuation gradients
+    across banknote borders rather than symmetric circular spots.
+    Generates a linear spatial gradient along a random direction
+    (top/bottom/left/right) to emulate real backlighting conditions.
+    
     """
     if seed is not None:
         np.random.seed(seed)
     h, w = img_bgr.shape[:2]
 
     edge = np.random.choice(['top', 'bottom', 'left', 'right'])
-    coverage = np.random.uniform(0.35, 0.65)  # tỉ lệ chiều dài ảnh bị ảnh hưởng
+    coverage = np.random.uniform(0.35, 0.65)  # spatial coverage fraction
     drop_factor = np.random.uniform(0.30, 0.60)
 
     if edge in ('top', 'bottom'):
@@ -138,7 +138,7 @@ def apply_directional_shadow(img_bgr: np.ndarray, seed: int = None) -> np.ndarra
             ramp = ramp[::-1]
         grad = np.tile(ramp[None, :], (h, 1))
 
-    # Làm mượt gradient để tránh viền cứng
+    # Smooth gradient transition boundary
     ksize = max(15, (min(h, w) // 8) * 2 + 1)
     grad = cv2.GaussianBlur(grad.astype(np.float32), (ksize, ksize), 0)
 
@@ -189,10 +189,10 @@ def write_label(label_path: Path, lines: list):
 
 def apply_and_save(transform, img_bgr, out_img_path: Path, seed=None, local_effect=None):
     """
-    Áp dụng biến đổi Albumentations kết hợp hiệu ứng cục bộ (nếu có) và lưu ảnh.
-    local_effect: None, 'glare', 'shadow', hoặc 'directional_shadow'
-    transform=None -> bỏ qua bước Albumentations, chỉ áp hiệu ứng cục bộ (dùng cho
-    các sample 'local_only', để tách tín hiệu local khỏi biến đổi global).
+    Apply Albumentations transformations with localized photometric effects.
+    local_effect: None, 'glare', 'shadow', or 'directional_shadow'
+    transform=None skips global affine transforms, applying localized modulation only
+    (used for local-only samples to isolate spatial residual signals).
     """
     if seed is not None:
         random.seed(seed)
@@ -249,7 +249,7 @@ def compute_torn_copies(torn_images_by_denom: dict):
 
 
 def merge_to_train(augmented_dir: Path, train_dir: Path):
-    print("\n[MERGE] Đang gộp train_augmented/ vào train/ ...")
+    print("\n[MERGE] Merging train_augmented/ into train/ ...")
     src_images = augmented_dir / "images"
     src_labels = augmented_dir / "labels"
     dst_images = train_dir / "images"
@@ -261,7 +261,7 @@ def merge_to_train(augmented_dir: Path, train_dir: Path):
     for f in src_labels.glob("*.txt"):
         shutil.copy2(f, dst_labels / f.name)
         n_lbl += 1
-    print(f"[MERGE] Đã copy {n_img} ảnh + {n_lbl} nhãn vào train/")
+    print(f"[MERGE] Copied {n_img} images + {n_lbl} labels into train/")
 
 
 def run_augmentation(
@@ -283,7 +283,7 @@ def run_augmentation(
     log_path = out_root / "augmentation_log.csv"
     combined_meta_path = out_root / "combined_metadata_augmented.csv"
 
-    # Đọc danh sách ảnh cần augment
+    # Read image filelist for augmentation
     target_filenames = set()
     if image_list is not None:
         target_filenames = set(str(x).strip() for x in image_list)
@@ -291,7 +291,7 @@ def run_augmentation(
         with open(image_list_path, 'r', encoding='utf-8') as f:
             target_filenames = set(line.strip() for line in f if line.strip())
 
-    # Tìm kiếm file ảnh và nhãn
+    # Locate corresponding image and label files
     img_map = {}
     lbl_map = {}
     for root, _, files in os.walk(data_path):
@@ -302,7 +302,7 @@ def run_augmentation(
             elif p.suffix.lower() == '.txt' and file != 'classes.txt':
                 lbl_map[p.stem] = p
 
-    # Lọc danh sách ảnh
+    # Filter candidate images
     if len(target_filenames) > 0:
         image_files = [img_map[fname] for fname in target_filenames if fname in img_map]
     else:
@@ -312,9 +312,9 @@ def run_augmentation(
         else:
             image_files = sorted(list(img_map.values()))
 
-    print(f"[AUGMENT] Chuẩn bị augment cho {len(image_files)} ảnh -> Output: {out_root}")
+    print(f"[AUGMENT] Preparing augmentation for {len(image_files)} images -> Output: {out_root}")
 
-    # Đọc metadata gốc nếu có
+    # Load metadata catalog if present
     meta_df = None
     if metadata_path and Path(metadata_path).exists():
         meta_df = pd.read_csv(metadata_path)
@@ -346,7 +346,7 @@ def run_augmentation(
         denom = infer_denomination(label_lines, torn_class_id)
         is_torn = has_torn_class(label_lines, torn_class_id)
 
-        # Lấy metadata gốc
+        # Retrieve original metadata
         orig_cond = "indoor"
         orig_denom_num = 10000
         if meta_df is not None:
@@ -355,9 +355,9 @@ def run_augmentation(
                 orig_cond = match['condition'].iloc[0]
                 orig_denom_num = match['denomination_class'].iloc[0]
 
-        # Thêm ảnh gốc vào combined metadata
-        # orig_img_path = chính nó (ảnh gốc không bị degrade) -- dùng làm target cho
-        # identity/photometric loss của IC-Net (task 1): IC-Net(ảnh gốc) nên ≈ ảnh gốc.
+        # Append original image entry to combined metadata
+        # orig_img_path points to clean reference target for photometric consistency supervision
+        
         combined_meta_rows.append({
             'filename': img_path.name,
             'img_path': str(img_path),
@@ -373,12 +373,11 @@ def run_augmentation(
         if is_torn:
             torn_by_denom[denom].append(stem)
 
-        # 1. Photometric (toàn cục + xen kẽ chói sáng/bóng đổ cục bộ)
+        # 1. Photometric transforms (global adjustments + localized glare/shadow)
         out_photo_img = out_img / f"{stem}_photo.jpg"
         out_photo_lbl = out_lbl / f"{stem}_photo.txt"
         photo_seed = hash(stem + "_photo") & 0xFFFF
-        # Trước đây: chỉ 33% có glare, còn lại thuần global -> Local Grid Head thiếu
-        # tín hiệu. Giờ ~60% có thêm hiệu ứng cục bộ, luân phiên cả 3 loại để đa dạng.
+        # ~60% samples receive localized effects alternating across glare/shadow/directional.
         _p_roll = idx % 5
         if _p_roll in (0, 1, 2):
             p_effect = ['glare', 'shadow', 'directional_shadow'][_p_roll]
@@ -392,9 +391,9 @@ def run_augmentation(
             "augmentation_type": "photometric", "denomination_class": denom,
             "is_torn_pair": "false", "pair_id": stem
         })
-        # pair_id + orig_img_path giờ luôn trỏ về ảnh gốc (trước đây để trống) -- cần
-        # thiết để tính photometric supervision loss (task 1) cho MỌI loại augmentation,
-        # không chỉ riêng light/dark pair.
+        # pair_id + orig_img_path point to original clean reference
+        # required for computing photometric loss across all augmentation variants
+        
         combined_meta_rows.append({
             'filename': out_photo_img.name,
             'img_path': str(out_photo_img),
@@ -407,14 +406,11 @@ def run_augmentation(
             'orig_img_path': str(img_path)
         })
 
-        # 2. Light/Dark pair (kết hợp toàn cục + chói sáng/bóng đổ cục bộ)
+        # 2. Light/Dark pairs (global modulation coupled with localized perturbations)
         out_light_img = out_img / f"{stem}_light.jpg"
         out_light_lbl = out_lbl / f"{stem}_light.txt"
         light_seed = hash(stem + "_light") & 0xFFFF
-        # Trước đây chỉ 50% có glare (1 elip cố định). Giờ ~75% có glare (1-2 elip,
-        # xem apply_specular_glare) để Local Grid Head thấy nhiều pattern chói hơn,
-        # đúng bản chất "light" = có nguồn sáng/phản chiếu cục bộ mạnh chứ không chỉ
-        # tăng sáng đều toàn ảnh.
+        # ~75% light pairs receive localized glare highlights to expose Local Grid Head to highlight patterns.
         light_effect = 'glare' if (idx % 4 != 3) else None
         apply_and_save(light_tf, img_bgr, out_light_img, seed=light_seed, local_effect=light_effect)
         write_label(out_light_lbl, label_lines)
@@ -439,9 +435,7 @@ def run_augmentation(
         out_dark_img = out_img / f"{stem}_dark.jpg"
         out_dark_lbl = out_lbl / f"{stem}_dark.txt"
         dark_seed = hash(stem + "_dark") & 0xFFFF
-        # Trước đây chỉ 50% có shadow (luôn dạng elip tâm). Giờ ~75% có hiệu ứng cục
-        # bộ, luân phiên elip (che cục bộ) và directional (mô phỏng backlight/ngược
-        # sáng thật -- tối dần theo 1 cạnh chứ không phải 1 đốm tròn ở giữa).
+        # ~75% dark pairs receive localized shadow or directional attenuation simulating backlight.
         _d_roll = idx % 4
         if _d_roll == 0:
             dark_effect = 'directional_shadow'
@@ -469,13 +463,8 @@ def run_augmentation(
             'orig_img_path': str(img_path)
         })
 
-        # 2b. Local-only sample (task 2): CHỈ áp hiệu ứng cục bộ (glare/shadow/
-        # directional), KHÔNG áp global brightness/gamma. Trước đây mọi hiệu ứng cục
-        # bộ đều bị chồng lên nền global (photo/light/dark) nên Local Grid Head luôn
-        # học lẫn với tín hiệu global -> tín hiệu yếu, nhiễu. Sample này cho nhánh
-        # Local Grid một tín hiệu "sạch": ảnh giữ nguyên phơi sáng tổng thể, chỉ có
-        # vùng cục bộ bị chói/tối -- đúng với thực tế banknote chụp trong điều kiện
-        # ánh sáng chuẩn nhưng có 1 vùng bị chói đèn / che khuất / ngược sáng cục bộ.
+        # 2b. Local-only samples: applies localized modulation (glare/shadow) only
+        # Provides isolated localized signals to the Local Grid Head.
         out_local_img = out_img / f"{stem}_local.jpg"
         out_local_lbl = out_lbl / f"{stem}_local.txt"
         local_seed = hash(stem + "_local") & 0xFFFF
@@ -500,7 +489,7 @@ def run_augmentation(
             'orig_img_path': str(img_path)
         })
 
-    # 3. Oversampling lớp rách (kết hợp chói sáng cục bộ mô phỏng torn_bright)
+    # 3. Tear defect oversampling (simulating glare-degraded tears)
     copies_map = compute_torn_copies(torn_by_denom)
     for img_path in image_files:
         stem = img_path.stem
@@ -525,9 +514,7 @@ def run_augmentation(
             torn_tf = get_torn_transform(seed)
             out_torn_img = out_img / f"{stem}_torn_aug{i}.jpg"
             out_torn_lbl = out_lbl / f"{stem}_torn_aug{i}.txt"
-            # Trước đây 50% có glare (mô phỏng torn_bright). Giờ ~75% có hiệu ứng cục
-            # bộ, luân phiên cả glare/shadow/directional_shadow để oversample lớp
-            # rách cũng thấy đa dạng điều kiện sáng thay vì chỉ mỗi "sáng thêm".
+            # ~75% oversampled tear samples receive diverse localized lighting effects.
             _t_roll = i % 4
             if _t_roll == 1:
                 torn_effect = 'glare'
@@ -568,7 +555,7 @@ def run_augmentation(
     # Ghi combined metadata CSV
     combined_df = pd.DataFrame(combined_meta_rows)
     combined_df.to_csv(combined_meta_path, index=False)
-    print(f"[AUGMENT] Đã ghi {len(combined_df)} records vào: {combined_meta_path}")
+    print(f"[AUGMENT] Recorded {len(combined_df)} records to: {combined_meta_path}")
 
     if merge:
         merge_to_train(out_root, data_path / "train")
@@ -581,9 +568,9 @@ def main():
     parser.add_argument("--data_dir", type=str, default=".", help="Root directory")
     parser.add_argument("--torn_class_id", type=int, default=DEFAULT_TORN_CLASS_ID, help="Class ID for torn label")
     parser.add_argument("--output_dir", type=str, default=DEFAULT_OUTPUT_DIR, help="Output subdirectory name")
-    parser.add_argument("--image_list_path", type=str, default=None, help="File txt chứa danh sách ảnh cần augment")
-    parser.add_argument("--metadata", type=str, default="metadata.csv", help="Đường dẫn file metadata.csv")
-    parser.add_argument("--merge", action="store_true", default=False, help="Gộp kết quả vào train/ gốc")
+    parser.add_argument("--image_list_path", type=str, default=None, help="Path to text file containing list of images to augment")
+    parser.add_argument("--metadata", type=str, default="metadata.csv", help="Path to metadata.csv")
+    parser.add_argument("--merge", action="store_true", default=False, help="Merge augmented outputs directly into original train/ directory")
     args = parser.parse_args()
 
     run_augmentation(

@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 """
-train_c2.py — Custom PyTorch Training & Evaluation Engine cho C2
-Tích hợp:
-  - Low-level DetectionModel (YOLOv8n)
-  - Registry Correction Module: IC-Net (đề xuất của C2) + các phương pháp so
-    sánh cổ điển KHÔNG học được (Gamma Correction, CLAHE) — xem
-    enhancement_methods.py. (Zero-DCE++/SCI/Retinexformer đã bị loại bỏ hoàn
-    toàn khỏi registry, xem ghi chú lý do trong enhancement_methods.py)
-  - Photometric Supervision Loss cho các module HỌC ĐƯỢC (so với ảnh tham
-    chiếu sạch); các module cổ điển (Gamma/CLAHE) không có loss này
-  - Custom training loop & Evaluation engine (bao gồm Torn F1 / Torn mAP)
+train_c2.py — Custom PyTorch Training & Evaluation Engine for C2
+Integrated with:
+  - Low-level DetectionModel (YOLOv8n / YOLOv11n)
+  - Registry Correction Modules: MQTone (proposed C2 module), IAT (Transformer),
+    Zero-DCE, Zero-DCE++, and non-learnable traditional baselines
+    (Gamma Correction, CLAHE) — see enhancement_methods.py.
+  - Photometric Supervision Loss for LEARNABLE modules (MQTone, IAT, Zero-DCE, Zero-DCE++)
+    against clean reference images; traditional baselines (Gamma/CLAHE) omit this loss.
+  - Custom training loop & evaluation engine (including Torn F1 / Torn mAP)
 
-Ghi chú: Consistency Loss (trên cặp ảnh {light, dark}) và PairBatchSampler đã
-được loại bỏ hoàn toàn khỏi pipeline này.
+Note: Consistency Loss (on {light, dark} pairs) and PairBatchSampler have
+been completely removed from this pipeline.
 """
 
 import os
@@ -20,7 +19,7 @@ import sys
 import time
 from pathlib import Path
 
-# Fix UTF-8 encoding trên Windows
+# Fix UTF-8 encoding on Windows
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 if hasattr(sys.stderr, "reconfigure"):
@@ -71,17 +70,16 @@ def box_iou(box1, box2):
 # ─────────────────────────────────────────────────────────────────────────────
 class CashVisionDataset(Dataset):
     """
-    Dataset nạp ảnh, bounding boxes định dạng YOLO, và thông tin pair_id/aug_type
-    (metadata mô tả, không còn dùng cho Consistency Loss -- đã bị loại bỏ khỏi pipeline).
+    Dataset loading images, YOLO format bounding boxes, and pair_id/aug_type metadata
+    (descriptive metadata, no longer used for Consistency Loss -- removed from pipeline).
 
-    load_clean_ref: nếu True, đồng thời nạp ảnh THAM CHIẾU SẠCH (chưa degrade) tương
-    ứng qua cột 'orig_img_path' trong metadata (do augment.py ghi -- xem task 1/2).
-    Dùng làm target cho photometric supervision loss của IC-Net: vì mọi phép biến đổi
-    trong augment.py (brightness/contrast/gamma toàn cục + glare/shadow cục bộ) đều
-    KHÔNG làm lệch không gian ảnh (không crop/rotate/flip), ảnh degrade và ảnh gốc
-    luôn align pixel-to-pixel, nên có thể dùng trực tiếp làm cặp (input, target) cho
-    một loss tái tạo/identity, tách biệt khỏi detection loss. Mặc định False để không
-    tốn thêm I/O ở các config không dùng IC-Net (A/C).
+    load_clean_ref: if True, concurrently loads the corresponding CLEAN REFERENCE image
+    (undegraded) via 'orig_img_path' in metadata (recorded by augment.py).
+    Used as target for MQTone photometric supervision loss: since all transformations
+    in augment.py (global brightness/contrast/gamma + local glare/shadow) preserve spatial
+    geometry (no crop/rotate/flip), degraded and clean images are strictly pixel-aligned,
+    allowing direct use as (input, target) pairs for photometric reconstruction/identity
+    loss separate from detection loss. Defaults to False to avoid I/O overhead.
     """
     def __init__(self, df: pd.DataFrame, img_size: int = 640, load_clean_ref: bool = False):
         self.img_size = img_size
@@ -102,12 +100,12 @@ class CashVisionDataset(Dataset):
                 if pd.notna(raw_orig) and str(raw_orig).strip():
                     orig_img_path = str(raw_orig)
                 else:
-                    # Metadata cũ (trước task 1/2) có thể chưa có cột này -- fallback
-                    # an toàn: coi ảnh hiện tại là ảnh sạch của chính nó (identity),
-                    # thay vì crash. Ảnh 'original' luôn đúng nghĩa dù có fallback hay không.
+                    # Legacy metadata might not have this column -- safe fallback:
+                    # treat the current image as its own clean reference (identity)
+                    # instead of crashing. 'original' images remain valid either way.
                     orig_img_path = str(img_p)
 
-            # Đọc nhãn YOLO
+            # Read YOLO annotations
             boxes = []  # list of [class_id, cx, cy, w, h]
             if lbl_p and lbl_p.exists():
                 with open(lbl_p, 'r', encoding='utf-8') as f:
@@ -157,10 +155,9 @@ class CashVisionDataset(Dataset):
         }
 
         if self.load_clean_ref:
-            # Ảnh gốc thường trùng lặp nhiều lần trong batch (mỗi ảnh gốc sinh ra
-            # ~5 bản augment cùng orig_img_path) -- chấp nhận đọc lại nhiều lần vì
-            # đơn giản & an toàn hơn cache thủ công trong Dataset (Dataset có thể
-            # được fork sang nhiều worker process của DataLoader).
+            # Original images frequently repeat in a batch (each original generates
+            # ~5 augmented versions sharing the same orig_img_path) -- re-reading is safer
+            # and simpler than manual in-memory caching across DataLoader worker forks.
             out['clean_img'] = self._load_img_tensor(item['orig_img_path'])
 
         return out
@@ -168,10 +165,10 @@ class CashVisionDataset(Dataset):
 
 def cashvision_collate_fn(batch):
     """
-    Collate function gộp batch cho DetectionModel:
-    Tạo tensor 'img' (B, 3, H, W), 'cls' (N, 1), 'bboxes' (N, 4), 'batch_idx' (N,)
-    Nếu dataset bật load_clean_ref, gộp thêm 'clean_img' (B, 3, H, W) -- target sạch
-    dùng cho photometric supervision loss của IC-Net (task 1).
+    Collate function batching samples for DetectionModel:
+    Produces tensors: 'img' (B, 3, H, W), 'cls' (N, 1), 'bboxes' (N, 4), 'batch_idx' (N,)
+    If load_clean_ref is enabled, also collates 'clean_img' (B, 3, H, W) -- clean target
+    used for photometric supervision loss (MQTone, learnable modules).
     """
     imgs = torch.stack([item['img'] for item in batch], dim=0)
     clean_imgs = None
@@ -219,26 +216,28 @@ def cashvision_collate_fn(batch):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Model Wrapper: Correction Module (IC-Net / Gamma / CLAHE / None) + YOLOv8
+# Model Wrapper: Correction Module (MQTone / Gamma / CLAHE / None) + YOLO
 # DetectionModel
 # ─────────────────────────────────────────────────────────────────────────────
 class C2DetectionPipeline(nn.Module):
     """
-    Wrapper kết hợp:
-    - Correction Module tùy chọn (correction_method), xem enhancement_methods.py:
-      'none' | 'icnet' (đề xuất C2) | 'gamma' | 'clahe'
-    - DetectionModel YOLOv8n
+    Combined wrapper:
+    - Optional Correction Module (correction_method), see enhancement_methods.py:
+      'none' | 'mqtone' (proposed C2) | 'gamma' | 'clahe'
+    - DetectionModel YOLOv8n / YOLOv11n
     """
-    def __init__(self, weights_path: str = "yolov8n.pt", correction_method: str = "icnet"):
+    def __init__(self, weights_path: str = "yolov8n.pt", correction_method: str = "mqtone"):
         super().__init__()
         correction_method = correction_method.lower()
+        if correction_method == 'icnet':
+            correction_method = 'mqtone'
         if correction_method not in CORRECTION_METHODS:
-            raise ValueError(f"correction_method không hợp lệ: '{correction_method}'. "
-                              f"Các lựa chọn hợp lệ: {CORRECTION_METHODS}")
+            raise ValueError(f"Invalid correction_method: '{correction_method}'. "
+                              f"Valid options: {CORRECTION_METHODS}")
         self.correction_method = correction_method
         self.use_correction = (correction_method != 'none')
-        # Module KHÔNG có tham số học được (Gamma/CLAHE): áp dụng như 1 phép biến đổi
-        # cố định, không train riêng, không có Photometric Loss (xem train_one_epoch_c2).
+        # Non-learnable modules (Gamma/CLAHE): applied as fixed transformations,
+        # not trained, and omit Photometric Loss (see train_one_epoch_c2).
         self.is_learnable_correction = self.use_correction and (correction_method not in NON_LEARNABLE_METHODS)
 
         # 1. Correction Module
@@ -246,24 +245,21 @@ class C2DetectionPipeline(nn.Module):
 
         # 2. YOLOv8 DetectionModel
         yolo = YOLO(weights_path)
-        # QUAN TRỌNG: object.__setattr__ thay vì self.yolo = yolo.
-        # ultralytics.YOLO (class Model) cũng kế thừa nn.Module, nên gán bình thường sẽ
-        # khiến PyTorch tự đăng ký nó làm submodule con. Khi đó pipeline.train()/eval()
-        # sẽ đệ quy gọi yolo.train(mode)/yolo.eval() -- nhưng Model.train() bị Ultralytics
-        # override để nghĩa là "chạy training pipeline đầy đủ" (nhận trainer=None, **kwargs),
-        # không phải bật cờ .training như nn.Module chuẩn -> gây lỗi
-        # "TypeError: 'bool' object is not callable". Dùng object.__setattr__ để lưu
-        # self.yolo như attribute thường, không bị PyTorch quản lý như submodule.
+        # IMPORTANT: object.__setattr__ instead of self.yolo = yolo.
+        # ultralytics.YOLO inherits nn.Module, so standard attribute assignment
+        # causes PyTorch to register it as a submodule. Then pipeline.train()/eval()
+        # would recursively call yolo.train(mode) -- which Ultralytics overrides to execute
+        # full training pipeline rather than toggling the .training flag, raising
+        # "TypeError: 'bool' object is not callable". Using object.__setattr__ keeps
+        # self.yolo as a regular attribute rather than a tracked submodule.
         object.__setattr__(self, 'yolo', yolo)
         self.detector = yolo.model
         self.detector.args = get_cfg(DEFAULT_CFG)
 
-        # File .pt release của Ultralytics đã qua strip_optimizer(): toàn bộ tham số
-        # bị set requires_grad=False và ép về half-precision (FP16), vì file này chỉ
-        # dùng làm checkpoint khởi đầu cho Trainer chính thức của Ultralytics (Trainer
-        # tự bật lại requires_grad trước khi train). Do pipeline này tự viết training
-        # loop riêng (không qua Trainer), cần bật lại thủ công ở đây, nếu không
-        # loss sẽ không có grad_fn khi gọi .backward().
+        # Release .pt weights from Ultralytics undergo strip_optimizer(): parameters
+        # have requires_grad=False and may be converted to half-precision. Because our
+        # pipeline uses a custom training loop (without the default Trainer),
+        # we explicitly restore requires_grad=True so loss has grad_fn during .backward().
         self.detector = self.detector.float()
         for p in self.detector.parameters():
             p.requires_grad = True
@@ -280,7 +276,7 @@ class C2DetectionPipeline(nn.Module):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Huấn luyện 1 Epoch
+# Train 1 Epoch
 # ─────────────────────────────────────────────────────────────────────────────
 def train_one_epoch_c2(
     pipeline: C2DetectionPipeline,
@@ -311,40 +307,34 @@ def train_one_epoch_c2(
 
         optimizer.zero_grad()
 
-        # 1. Forward Pass (return_corrected=True để tái sử dụng output correction
-        # module cho photometric loss bên dưới, tránh phải forward lần thứ 2)
+        # 1. Forward Pass (return_corrected=True to reuse correction module output
+        # for photometric supervision loss below without redundant forward pass)
         preds, corrected_imgs = pipeline(imgs, return_corrected=True)
 
         # 2. Detection Loss
         loss_components, loss_items = loss_fn(preds, batch_yolo)
         L_detection = loss_components.sum()
 
-        # 2b. Photometric Supervision Loss (chỉ áp dụng cho module HỌC ĐƯỢC: IC-Net --
-        # method HỌC ĐƯỢC duy nhất còn lại sau khi loại Zero-DCE++/SCI/Retinexformer
-        # khỏi registry -- KHÔNG áp dụng cho module cổ điển không có tham số như
-        # Gamma/CLAHE) -- L1 giữa ảnh đã sửa và ảnh THAM CHIẾU SẠCH
-        # (clean_img, do augment.py cung cấp qua orig_img_path -- luôn align pixel vì
-        # augment chỉ đổi photometric, không đổi hình học). Với ảnh 'original'
-        # clean_img == chính nó -> ép module gần identity trên ảnh đã đẹp sẵn. Với
-        # ảnh degrade (photo/light/dark/torn/local_only) -> ép module thực sự sửa về
-        # đúng ảnh gốc, thay vì chỉ được tối ưu gián tiếp qua detection loss.
+        # 2b. Photometric Supervision Loss (applied to LEARNABLE modules: MQTone,
+        # IAT, Zero-DCE, Zero-DCE++ -- NOT applied to non-learnable classical methods
+        # such as Gamma/CLAHE) -- L1 between corrected image and CLEAN REFERENCE
+        # image (clean_img, provided via orig_img_path from augment.py -- strictly pixel-aligned).
+        # For 'original' images, clean_img is identical -> enforces near-identity behavior.
+        # For degraded images -> actively guides the module back to clean reference.
         L_photo = torch.tensor(0.0, device=device)
         if pipeline.is_learnable_correction and corrected_imgs is not None and batch.get('clean_img') is not None:
             clean_imgs = batch['clean_img'].to(device)
             L_photo = F.l1_loss(corrected_imgs, clean_imgs)
 
-        # 3. Tổng Loss (chỉ Detection Loss + Photometric Supervision Loss cho module
-        # HỌC ĐƯỢC; Consistency Loss đã bị loại bỏ hoàn toàn khỏi pipeline)
+        # 3. Total Loss (Detection Loss + Photometric Supervision Loss for learnable
+        # modules; Consistency Loss has been eliminated from the pipeline)
         L_total = L_detection \
             + (lambda_photo * L_photo if pipeline.is_learnable_correction else 0.0)
 
         L_total.backward()
 
-        # Gradient clipping: Ultralytics Trainer gốc luôn áp dụng bước này tự động
-        # (max_norm=10.0), nhưng custom loop này không có -- thiếu nó có thể khiến
-        # 1 batch có gradient bất thường (đặc biệt đầu training, khi chỉ 1 trong 2
-        # loss signal hoạt động) đẩy tham số (đặc biệt correction module) lệch khỏi
-        # vùng ổn định.
+        # Gradient clipping: clips gradients to max_norm=10.0 for training stability,
+        # preventing sudden gradient spikes from destabilizing correction parameters.
         torch.nn.utils.clip_grad_norm_(
             [p for g in optimizer.param_groups for p in g['params']],
             max_norm=10.0
@@ -366,9 +356,9 @@ def train_one_epoch_c2(
 
 def _set_bn_eval(module: nn.Module):
     """
-    Đặt riêng các lớp BatchNorm về chế độ eval() (dùng running_mean/running_var
-    đã tích luỹ, KHÔNG cập nhật running stats theo batch hiện tại), trong khi phần
-    còn lại của model vẫn ở train() -- cần thiết cho validate_one_epoch_c2 bên dưới.
+    Sets BatchNorm layers specifically to eval() mode (using accumulated running_mean/var
+    without updating stats on the current batch), while keeping the rest of the model
+    in train() mode -- necessary for validate_one_epoch_c2 below.
     """
     for m in module.modules():
         if isinstance(m, (nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d)):
@@ -376,7 +366,7 @@ def _set_bn_eval(module: nn.Module):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Đánh giá 1 Epoch trên tập Validation (KHÔNG cập nhật trọng số)
+# Evaluate 1 Epoch on Validation Set (NO weight updates)
 # ─────────────────────────────────────────────────────────────────────────────
 @torch.no_grad()
 def validate_one_epoch_c2(
@@ -386,29 +376,20 @@ def validate_one_epoch_c2(
     device: str
 ) -> float:
     """
-    Tính Detection Loss trung bình trên tập validation của fold (20% còn lại,
-    đã augment riêng), dùng làm tiêu chí CHỌN CHECKPOINT tốt nhất mỗi epoch
-    (giống early-stopping/model-selection chuẩn). KHÔNG cập nhật trọng số,
-    KHÔNG dùng để báo cáo kết quả cuối cùng (kết quả cuối luôn đến từ
-    evaluate_c2_pipeline() trên Locked Test Set).
+    Computes average Detection Loss on the validation split (held-out 20%,
+    augmented independently), used as the BEST CHECKPOINT SELECTION criterion
+    per epoch (standard early stopping / model selection). Does NOT update weights;
+    does NOT serve as final test report (final metrics come from
+    evaluate_c2_pipeline() on Locked Test Set).
 
-    Lưu ý kỹ thuật quan trọng:
-    - Đầu ra thô (raw, đa tỉ lệ) của Detect head trong Ultralytics chỉ được trả về
-      khi `self.training=True` (tức model đang ở .train()); ở .eval() model trả về
-      bounding-box đã decode -- SAI FORMAT mà v8DetectionLoss cần. Do đó hàm này
-      GIỮ NGUYÊN pipeline.train() (không gọi pipeline.eval()) để lấy đúng format.
-    - Nhưng nếu để nguyên train() thông thường, mỗi forward pass trên batch validation
-      sẽ tiếp tục cập nhật running_mean/running_var của BatchNorm theo chính batch
-      validation đó -> rò rỉ thống kê tập validation vào các layer BatchNorm, ảnh
-      hưởng ngược lại hành vi model lúc inference thật (evaluate_c2_pipeline dùng
-      .eval() với running stats này). Để tránh rò rỉ, hàm _set_bn_eval() ở trên
-      đóng băng riêng các lớp BatchNorm về eval() (dùng running stats có sẵn, không
-      cập nhật), trong khi Detect head vẫn "nghĩ" mình đang training để trả đúng format.
-    - torch.no_grad() đảm bảo không build computation graph -> không tốn bộ nhớ,
-      không có gradient nào được tính hay áp dụng.
-
-    Việc chọn checkpoint dựa trên avg Detection Loss thuần (không cộng Photometric
-    Loss) để tiêu chí so sánh nhất quán giữa 2 config A (baseline) / B (IC-Net).
+    Key technical notes:
+    - Multi-scale raw outputs from Ultralytics Detect head are only returned
+      when `self.training=True`; in .eval() mode it returns decoded boxes -- incorrect
+      format for v8DetectionLoss. Hence this function keeps pipeline in .train() mode.
+    - To prevent validation stats leakage into BatchNorm running stats,
+      _set_bn_eval() freezes BN layers into eval() while Detect head outputs training format.
+    - torch.no_grad() prevents computation graph construction and saves memory.
+    - Selection criterion relies on pure Detection Loss for fair comparison across methods.
     """
     pipeline.train()
     _set_bn_eval(pipeline)
@@ -436,7 +417,7 @@ def validate_one_epoch_c2(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Đánh giá Chi tiết Toàn diện C2
+# Comprehensive Evaluation for C2
 # ─────────────────────────────────────────────────────────────────────────────
 def evaluate_c2_pipeline(pipeline: C2DetectionPipeline, df: pd.DataFrame, condition_name: str, device: str, conf_thresh: float = 0.25):
     pipeline.eval()
@@ -501,9 +482,8 @@ def evaluate_c2_pipeline(pipeline: C2DetectionPipeline, df: pd.DataFrame, condit
         with torch.no_grad():
             if pipeline.use_correction and pipeline.corrector is not None:
                 img_tensor = pipeline.corrector(img_tensor)
-            # Dùng predict method của wrapper YOLO cấp cao (self.yolo), không phải self.detector
-            # (self.detector chỉ là DetectionModel thô, .predict() của nó khác chữ ký và
-            # không trả về Results object có .boxes như code bên dưới cần)
+            # Use predict method of high-level YOLO wrapper (self.yolo), not self.detector
+            # (self.detector is a raw DetectionModel without standard Results bounding boxes)
             results = pipeline.yolo.predict(img_tensor, conf=conf_thresh, device=device, verbose=False)[0]
 
         best_denom_id = None
@@ -526,7 +506,7 @@ def evaluate_c2_pipeline(pipeline: C2DetectionPipeline, df: pd.DataFrame, condit
 
         has_pred_tear = (len(pred_tear_boxes) > 0)
 
-        # 1. Đánh giá Mệnh giá & Định vị tờ tiền
+        # 1. Evaluate Denomination & Banknote Localization
         if gt_denom_id is not None:
             if best_denom_id is not None:
                 y_pred_denom.append(best_denom_id)
@@ -539,7 +519,7 @@ def evaluate_c2_pipeline(pipeline: C2DetectionPipeline, df: pd.DataFrame, condit
                 y_pred_denom.append(-1)
                 missed_banknotes += 1
 
-        # 2. Đánh giá Nhị phân Rách
+        # 2. Binary Tear Evaluation
         if is_torn_gt and has_pred_tear:
             tp_tear_img += 1
         elif (not is_torn_gt) and has_pred_tear:
@@ -549,7 +529,7 @@ def evaluate_c2_pipeline(pipeline: C2DetectionPipeline, df: pd.DataFrame, condit
         else:
             tn_tear_img += 1
 
-        # 3. Đánh giá Box Vết rách
+        # 3. Evaluate Tear Bounding Boxes
         if len(gt_tear_boxes) > 0:
             for gt_box in gt_tear_boxes:
                 best_iou = 0.0
@@ -561,7 +541,7 @@ def evaluate_c2_pipeline(pipeline: C2DetectionPipeline, df: pd.DataFrame, condit
                     matched_gt_tear_boxes += 1
                     tear_box_ious.append(best_iou)
 
-    # Tính toán chỉ số
+    # Compute evaluation metrics
     if len(y_true_denom) > 0:
         correct_denom = sum(1 for yt, yp in zip(y_true_denom, y_pred_denom) if yt == yp)
         denom_acc = (correct_denom / len(y_true_denom)) * 100.0
@@ -576,10 +556,9 @@ def evaluate_c2_pipeline(pipeline: C2DetectionPipeline, df: pd.DataFrame, condit
     binary_tear_acc = ((tp_tear_img + tn_tear_img) / max(1, n_total_imgs)) * 100.0
     false_alarm_rate = (fp_tear_img / max(1, n_gt_intact_imgs)) * 100.0 if n_gt_intact_imgs > 0 else 0.0
 
-    # Torn F1 (ở cấp độ ẢNH, phân loại nhị phân "có rách hay không") -- dùng chung
-    # tp/fp/fn đã đếm ở bước 2 phía trên. Đây là chỉ số MỚI, bổ sung theo yêu cầu,
-    # đo cân bằng giữa Precision (bao nhiêu cảnh báo rách là đúng) và Recall (bắt
-    # được bao nhiêu ảnh rách thật sự) -- false_alarm_rate ở trên chỉ phản ánh 1 vế.
+    # Torn F1 (image-level binary classification: "torn or intact") -- using
+    # tp/fp/fn counts from step 2 above. Balances Precision (correct tear alarms)
+    # and Recall (true torn banknotes detected).
     torn_precision = (tp_tear_img / (tp_tear_img + fp_tear_img) * 100.0) if (tp_tear_img + fp_tear_img) > 0 else 0.0
     torn_recall = (tp_tear_img / (tp_tear_img + fn_tear_img) * 100.0) if (tp_tear_img + fn_tear_img) > 0 else 0.0
     torn_f1 = (2 * torn_precision * torn_recall / (torn_precision + torn_recall)) if (torn_precision + torn_recall) > 0 else 0.0

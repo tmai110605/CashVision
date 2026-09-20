@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """
-run_e1.py — Thí nghiệm E1 & E3: Problem Characterization & Task Degradation Analysis
-Định lượng ảnh hưởng của điều kiện ánh sáng lên:
-  (a) Phân loại mệnh giá tiền polymer
-  (b) Phát hiện và định vị vùng rách
+run_e1.py — Experiments E1 & E3: Problem Characterization & Task Degradation Analysis
+Quantifying the impact of illumination conditions on:
+  (a) Polymer banknote denomination classification
+  (b) Tear detection and localization
 
-Chạy trên GPU/CUDA với Ultralytics YOLO (yolov8n, yolo11n, ...)
-Protocol A chuẩn (5-Fold Cross-Validation):
-  - Tập huấn luyện chuẩn trong nhà (Normal/Indoor): 'indoor' (nguyên vẹn) + 'torn_clean' (rách sạch) -> 5-Fold Stratified
-  - Tập đánh giá điều kiện ánh sáng biến đổi (Test):
-      + 'outdoor' (ngoài trời)
-      + 'backlight' (ngược sáng)
-      + 'overexposed' (cháy sáng nguyên vẹn)
-      + 'torn_bright' (rách + chói sáng)
+Runs on GPU/CUDA with Ultralytics YOLO (yolov8n, yolo11n, ...)
+Standard Protocol A (5-Fold Cross-Validation):
+  - Standard indoor training pool (Normal/Indoor): 'indoor' (intact) + 'torn_clean' (clean torn) -> 5-Fold Stratified
+  - Challenging illumination evaluation sets (Test):
+      + 'outdoor' (outdoor illumination)
+      + 'backlight' (strong backlight)
+      + 'overexposed' (severe overexposure intact)
+      + 'torn_bright' (torn + severe glare)
 """
 
 import argparse
@@ -25,7 +25,7 @@ import shutil
 import sys
 from pathlib import Path
 
-# Fix UTF-8 encoding trên Windows
+# Fix UTF-8 encoding on Windows
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 if hasattr(sys.stderr, "reconfigure"):
@@ -39,7 +39,7 @@ import yaml
 from ultralytics import YOLO
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Cấu hình danh mục lớp
+# Class configurations
 # ─────────────────────────────────────────────────────────────────────────────
 CLASS_NAMES = ['10', '100', '20', '200', '50', '500', 'torn']
 DENOM_CLASSES = {0: '10k', 1: '100k', 2: '20k', 3: '200k', 4: '50k', 5: '500k'}
@@ -54,7 +54,7 @@ DENOM_NAME_TO_ID = {
 TORN_CLASS_ID = 6
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Cố định Seed
+# Set random seed
 # ─────────────────────────────────────────────────────────────────────────────
 def set_seed(seed: int = 42):
     random.seed(seed)
@@ -69,7 +69,7 @@ def set_seed(seed: int = 42):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Tiện ích tính IoU & Bounding Box
+# IoU & Bounding Box utilities
 # ─────────────────────────────────────────────────────────────────────────────
 def xywh_to_xyxy(box):
     cx, cy, w, h = box
@@ -92,22 +92,22 @@ def box_iou(box1, box2):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Đọc và xác thực Metadata
+# Load and validate metadata
 # ─────────────────────────────────────────────────────────────────────────────
 def load_and_validate_metadata(metadata_path: Path, data_dir: Path):
     if not metadata_path.exists():
-        raise FileNotFoundError(f"❌ Không tìm thấy file metadata: '{metadata_path}'!")
+        raise FileNotFoundError(f"❌ Metadata file not found: '{metadata_path}'!")
 
     df = pd.read_csv(metadata_path)
     required_cols = {'filename', 'condition', 'is_torn'}
     if not required_cols.issubset(df.columns):
-        raise ValueError(f"❌ metadata.csv thiếu cột bắt buộc. Cần có: {required_cols}")
+        raise ValueError(f"❌ metadata.csv missing required columns. Required: {required_cols}")
 
     df['condition'] = df['condition'].astype(str).str.strip().str.lower()
     df['filename'] = df['filename'].astype(str).str.strip()
     df['is_torn'] = df['is_torn'].astype(str).str.strip().str.lower()
 
-    # Tìm file thực tế (chỉ quét các thư mục gốc train/valid/test)
+    # Locate actual files (only scanning train/valid/test root directories)
     img_map = {}
     lbl_map = {}
     valid_split_dirs = [data_dir / s for s in ['train', 'valid', 'test', 'val'] if (data_dir / s).exists()]
@@ -129,26 +129,26 @@ def load_and_validate_metadata(metadata_path: Path, data_dir: Path):
 
     missing_imgs = df[df['img_path'].isna()]
     if len(missing_imgs) > 0:
-        raise FileNotFoundError(f"❌ Có {len(missing_imgs)} ảnh trong metadata không tìm thấy trong '{data_dir}'!")
+        raise FileNotFoundError(f"❌ Found {len(missing_imgs)} images in metadata not found in '{data_dir}'!")
 
     return df
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Chuẩn bị K-Fold Splits cho Nhóm Indoor (indoor + torn_clean)
+# Prepare K-Fold Splits for Indoor Pool (indoor + torn_clean)
 # ─────────────────────────────────────────────────────────────────────────────
 def prepare_kfold_dataset(df: pd.DataFrame, experiment_dir: Path, n_splits: int = 5, seed: int = 42):
     """
-    Tách nhóm 'indoor' (nguyên vẹn) và 'torn_clean' (rách trong nhà) làm pool huấn luyện chuẩn.
-    Chia 5-Fold Stratified theo tổ hợp (mệnh giá + trạng thái rách).
+    Separate 'indoor' (intact) and 'torn_clean' (clean torn) as the standard training pool.
+    Split into 5-Fold Stratified based on combinations of (denomination + torn status).
     """
     dataset_root = experiment_dir / "protocol_a_kfold"
     dataset_root.mkdir(parents=True, exist_ok=True)
 
-    # 1. Nhóm Train/Val trong nhà
+    # 1. Indoor Train/Val pool
     normal_df = df[df['condition'].isin(['indoor', 'torn_clean'])].copy().reset_index(drop=True)
     if len(normal_df) == 0:
-        raise ValueError("❌ Không tìm thấy ảnh indoor hoặc torn_clean để huấn luyện!")
+        raise ValueError("❌ No indoor or torn_clean images found for training!")
 
     # Stratified key
     normal_df['strat_key'] = normal_df['denomination_class'].astype(str) + "_" + normal_df['is_torn'].astype(str)
@@ -164,7 +164,7 @@ def prepare_kfold_dataset(df: pd.DataFrame, experiment_dir: Path, n_splits: int 
         train_df = normal_df.iloc[train_idx].reset_index(drop=True)
         val_df = normal_df.iloc[val_idx].reset_index(drop=True)
 
-        # Lưu ảnh & nhãn cho Train & Val của fold này
+        # Save images & labels for Train & Val of this fold
         for split_name, split_data in [('train', train_df), ('val_indoor', val_df)]:
             img_out = fold_dir / split_name / "images"
             lbl_out = fold_dir / split_name / "labels"
@@ -182,7 +182,7 @@ def prepare_kfold_dataset(df: pd.DataFrame, experiment_dir: Path, n_splits: int 
                 else:
                     dest_lbl.touch()
 
-        # Tạo file dataset.yaml cho fold này
+        # Generate dataset.yaml file for this fold
         fold_yaml = fold_dir / "dataset.yaml"
         yaml_dict = {
             'path': str(fold_dir.resolve()).replace('\\', '/'),
@@ -201,7 +201,7 @@ def prepare_kfold_dataset(df: pd.DataFrame, experiment_dir: Path, n_splits: int 
             'val_df': val_df
         })
 
-    # 2. Chuẩn bị các tập Test ánh sáng biến đổi (dùng chung cho mọi fold)
+    # 2. Prepare test sets under adverse illumination (shared across folds)
     test_splits = {}
     test_root = dataset_root / "test_sets"
     test_root.mkdir(parents=True, exist_ok=True)
@@ -226,7 +226,7 @@ def prepare_kfold_dataset(df: pd.DataFrame, experiment_dir: Path, n_splits: int 
                 else:
                     dest_lbl.touch()
 
-            # YAML đánh giá
+            # Evaluation YAML
             test_yaml = test_root / cond / "dataset_eval.yaml"
             t_yaml_dict = {
                 'path': str((test_root / cond).resolve()).replace('\\', '/'),
@@ -237,22 +237,22 @@ def prepare_kfold_dataset(df: pd.DataFrame, experiment_dir: Path, n_splits: int 
             with open(test_yaml, 'w', encoding='utf-8') as f:
                 yaml.dump(t_yaml_dict, f, sort_keys=False)
 
-    print(f"\n[DATASET] Đã tạo thành công {n_splits}-Fold Cross-Validation:")
-    print(f"  - Tập huấn luyện chuẩn: {len(normal_df)} ảnh (indoor: 390 + torn_clean: 210)")
-    print(f"  - Mỗi fold: Train ~ {len(fold_configs[0]['train_df'])}, Val Baseline ~ {len(fold_configs[0]['val_df'])}")
+    print(f"\n[DATASET] Successfully created {n_splits}-Fold Cross-Validation:")
+    print(f"  - Standard training pool: {len(normal_df)} images (indoor: 390 + torn_clean: 210)")
+    print(f"  - Per fold: Train ~ {len(fold_configs[0]['train_df'])}, Val Baseline ~ {len(fold_configs[0]['val_df'])}")
     for cond, c_df in test_splits.items():
-        print(f"  - Tập test '{cond}': {len(c_df)} ảnh")
+        print(f"  - Test set '{cond}': {len(c_df)} images")
 
     return fold_configs, test_splits
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Đánh giá Chi tiết Toàn diện theo Condition
+# Comprehensive evaluation by condition
 # ─────────────────────────────────────────────────────────────────────────────
 def evaluate_condition(model: YOLO, split_df: pd.DataFrame, condition_name: str, device: str, conf_thresh: float = 0.25):
     predictions_raw = []
     
-    # ── Task 1: Tờ tiền (Mệnh giá & Định vị tờ tiền) ──────────────────────────
+    # ── Task 1: Banknote (Denomination & Localization) ──────────────────
     y_true_denom = []
     y_pred_denom = []
     denom_ious = []
@@ -261,7 +261,7 @@ def evaluate_condition(model: YOLO, split_df: pd.DataFrame, condition_name: str,
     missed_banknotes = 0
     denom_conf_matrix = np.zeros((6, 6), dtype=int)
 
-    # ── Task 2: Vết rách (Phân loại nhị phân & Định vị vết rách) ──────────────
+    # ── Task 2: Tear (Binary Classification & Localization) ──────────
     n_total_imgs = len(split_df)
     n_gt_torn_imgs = 0
     n_gt_intact_imgs = 0
@@ -310,7 +310,7 @@ def evaluate_condition(model: YOLO, split_df: pd.DataFrame, condition_name: str,
 
         total_gt_tear_boxes += len(gt_tear_boxes)
 
-        # ── Chạy Inference ───────────────────────────────────────────────────
+        # ── Run Inference ─────────────────────────────────────────────────
         results = model.predict(img_path, conf=conf_thresh, device=device, verbose=False)[0]
 
         pred_boxes_data = []
@@ -341,13 +341,13 @@ def evaluate_condition(model: YOLO, split_df: pd.DataFrame, condition_name: str,
 
         has_pred_tear = (len(pred_tear_boxes) > 0)
 
-        # ── 1. Đánh giá Tờ tiền (Classification + Box IoU) ───────────────────
+        # ── 1. Evaluate Banknote (Classification + Box IoU) ───────────────
         if gt_denom_id is not None:
             if best_denom_id is not None:
                 y_pred_denom.append(best_denom_id)
                 denom_conf_matrix[gt_denom_id, best_denom_id] += 1
                 
-                # Tính IoU của khung bao tờ tiền
+                # Compute IoU of banknote bounding box
                 if gt_banknote_box is not None and best_banknote_box is not None:
                     b_iou = box_iou(gt_banknote_box, best_banknote_box)
                     denom_ious.append(b_iou)
@@ -357,17 +357,17 @@ def evaluate_condition(model: YOLO, split_df: pd.DataFrame, condition_name: str,
                 y_pred_denom.append(-1)
                 missed_banknotes += 1
 
-        # ── 2. Đánh giá Nhị phân Rách (Image-level Confusion Matrix) ─────────
+        # ── 2. Binary Tear Evaluation (Image-level Confusion Matrix) ──────
         if is_torn_gt and has_pred_tear:
             tp_tear_img += 1
         elif (not is_torn_gt) and has_pred_tear:
-            fp_tear_img += 1  # Báo động giả
+            fp_tear_img += 1  # False alarm
         elif is_torn_gt and (not has_pred_tear):
-            fn_tear_img += 1  # Bỏ sót
+            fn_tear_img += 1  # Missed detection
         else:
             tn_tear_img += 1
 
-        # ── 3. Đánh giá Box Vết Rách (Box-level IoU matching) ────────────────
+        # ── 3. Evaluate Tear Box (Box-level IoU matching) ────────────────
         if len(gt_tear_boxes) > 0:
             for gt_box in gt_tear_boxes:
                 best_iou = 0.0
@@ -391,7 +391,7 @@ def evaluate_condition(model: YOLO, split_df: pd.DataFrame, condition_name: str,
             'predictions': pred_boxes_data
         })
 
-    # ── TÍNH TOÁN CHỈ SỐ TASK 1: TỜ TIỀN ─────────────────────────────────────
+    # ── COMPUTE METRICS FOR TASK 1: BANKNOTE ──────────────────────────
     if len(y_true_denom) > 0:
         correct_denom = sum(1 for yt, yp in zip(y_true_denom, y_pred_denom) if yt == yp)
         denom_accuracy = (correct_denom / len(y_true_denom)) * 100.0
@@ -403,14 +403,14 @@ def evaluate_condition(model: YOLO, split_df: pd.DataFrame, condition_name: str,
     banknote_map50_95 = banknote_avg_iou * (banknote_map50 / 100.0)
     banknote_miss_rate = (missed_banknotes / max(1, total_gt_banknotes)) * 100.0 if total_gt_banknotes > 0 else 0.0
 
-    # ── TÍNH TOÁN CHỈ SỐ TASK 2: VẾT RÁCH ────────────────────────────────────
+    # ── COMPUTE METRICS FOR TASK 2: TEAR ──────────────────────────────
     binary_tear_acc = ((tp_tear_img + tn_tear_img) / max(1, n_total_imgs)) * 100.0
     tear_precision = (tp_tear_img / max(1, (tp_tear_img + fp_tear_img))) * 100.0 if (tp_tear_img + fp_tear_img) > 0 else 0.0
     tear_recall = (tp_tear_img / max(1, (tp_tear_img + fn_tear_img))) * 100.0 if (tp_tear_img + fn_tear_img) > 0 else 0.0
     tear_f1 = (2 * tear_precision * tear_recall / (tear_precision + tear_recall)) if (tear_precision + tear_recall) > 0 else 0.0
     false_alarm_rate = (fp_tear_img / max(1, n_gt_intact_imgs)) * 100.0 if n_gt_intact_imgs > 0 else 0.0
 
-    # Chỉ số Bbox Vết Rách
+    # Tear Bounding Box Metrics
     has_real_tears = (total_gt_tear_boxes > 0)
     tear_box_avg_iou = (np.mean(tear_box_ious) * 100.0) if len(tear_box_ious) > 0 else 0.0
     tear_map50 = (matched_gt_tear_boxes / total_gt_tear_boxes) * 100.0 if has_real_tears else 0.0
@@ -422,14 +422,14 @@ def evaluate_condition(model: YOLO, split_df: pd.DataFrame, condition_name: str,
         'num_samples': n_total_imgs,
         'has_real_tears': has_real_tears,
         
-        # Task 1: Tờ tiền
+        # Task 1: Banknote
         'accuracy_denom': round(denom_accuracy, 2),
         'banknote_avg_iou': round(banknote_avg_iou, 2),
         'banknote_map50': round(banknote_map50, 2),
         'banknote_map50_95': round(banknote_map50_95, 2),
         'banknote_miss_rate': round(banknote_miss_rate, 2),
 
-        # Task 2: Vết rách
+        # Task 2: Tear
         'binary_tear_acc': round(binary_tear_acc, 2),
         'tear_precision': round(tear_precision, 2),
         'tear_recall': round(tear_recall, 2),
@@ -445,18 +445,18 @@ def evaluate_condition(model: YOLO, split_df: pd.DataFrame, condition_name: str,
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Main Routine Thí nghiệm E1 & E3 K-Fold
+# Main Routine for Experiments E1 & E3 K-Fold
 # ─────────────────────────────────────────────────────────────────────────────
 def run_experiment_e1_kfold(data_dir: str, metadata: str, models: list, n_splits: int, seed: int, epochs: int, batch_size: int, device: str, results_dir: str):
     set_seed(seed)
 
-    # Chuẩn hoá path
+    # Normalize paths
     if sys.platform != "win32" and ":" in str(data_dir):
         clean_drive = data_dir.replace("\\", "/")
         if Path(clean_drive).exists():
             data_path = Path(clean_drive).resolve()
         elif Path("train").exists():
-            print(f"[INFO] Chuyển đường dẫn về thư mục hiện tại: '{Path('.').resolve()}'")
+            print(f"[INFO] Setting working directory to current path: '{Path('.').resolve()}'")
             data_path = Path(".").resolve()
         else:
             wsl_path = re.sub(r"^([a-zA-Z]):", r"/mnt/\1", clean_drive).lower()
@@ -474,9 +474,9 @@ def run_experiment_e1_kfold(data_dir: str, metadata: str, models: list, n_splits
     if device == 'auto':
         device = '0' if torch.cuda.is_available() else 'cpu'
 
-    print(f"🚀 [INIT] Khởi động thí nghiệm E1 (5-Fold Cross-Validation) trên thiết bị: {device}")
+    print(f"🚀 [INIT] Launching Experiment E1 (5-Fold Cross-Validation) on device: {device}")
 
-    # Chuẩn bị K-Fold
+    # Prepare K-Fold splits
     df = load_and_validate_metadata(metadata_path, data_path)
     fold_configs, test_splits = prepare_kfold_dataset(df, results_path, n_splits=n_splits, seed=seed)
 
@@ -486,13 +486,13 @@ def run_experiment_e1_kfold(data_dir: str, metadata: str, models: list, n_splits
 
     for model_name in models:
         print("\n" + "=" * 80)
-        print(f"🔥 HUẤN LUYỆN VÀ ĐÁNH GIÁ MODEL: {model_name} (qua {n_splits} Folds)")
+        print(f"🔥 TRAINING AND EVALUATING MODEL: {model_name} (across {n_splits} Folds)")
         print("=" * 80)
 
         model_out_dir = results_path / model_name
         model_out_dir.mkdir(parents=True, exist_ok=True)
 
-        # Lưu từng fold kết quả
+        # Store results per fold
         fold_condition_records = []
 
         for f_conf in fold_configs:
@@ -517,7 +517,7 @@ def run_experiment_e1_kfold(data_dir: str, metadata: str, models: list, n_splits
             best_pt = model_out_dir / f"fold_{f_idx}" / "weights" / "best.pt"
             eval_model = YOLO(str(best_pt)) if best_pt.exists() else model
 
-            # Đánh giá Fold này trên Indoor Val (Baseline)
+            # Evaluate this fold on Indoor Val (Baseline)
             m_indoor, preds_in, _ = evaluate_condition(eval_model, f_conf['val_df'], 'indoor_baseline', device)
             m_indoor['fold'] = f_idx
             m_indoor['delta_acc(%)'] = 0.0
@@ -527,7 +527,7 @@ def run_experiment_e1_kfold(data_dir: str, metadata: str, models: list, n_splits
             baseline_acc = m_indoor['accuracy_denom']
             baseline_map = m_indoor.get('tear_map50', 0.0)
 
-            # Đánh giá trên các Test condition
+            # Evaluate across Test conditions
             for cond_name, cond_df in test_splits.items():
                 m_cond, preds_cond, cm_cond = evaluate_condition(eval_model, cond_df, cond_name, device)
                 m_cond['fold'] = f_idx
@@ -538,11 +538,11 @@ def run_experiment_e1_kfold(data_dir: str, metadata: str, models: list, n_splits
                     m_cond['delta_mAP50(%)'] = None
                 fold_condition_records.append(m_cond)
 
-        # Lưu raw metrics của từng fold
+        # Save raw metrics per fold
         f_df = pd.DataFrame(fold_condition_records)
         f_df.to_csv(model_out_dir / "all_folds_raw_metrics.csv", index=False)
 
-        # ── 1. Tổng hợp BẢNG MỆNH GIÁ & ĐỊNH VỊ TỜ TIỀN (5-Fold) ─────────────
+        # ── 1. Aggregate TABLE: BANKNOTE DENOMINATION & LOCALIZATION (5-Fold) ─────────────
         for cond in ['indoor_baseline', 'outdoor', 'backlight', 'overexposed', 'torn_bright']:
             sub = f_df[f_df['condition'] == cond]
             if len(sub) == 0:
@@ -568,7 +568,7 @@ def run_experiment_e1_kfold(data_dir: str, metadata: str, models: list, n_splits
                 'raw_delta_acc': d_acc_m
             })
 
-        # ── 2. Tổng hợp BẢNG VẾT RÁCH & RÁCH/KHÔNG RÁCH TOÀN BỘ (5-Fold) ───────
+        # ── 2. Aggregate TABLE: TEAR DETECTION & LOCALIZATION (5-Fold) ───────
         for cond in ['indoor_baseline', 'torn_bright', 'outdoor', 'backlight', 'overexposed']:
             sub = f_df[f_df['condition'] == cond]
             if len(sub) == 0:
@@ -608,7 +608,7 @@ def run_experiment_e1_kfold(data_dir: str, metadata: str, models: list, n_splits
             tear_summary_rows.append({
                 'model': model_name,
                 'condition': cond,
-                'data_type': "Có rách thật" if has_tears else "Nguyên vẹn",
+                'data_type': "Torn" if has_tears else "Intact",
                 'binary_tear_acc': f"{bin_acc_m:.2f} ± {bin_acc_s:.2f}",
                 'tear_precision': prec_str,
                 'tear_recall': rec_str,
@@ -621,18 +621,18 @@ def run_experiment_e1_kfold(data_dir: str, metadata: str, models: list, n_splits
                 'raw_map_mean': map_m
             })
 
-            # Phục vụ bảng E3
+            # For Table E3
             if cond == 'torn_bright':
                 denom_sub = f_df[f_df['condition'] == 'torn_bright']
                 e3_comparison_rows.append({
                     'model': model_name,
-                    'condition': 'torn_bright (Chói sáng)',
+                    'condition': 'torn_bright (Severe Glare)',
                     'task1_denom_acc_drop': f"{abs(denom_sub['delta_acc(%)'].mean()):.2f}%",
                     'task2_tear_mAP50_drop': f"{abs(map_m - f_df[f_df['condition']=='indoor_baseline']['tear_map50'].mean()):.2f}%" if map_m is not None else "N/A",
                     'more_vulnerable_task': "Classification" if abs(denom_sub['delta_acc(%)'].mean()) > abs(map_m - f_df[f_df['condition']=='indoor_baseline']['tear_map50'].mean()) else "Tear Localization"
                 })
 
-    # ── Xuất CSV ─────────────────────────────────────────────────────────────
+    # ── Export CSV ─────────────────────────────────────────────────────────────
     denom_df = pd.DataFrame(denom_summary_rows)
     tear_df = pd.DataFrame(tear_summary_rows)
     e3_df = pd.DataFrame(e3_comparison_rows)
@@ -645,9 +645,9 @@ def run_experiment_e1_kfold(data_dir: str, metadata: str, models: list, n_splits
     tear_df.to_csv(tear_csv, index=False)
     e3_df.to_csv(e3_csv, index=False)
 
-    # ── IN BẢNG TERMINAL ĐẸP MẮT & CHI TIẾT ──────────────────────────────────
+    # ── PRINT DETAILED TERMINAL TABLES ───────────────────────────────────────
     print("\n" + "=" * 135)
-    print("📋 BẢNG 1 (E1): PHÂN LOẠI & ĐỊNH VỊ TỜ TIỀN - BANKNOTE DETECTION & CLASSIFICATION (5-FOLD MEAN ± STD)")
+    print("📋 TABLE 1 (E1): BANKNOTE DETECTION & CLASSIFICATION (5-FOLD MEAN ± STD)")
     print("=" * 135)
     print(f"{'Model':<9} | {'Condition':<16} | {'Top-1 Acc (%)':<16} | {'Δ vs Indoor (%)':<18} | {'Banknote mAP50':<16} | {'Banknote IoU(%)':<17} | {'Miss Rate(%)'}")
     print("-" * 135)
@@ -656,39 +656,39 @@ def run_experiment_e1_kfold(data_dir: str, metadata: str, models: list, n_splits
     print("=" * 135)
 
     print("\n" + "=" * 155)
-    print("🩹 BẢNG 2 (E1): NHẬN DIỆN RÁCH & ĐỊNH VỊ VẾT RÁCH - TEAR DETECTION & CLASSIFICATION (5-FOLD MEAN ± STD)")
+    print("🩹 TABLE 2 (E1): TEAR DETECTION & LOCALIZATION (5-FOLD MEAN ± STD)")
     print("=" * 155)
-    print(f"{'Model':<9} | {'Condition':<16} | {'Loại ảnh':<12} | {'Đoán đúng(%)':<16} | {'Báo động giả(%)':<18} | {'Tear mAP50':<16} | {'Tear IoU(%)':<15} | {'Bỏ sót vết rách(%)'}")
+    print(f"{'Model':<9} | {'Condition':<16} | {'Data Type':<12} | {'Accuracy(%)':<16} | {'False Alarm(%)':<18} | {'Tear mAP50':<16} | {'Tear IoU(%)':<15} | {'Miss Rate(%)'}")
     print("-" * 155)
     for _, r in tear_df.iterrows():
         print(f"{r['model']:<9} | {r['condition']:<16} | {r['data_type']:<12} | {r['binary_tear_acc']:<16} | {r['false_alarm_rate']:<18} | {r['tear_mAP50']:<16} | {r['tear_box_avg_iou']:<15} | {r['tear_box_miss_rate']}")
     print("=" * 155)
 
     print("\n" + "=" * 105)
-    print("📈 BẢNG 3 (E3): SO SÁNH MỨC ĐỘ SUY GIẢM GIỮA 2 TASK DƯỚI ÁNH SÁNG CHÓI")
+    print("📈 TABLE 3 (E3): TASK DEGRADATION COMPARISON UNDER SEVERE GLARE")
     print("=" * 105)
-    print(f"{'Model':<9} | {'Tình huống test':<24} | {'Suy giảm Acc Mệnh giá':<25} | {'Suy giảm mAP50 Vết rách':<25}")
+    print(f"{'Model':<9} | {'Test Condition':<24} | {'Denom Acc Degradation':<25} | {'Tear mAP50 Degradation':<25}")
     print("-" * 105)
     for _, r in e3_df.iterrows():
         print(f"{r['model']:<9} | {r['condition']:<24} | {r['task1_denom_acc_drop']:<25} | {r['task2_tear_mAP50_drop']:<25}")
     print("=" * 105)
-    print(f"\n📁 Đã lưu 3 file CSV chi tiết:")
-    print(f"  - Bảng 1: {denom_csv}")
-    print(f"  - Bảng 2: {tear_csv}")
-    print(f"  - Bảng 3: {e3_csv}\n")
+    print(f"\n📁 Successfully saved 3 detailed CSV files:")
+    print(f"  - Table 1: {denom_csv}")
+    print(f"  - Table 2: {tear_csv}")
+    print(f"  - Table 3: {e3_csv}\n")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Chạy thí nghiệm E1 & E3 với 5-Fold Cross-Validation.")
-    parser.add_argument("--data_dir", type=str, default=".", help="Thư mục dataset")
-    parser.add_argument("--metadata", type=str, default="metadata.csv", help="Đường dẫn file metadata.csv")
-    parser.add_argument("--models", nargs="+", default=["yolov8n", "yolo11n"], help="Danh sách model")
-    parser.add_argument("--n_splits", type=int, default=5, help="Số fold cross-validation (mặc định: 5)")
-    parser.add_argument("--seed", type=int, default=42, help="Seed ngẫu nhiên")
-    parser.add_argument("--epochs", type=int, default=100, help="Số epochs")
+    parser = argparse.ArgumentParser(description="Run experiments E1 & E3 with 5-Fold Cross-Validation.")
+    parser.add_argument("--data_dir", type=str, default=".", help="Dataset directory")
+    parser.add_argument("--metadata", type=str, default="metadata.csv", help="Path to metadata.csv")
+    parser.add_argument("--models", nargs="+", default=["yolov8n", "yolo11n"], help="List of model architectures")
+    parser.add_argument("--n_splits", type=int, default=5, help="Number of cross-validation folds (default: 5)")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed")
+    parser.add_argument("--epochs", type=int, default=100, help="Number of training epochs")
     parser.add_argument("--batch", type=int, default=16, help="Batch size")
     parser.add_argument("--device", type=str, default="auto", help="Device (0, cpu, auto)")
-    parser.add_argument("--results_dir", type=str, default="results", help="Thư mục kết quả")
+    parser.add_argument("--results_dir", type=str, default="results", help="Directory to save results")
 
     args = parser.parse_args()
     run_experiment_e1_kfold(

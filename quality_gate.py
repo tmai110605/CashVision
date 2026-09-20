@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
 quality_gate.py — Quality-Gate Module
-Classifier siêu nhẹ chạy độc lập từng frame để phân loại chất lượng ảnh:
+Ultra-lightweight sensory classifier running per frame to assess optical quality:
   Class 0: good (indoor, outdoor)
   Class 1: underexposed (backlight)
   Class 2: overexposed (overexposed)
-Bao gồm: Huấn luyện độc lập, Sweep ngưỡng tau, và Mô phỏng phiên sử dụng (Session Simulation).
+Modules: Standalone training, tau threshold sweep, and streaming session simulation.
 """
 
 import os
@@ -25,7 +25,7 @@ class QualityGate(nn.Module):
     """
     Quality-Gate Sub-network:
     Input: 64x64x3 thumbnail
-    Output: Logits cho 3 lớp: [good, underexposed, overexposed]
+    Output: Logits for 3 photometric classes: [good, underexposed, overexposed]
     """
     def __init__(self, thumbnail_size: int = 64):
         super().__init__()
@@ -49,7 +49,7 @@ class QualityGate(nn.Module):
 
             nn.AdaptiveAvgPool2d(1),
             nn.Flatten(),
-            nn.Linear(24, 3)  # 3 lớp: good, underexposed, overexposed
+            nn.Linear(24, 3)  # 3 classes: good, underexposed, overexposed
         )
 
     def forward(self, x: torch.Tensor):
@@ -60,9 +60,9 @@ class QualityGate(nn.Module):
 
     def predict_quality(self, x: torch.Tensor, tau: float = 0.6):
         """
-        Quy tắc quyết định:
-        - Nếu argmax != 0 ('good') VÀ confidence > tau -> Chặn frame (is_passed = False)
-        - Ngược lại -> Cho phép frame đi tiếp (is_passed = True)
+        Decision rule:
+        - If argmax != 0 ('good') AND confidence > tau -> Defer frame (is_passed = False)
+        - Otherwise -> Pass frame to deep detector (is_passed = True)
         """
         self.eval()
         with torch.no_grad():
@@ -78,7 +78,7 @@ class QualityGate(nn.Module):
 
 
 class QualityGateDataset(Dataset):
-    """Dataset đọc ảnh và gán nhãn 3 lớp chất lượng dựa trên condition."""
+    """Dataset reader assigning 3-class photometric quality labels from environmental metadata."""
     def __init__(self, df: pd.DataFrame, thumbnail_size: int = 64):
         self.samples = []
         self.thumbnail_size = thumbnail_size
@@ -103,7 +103,7 @@ class QualityGateDataset(Dataset):
         img_path, label = self.samples[idx]
         bgr = cv2.imread(img_path)
         if bgr is None:
-            # Fallback tensor rỗng
+            # Fallback empty tensor
             tensor = torch.zeros((3, self.thumbnail_size, self.thumbnail_size), dtype=torch.float32)
         else:
             rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
@@ -114,7 +114,7 @@ class QualityGateDataset(Dataset):
 
 
 def train_quality_gate(train_df: pd.DataFrame, val_df: pd.DataFrame, device: str = 'cuda', epochs: int = 25, batch_size: int = 32, lr: float = 1e-3):
-    """Huấn luyện Quality-Gate độc lập với Cross-Entropy Loss."""
+    """Train Quality-Gate independently using Cross-Entropy Loss."""
     train_dataset = QualityGateDataset(train_df)
     val_dataset = QualityGateDataset(val_df)
 
@@ -128,7 +128,7 @@ def train_quality_gate(train_df: pd.DataFrame, val_df: pd.DataFrame, device: str
     best_val_acc = 0.0
     best_weights = None
 
-    print(f"\n[QUALITY-GATE] Bắt đầu huấn luyện ({len(train_dataset)} ảnh train, {len(val_dataset)} ảnh val)...")
+    print(f"\n[QUALITY-GATE] Starting training ({len(train_dataset)} train samples, {len(val_dataset)} val samples)...")
 
     for epoch in range(1, epochs + 1):
         model.train()
@@ -151,7 +151,7 @@ def train_quality_gate(train_df: pd.DataFrame, val_df: pd.DataFrame, device: str
 
         train_acc = (correct / total) * 100.0
 
-        # Đánh giá Val
+        # Validation evaluation
         model.eval()
         val_correct = 0
         val_total = 0
@@ -173,14 +173,14 @@ def train_quality_gate(train_df: pd.DataFrame, val_df: pd.DataFrame, device: str
             print(f"  Epoch {epoch:02d}/{epochs:02d} | Train Loss: {total_loss/total:.4f}, Train Acc: {train_acc:.1f}% | Val Acc: {val_acc:.1f}%")
 
     model.load_state_dict(best_weights)
-    print(f"[QUALITY-GATE] Huấn luyện hoàn tất. Best Val Acc: {best_val_acc:.2f}%")
+    print(f"[QUALITY-GATE] Training complete. Best Val Acc: {best_val_acc:.2f}%")
     return model
 
 
 def sweep_quality_gate_threshold(model: QualityGate, val_df: pd.DataFrame, device: str = 'cuda', output_csv: str = None):
     """
-    Quét dải ngưỡng tau từ 0.30 đến 0.95 để xuất bảng Precision, Recall, F1
-    cho việc phát hiện frame xấu (underexposed/overexposed).
+    Sweep tau acceptance thresholds from 0.30 to 0.95 to report Precision, Recall, F1
+    for detecting adverse frames (underexposed/overexposed).
     """
     val_dataset = QualityGateDataset(val_df)
     loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
@@ -201,7 +201,7 @@ def sweep_quality_gate_threshold(model: QualityGate, val_df: pd.DataFrame, devic
 
     all_probs = torch.cat(all_probs, dim=0).numpy()
     all_targets = np.concatenate(all_targets, axis=0)
-    is_bad_gt = (all_targets != 0)  # Ground truth frame xấu
+    is_bad_gt = (all_targets != 0)  # Ground truth adverse frames
 
     tau_candidates = np.arange(0.30, 0.96, 0.05)
     records = []
@@ -210,7 +210,7 @@ def sweep_quality_gate_threshold(model: QualityGate, val_df: pd.DataFrame, devic
         pred_cls = np.argmax(all_probs, axis=1)
         conf = np.max(all_probs, axis=1)
 
-        # Chặn frame nếu pred != good và conf > tau
+        # Defer frame if pred != good and conf > tau
         pred_blocked = (pred_cls != 0) & (conf > tau)
 
         tp = np.sum(pred_blocked & is_bad_gt)
@@ -236,18 +236,18 @@ def sweep_quality_gate_threshold(model: QualityGate, val_df: pd.DataFrame, devic
     if output_csv:
         Path(output_csv).parent.mkdir(parents=True, exist_ok=True)
         df_sweep.to_csv(output_csv, index=False)
-        print(f"[QUALITY-GATE] Đã xuất kết quả sweep ngưỡng tau -> {output_csv}")
+        print(f"[QUALITY-GATE] Exported tau threshold sweep -> {output_csv}")
 
     return df_sweep
 
 
 def simulate_session(quality_gate: QualityGate, test_df: pd.DataFrame, tau: float = 0.6, device: str = 'cuda', output_csv: str = None):
     """
-    Mô phỏng phiên sử dụng có / không có Quality-Gate:
-    Đo:
-      (a) Tỷ lệ frame được chuyển tiếp đến model chính
-      (b) Số lần model chính phải chạy inference
-      (c) Ước tính năng lượng tiết kiệm (% frames filtered)
+    Simulate streaming session with / without Quality-Gate:
+    Measures:
+      (a) Percentage of frames forwarded to downstream detector
+      (b) Number of heavy neural inference invocations
+      (c) Estimated compute/energy savings (% frames shed)
     """
     dataset = QualityGateDataset(test_df)
     loader = DataLoader(dataset, batch_size=32, shuffle=False)
@@ -289,6 +289,6 @@ def simulate_session(quality_gate: QualityGate, test_df: pd.DataFrame, tau: floa
     if output_csv:
         Path(output_csv).parent.mkdir(parents=True, exist_ok=True)
         sim_df.to_csv(output_csv, index=False)
-        print(f"[QUALITY-GATE] Đã xuất mô phỏng phiên sử dụng -> {output_csv}")
+        print(f"[QUALITY-GATE] Exported session simulation -> {output_csv}")
 
     return sim_df

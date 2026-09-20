@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-create_metadata.py — Tự động sinh file metadata.csv từ cấu trúc tên file và nhãn của bộ dữ liệu CashVision.
+create_metadata.py — Generate metadata.csv catalog from dataset file naming conventions and annotations.
 
-Cấu trúc tên file: {split}_{denom}_{condition}_{index}_jpg.rf.{hash}.jpg
-Ví dụ:
+Filename structure: {split}_{denom}_{condition}_{index}_jpg.rf.{hash}.jpg
+Example:
   - train_100k_backlight_0001_jpg.rf.WMHOUSo8P4ZMzNHK4O6P.jpg -> condition: backlight, is_torn: false, denom: 100000
   - train_500k_torn_overexposed_0023_jpg.rf.qiXs34...jpg      -> condition: torn_bright, is_torn: true, denom: 500000
   - train_10k_torn_clean_0001_jpg.rf...jpg                   -> condition: torn_clean, is_torn: true, denom: 10000
@@ -16,7 +16,7 @@ import re
 import sys
 from pathlib import Path
 
-# Fix UTF-8 encoding trên Windows
+# Fix UTF-8 encoding on Windows
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 if hasattr(sys.stderr, "reconfigure"):
@@ -31,7 +31,7 @@ DENOM_MAP = {
     '500k': 500000
 }
 
-# Ánh xạ từ pattern tên file sang 6 điều kiện chuẩn của bài báo
+# Mapping from filename patterns to 6 standard environmental conditions
 CONDITION_MAP = {
     'indoor': 'indoor',
     'outdoor': 'outdoor',
@@ -45,18 +45,18 @@ CONDITION_MAP = {
 
 def parse_filename(filename: str):
     """
-    Phân tích tên file để lấy (denomination_class, condition, is_torn).
+    Parse filename to extract (denomination_class, condition, is_torn).
     """
     stem = filename.lower()
     
-    # 1. Tìm mệnh giá
+    # 1. Extract denomination
     denom_val = None
     for d_key, d_num in DENOM_MAP.items():
         if f"_{d_key}_" in stem or f"_{d_key}" in stem:
             denom_val = d_num
             break
 
-    # 2. Tìm condition
+    # 2. Extract condition
     matched_cond = None
     if "torn_overexposed" in stem or "torn_bright" in stem:
         matched_cond = "torn_bright"
@@ -78,7 +78,7 @@ def parse_filename(filename: str):
 
 
 def check_label_is_torn(label_path: Path, torn_class_id: int = 6):
-    """Kiểm tra nhãn YOLO thực tế có chứa class rách hay không."""
+    """Check whether YOLO label file contains tear defect class."""
     if not label_path.exists():
         return False
     with open(label_path, 'r', encoding='utf-8') as f:
@@ -97,8 +97,8 @@ def generate_metadata(data_dir: str, output_csv: str, include_splits: list = Non
     rows = []
     skipped = 0
 
-    print(f"[INFO] Bắt đầu quét dữ liệu trong: {data_path}")
-    print(f"[INFO] Quét các thư mục: {include_splits}")
+    print(f"[INFO] Scanning dataset in: {data_path}")
+    print(f"[INFO] Scanning directories: {include_splits}")
 
     image_exts = {'.jpg', '.jpeg', '.png'}
 
@@ -107,7 +107,7 @@ def generate_metadata(data_dir: str, output_csv: str, include_splits: list = Non
         split_lbl_dir = data_path / split / "labels"
 
         if not split_img_dir.exists():
-            print(f"⚠️ Không tìm thấy thư mục {split_img_dir}, bỏ qua.")
+            print(f"⚠️ Directory not found: {split_img_dir}, skipping.")
             continue
 
         for img_file in sorted(split_img_dir.iterdir()):
@@ -117,15 +117,15 @@ def generate_metadata(data_dir: str, output_csv: str, include_splits: list = Non
             fname = img_file.name
             denom, cond, is_torn_by_name = parse_filename(fname)
 
-            # Kiểm tra label thực tế
+            # Check ground truth label file
             lbl_file = split_lbl_dir / f"{img_file.stem}.txt"
             has_torn_label = check_label_is_torn(lbl_file)
             
-            # Ưu tiên xác định is_torn kết hợp giữa tên file và nhãn
+            # Determine is_torn status combining filename and bounding box annotations
             is_torn_final = "true" if (is_torn_by_name == "true" or has_torn_label) else "false"
 
             if cond is None or denom is None:
-                print(f"⚠️ Cảnh báo: Không parse được file: {fname} (denom={denom}, cond={cond})")
+                print(f"⚠️ Warning: Failed to parse file: {fname} (denom={denom}, cond={cond})")
                 skipped += 1
                 continue
 
@@ -143,14 +143,14 @@ def generate_metadata(data_dir: str, output_csv: str, include_splits: list = Non
         writer.writeheader()
         writer.writerows(rows)
 
-    # Thống kê
+    # Summary statistics
     print("\n" + "=" * 60)
-    print(f"✅ ĐÃ TẠO XONG: {out_path}")
+    print(f"✅ CATALOG GENERATED: {out_path}")
     print("=" * 60)
-    print(f"  Tổng số ảnh ghi nhận: {len(rows)}")
-    print(f"  Số file bỏ qua:       {skipped}")
+    print(f"  Total images indexed: {len(rows)}")
+    print(f"  Skipped files:       {skipped}")
     
-    # Phân bố theo condition
+    # Distribution by condition
     cond_counts = {}
     torn_counts = {}
     for r in rows:
@@ -159,18 +159,18 @@ def generate_metadata(data_dir: str, output_csv: str, include_splits: list = Non
         if r['is_torn'] == 'true':
             torn_counts[c] = torn_counts.get(c, 0) + 1
 
-    print("\n📊 PHÂN BỐ THEO CONDITION:")
+    print("\n📊 DISTRIBUTION BY CONDITION:")
     for cond, count in sorted(cond_counts.items()):
         torn_c = torn_counts.get(cond, 0)
-        print(f"  - {cond:<16}: {count:>4} ảnh (trong đó rách: {torn_c:>3})")
+        print(f"  - {cond:<16}: {count:>4} images (torn: {torn_c:>3})")
     print("=" * 60 + "\n")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Tạo file metadata.csv từ tên file và nhãn của dataset.")
-    parser.add_argument("--data_dir", type=str, default=".", help="Thư mục gốc chứa train/, valid/, test/")
-    parser.add_argument("--output", type=str, default="metadata.csv", help="Đường dẫn file metadata.csv cần tạo")
-    parser.add_argument("--splits", nargs="+", default=["train", "valid", "test"], help="Các split cần quét")
+    parser = argparse.ArgumentParser(description="Generate metadata.csv from dataset filenames and YOLO labels.")
+    parser.add_argument("--data_dir", type=str, default=".", help="Root directory containing train/, valid/, test/ splits")
+    parser.add_argument("--output", type=str, default="metadata.csv", help="Output path for metadata.csv")
+    parser.add_argument("--splits", nargs="+", default=["train", "valid", "test"], help="Dataset splits to scan")
 
     args = parser.parse_args()
     generate_metadata(data_dir=args.data_dir, output_csv=args.output, include_splits=args.splits)

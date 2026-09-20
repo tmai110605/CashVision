@@ -1,0 +1,4 @@
+model,condition,task1_denom_acc_drop,task2_tear_mAP50_drop,more_vulnerable_task
+yolov8n,torn_bright (Chói sáng),12.53%,2.97%,Classification
+yolov8s,torn_bright (Chói sáng),10.34%,3.64%,Classification
+yolo11n,torn_bright (Chói sáng),9.52%,4.91%,Classification

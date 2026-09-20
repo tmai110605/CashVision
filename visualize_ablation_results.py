@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """
-visualize_ablation_results.py — Trực quan hoá kết quả Ablation 2x2 (Config A/B/C/D)
-của CashVision C2 Pipeline.
+visualize_ablation_results.py — Visualize 2x2 ablation benchmark results (Config A/B/C/D)
+for CashVision C2 Pipeline.
 
-Đọc results_c2/config_A/metrics_per_condition.csv (và B, C, D nếu có), xuất ra:
+Reads results_c2/config_A/metrics_per_condition.csv (and B, C, D) and exports:
   - Heatmap Accuracy Denom theo Condition x Config
-  - Heatmap mAP50 Tear theo Condition x Config (chỉ áp dụng torn_clean/torn_bright)
+  - Heatmap of Tear mAP50 by Condition x Config (torn_clean / torn_bright)
   - Heatmap False Alarm Rate theo Condition x Config
-  - Bar chart Overall (weighted theo num_samples) cho từng metric, so sánh 4 config
-  - Gộp tất cả vào 1 file HTML duy nhất để mở bằng trình duyệt
+  - Overall bar charts (weighted by sample count) comparing 4 configurations
+  - Bundles all figures into a single HTML report
 
-Cách chạy (từ thư mục ~/CashVision, sau khi đã chạy xong run_c2.py --stage ablation):
+Usage: python visualize_ablation_results.py --results_dir results_c2
     python visualize_ablation_results.py --results_dir results_c2
 
-Không cần GPU / không cần load lại model — chỉ đọc CSV kết quả đã có sẵn.
+No GPU required — processes precomputed benchmark CSV files directly.
 """
 
 import argparse
@@ -22,22 +22,22 @@ import io
 from pathlib import Path
 
 import matplotlib
-matplotlib.use("Agg")  # không cần display, chỉ xuất ảnh
+matplotlib.use("Agg")  # Headless mode for saving figures
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 CONFIG_COLORS = {
-    'A': '#e74c3c',  # đỏ - baseline
-    'B': '#3498db',  # xanh dương - IC-Net
-    'C': '#2ecc71',  # xanh lá - Consistency Loss
-    'D': '#9b59b6',  # tím - cả hai
+    'A': '#e74c3c',  # Red - baseline
+    'B': '#3498db',  # Blue - MQTone
+    'C': '#2ecc71',  # Green - Consistency Loss
+    'D': '#9b59b6',  # Purple - Full
 }
 CONFIG_LABELS = {
     'A': 'A: Baseline',
-    'B': 'B: +IC-Net',
+    'B': 'B: +MQTone',
     'C': 'C: +Consistency',
-    'D': 'D: +IC-Net+Consistency',
+    'D': 'D: +MQTone+Consistency',
 }
 CONDITION_ORDER = ['indoor', 'outdoor', 'backlight', 'overexposed', 'torn_clean', 'torn_bright']
 
@@ -49,7 +49,7 @@ def load_configs(results_dir: Path) -> dict:
         if csv_path.exists():
             data[cfg] = pd.read_csv(csv_path)
         else:
-            print(f"  (bỏ qua) Không tìm thấy: {csv_path}")
+            print(f"  (skipped) File not found: {csv_path}")
     return data
 
 
@@ -143,24 +143,24 @@ def build_pivot(data: dict, value_col: str, only_notna: bool = False) -> pd.Data
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Trực quan hoá kết quả Ablation 2x2 (CashVision C2)")
-    parser.add_argument("--results_dir", type=str, default="results_c2", help="Thư mục chứa config_A/, config_B/, ...")
-    parser.add_argument("--output", type=str, default="ablation_report.html", help="Tên file HTML báo cáo đầu ra")
+    parser = argparse.ArgumentParser(description="Visualize 2x2 ablation results (CashVision C2)")
+    parser.add_argument("--results_dir", type=str, default="results_c2", help="Directory containing config_A/, config_B/, ...")
+    parser.add_argument("--output", type=str, default="ablation_report.html", help="Output HTML report filename")
     args = parser.parse_args()
 
     results_dir = Path(args.results_dir).resolve()
-    print(f"🔍 Đang tìm kết quả trong: {results_dir}")
+    print(f"🔍 Searching for results in: {results_dir}")
     data = load_configs(results_dir)
 
     if not data:
-        print(f"❌ Không tìm thấy metrics_per_condition.csv nào trong {results_dir}/config_*/")
-        print("   Hãy chạy 'python run_c2.py --stage ablation ...' trước.")
+        print(f"❌ No metrics_per_condition.csv found in {results_dir}/config_*/")
+        print("   Please run 'python run_c2.py --stage ablation ...' first.")
         return
 
-    print(f"✅ Tìm thấy kết quả cho config: {list(data.keys())}")
+    print(f"✅ Found results for configurations: {list(data.keys())}")
 
     overall_df = compute_overall(data)
-    print("\n=== TỔNG QUAN (weighted theo num_samples mỗi điều kiện) ===")
+    print("\n=== SUMMARY OVERVIEW (weighted by sample count per condition) ===")
     print(overall_df.to_string(index=False))
 
     acc_pivot = build_pivot(data, "accuracy_denom")
@@ -169,27 +169,27 @@ def main():
 
     images = {}
     images["acc_heatmap"] = fig_to_base64(
-        plot_heatmap(acc_pivot, "Độ chính xác Mệnh giá (%) — Điều kiện x Config", cmap="RdYlGn", vmin=0, vmax=100)
+        plot_heatmap(acc_pivot, "Denomination Accuracy (%) — Condition x Config", cmap="RdYlGn", vmin=0, vmax=100)
     )
     if not tear_pivot.empty:
         images["tear_heatmap"] = fig_to_base64(
-            plot_heatmap(tear_pivot, "mAP50 Phát hiện Rách (%) — Điều kiện x Config", cmap="RdYlGn", vmin=0, vmax=100)
+            plot_heatmap(tear_pivot, "Tear mAP50 (%) — Condition x Config", cmap="RdYlGn", vmin=0, vmax=100)
         )
     if not fa_pivot.empty:
         fa_max = max(10, np.nanmax(fa_pivot.values))
         images["fa_heatmap"] = fig_to_base64(
-            plot_heatmap(fa_pivot, "Tỷ lệ Báo động giả (%) — càng THẤP càng tốt", cmap="RdYlGn_r", vmin=0, vmax=fa_max)
+            plot_heatmap(fa_pivot, "False Alarm Rate (%) — Lower is Better", cmap="RdYlGn_r", vmin=0, vmax=fa_max)
         )
 
     images["overall_acc_bar"] = fig_to_base64(
-        plot_bar(overall_df, "overall_accuracy_denom", "Độ chính xác Mệnh giá — Tổng thể", "Accuracy (%)")
+        plot_bar(overall_df, "overall_accuracy_denom", "Denomination Accuracy — Overall", "Accuracy (%)")
     )
     if overall_df["overall_mAP50_tear"].notna().any():
         images["overall_tear_bar"] = fig_to_base64(
-            plot_bar(overall_df, "overall_mAP50_tear", "mAP50 Phát hiện Rách — Tổng thể", "mAP50 (%)")
+            plot_bar(overall_df, "overall_mAP50_tear", "Tear Defect mAP50 — Overall", "mAP50 (%)")
         )
     images["overall_fa_bar"] = fig_to_base64(
-        plot_bar(overall_df, "overall_false_alarm_rate", "Tỷ lệ Báo động giả — Tổng thể (thấp hơn = tốt hơn)", "False Alarm (%)")
+        plot_bar(overall_df, "overall_false_alarm_rate", "False Alarm Rate — Overall (Lower is Better)", "False Alarm (%)")
     )
 
     html = ["<html><head><meta charset='utf-8'><title>CashVision C2 — Ablation Report</title><style>",
@@ -202,25 +202,25 @@ def main():
             ".grid{display:flex;flex-wrap:wrap;gap:20px;justify-content:center}",
             ".grid>div{flex:1;min-width:340px}",
             "</style></head><body>",
-            "<h1>📊 CashVision C2 — Báo cáo Ablation 2x2 (Config A/B/C/D)</h1>",
-            f"<p>Nguồn dữ liệu: <code>{results_dir}</code></p>",
-            "<h2>1. Tổng quan (weighted theo số ảnh mỗi điều kiện)</h2>",
+            "<h1>📊 CashVision C2 — Ablation Report 2x2 (Config A/B/C/D)</h1>",
+            f"<p>Data source: <code>{results_dir}</code></p>",
+            "<h2>1. Summary Overview (weighted by sample count per condition)</h2>",
             overall_df.to_html(index=False, na_rep="—"),
             "<div class='grid'>",
-            f"<div><h3>Accuracy Mệnh giá</h3><img src='data:image/png;base64,{images['overall_acc_bar']}'></div>"]
+            f"<div><h3>Denomination Accuracy</h3><img src='data:image/png;base64,{images['overall_acc_bar']}'></div>"]
     if "overall_tear_bar" in images:
-        html.append(f"<div><h3>mAP50 Rách</h3><img src='data:image/png;base64,{images['overall_tear_bar']}'></div>")
+        html.append(f"<div><h3>Tear mAP50</h3><img src='data:image/png;base64,{images['overall_tear_bar']}'></div>")
     html.append(f"<div><h3>False Alarm Rate</h3><img src='data:image/png;base64,{images['overall_fa_bar']}'></div>")
     html.append("</div>")
 
-    html.append("<h2>2. Chi tiết theo từng Điều kiện (Heatmap)</h2>")
+    html.append("<h2>2. Condition Breakdown (Heatmaps)</h2>")
     html.append(f"<img src='data:image/png;base64,{images['acc_heatmap']}'>")
     if "tear_heatmap" in images:
         html.append(f"<img src='data:image/png;base64,{images['tear_heatmap']}'>")
     if "fa_heatmap" in images:
         html.append(f"<img src='data:image/png;base64,{images['fa_heatmap']}'>")
 
-    html.append("<h2>3. Bảng dữ liệu đầy đủ theo từng Config</h2>")
+    html.append("<h2>3. Comprehensive Metrics Table by Config</h2>")
     for cfg in sorted(data.keys()):
         html.append(f"<h3>Config {cfg} ({CONFIG_LABELS.get(cfg, cfg)})</h3>")
         html.append(data[cfg].to_html(index=False, na_rep="—"))
@@ -232,9 +232,9 @@ def main():
         out_path = results_dir / args.output
     out_path.write_text("\n".join(html), encoding="utf-8")
 
-    print(f"\n✅ Đã xuất báo cáo trực quan: {out_path}")
-    print("   Mở file này bằng trình duyệt để xem. Nếu đang SSH vào server không có GUI,")
-    print("   copy file về máy local bằng lệnh (chạy trên máy local):")
+    print(f"\n✅ Visual report exported: {out_path}")
+    print("   Open this file in a web browser to inspect results. If connected via SSH without GUI,")
+    print("   copy the file to your local machine via SCP:")
     print(f"   scp thaimq@<server_ip>:{out_path} .")
 
 

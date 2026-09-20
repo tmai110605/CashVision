@@ -1,0 +1,10 @@
+{
+  "epochs_requested": 100,
+  "epochs_run": 19,
+  "early_stopping_enabled": true,
+  "early_stopping_patience": 10,
+  "stopped_early": true,
+  "monitor_metric": "val_loss",
+  "best_epoch": 9,
+  "best_loss": 39.523076
+}
