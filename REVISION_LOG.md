@@ -263,3 +263,135 @@ The current title (*"Seeing Through the Glare: A Real-Time, Energy-Efficient Mob
   - Did not add external citations not present in `references.bib`.
   - Did not edit `.bib`, `.bbl`, or renumber any existing tables/figures.
 
+---
+
+## TASK 3: Claim Calibration, Contribution Demotion, Abstract/Highlights Rewrite, and Straw-Man Attribution Elimination
+
+**Date:** 2026-09-21  
+**Target Journal:** Expert Systems with Applications (ESWA), Elsevier  
+**Status:** Completed and Verified with `latexmk -pdf` (Build: Zero Errors)  
+**Files Touched:**
+1. `CVS_ESWA/elsarticle-template-harv.tex` (Main LaTeX manuscript)
+2. `ALTERNATIVE_C2_FRAMING.md` (Full specification, empirical defense, and drop-in text for Option B)
+3. `REVISION_LOG.md` (Updated with Task 3 audit, register table, and character counts)
+
+**Total `\AUTHORACTION` Markers in Manuscript:** 29 occurrences (1 macro definition + 28 active markers in text; no markers added or removed in Task 3)
+
+---
+
+### 1. Diagnosis Addressed: Claim Inconsistencies, C2 Self-Defeat, and Straw-Man Baselines
+
+1. **The C2 Self-Defeat:** Contribution C2 previously heralded MQTone as an algorithmic breakthrough matching Gamma correction under overexposure ($69.63\%$ vs.\ $70.03\%$). Limitation 5 conceded that MQTone's core value does not stem from an unprecedented transformation, and Highlight 2 advertised "matching Gamma". Advertising parity with 1970s classical gamma correction as a headline contribution invited desk rejection.
+2. **Abstract Word and Number Bloat:** The original abstract spanned over 300 words with >25 numbers, omitted essential empirical qualifiers (offline vs.\ live lighting, sighted blindfolded cohort, computational work proxy), and falsely coupled "illumination-robust" with "zero valuation errors on device" when those conditions were never measured concurrently.
+3. **Highlights Exceeding Elsevier Standards:** Bullets did not reflect the calibrated C2 framing and required rigorous verification against Elsevier's strict 85-character ceiling.
+4. **Straw-Man Commercial Attribution:** The manuscript cited commercial apps (TapTapSee, LookTel, Seeing AI) and then attributed an $8.3\%$ exact-match accuracy to "static photo-assistive apps". Baseline $B_1$ was in fact the authors' own $1.0$\,s timer-triggered single-shot implementation; no commercial products were evaluated.
+5. **Promotional Register:** Pervasive hyperbolic adverbs and adjectives ("acute", "slashes", "unlocks", "dramatically", "outstanding", "exceptional") compromised Elsevier academic tone.
+
+---
+
+### 2. Resolution of C2: Option A vs. Option B
+
+- **Option A (Implemented in Manuscript):** Repositioned MQTone from a standalone computer-vision breakthrough to an ultra-compact edge conditioning component whose primary role is enabling the real-time cascade ($C_3$). Shifted the manuscript's weight onto the problem characterization and multi-condition dataset ($C_1$), the rule-governed expert cascade system ($C_3$), and the live hardware and human-in-the-loop usability evaluations ($C_3, C_4$). Updated C2 in the Introduction, Abstract, Highlight 2, and Conclusion item 2.
+- **Option B (Documented in Full in `ALTERNATIVE_C2_FRAMING.md`):** Formulated the strongest empirical defense of MQTone using findings already in the paper:
+  - On YOLO11n, static Gamma degrades strong backlighting accuracy to $82.63\%$ (below the $85.33\%$ uncorrected baseline) due to shadow-crushing artifacts, whereas MQTone's local $8 \times 8$ grid preserves foreground intaglio to reach $86.43\%$ ($+3.80$ percentage points over Gamma).
+  - Gamma's cross-fold standard deviation under overexposure on YOLO11n is $\pm 7.80\%$, whereas MQTone maintains $\pm 4.19\%$ (nearly $2\times$ tighter consistency).
+  - Specified the experiment needed to make Option B airtight: a per-condition optimal-gamma sweep ($\gamma \in [0.4, 2.2]$) showing mutually incompatible optima across overexposure and backlighting.
+  - Provided full drop-in replacement blocks for all four sections in `ALTERNATIVE_C2_FRAMING.md`.
+
+> **Editorial Recommendation:** **Option A is strongly recommended for initial submission.** It aligns perfectly with Limitation 5, eliminates reviewer attacks on image enhancement novelty, and anchors the paper squarely in ESWA's expert systems scope. Option B remains available in `ALTERNATIVE_C2_FRAMING.md` should reviewers request deeper enhancement novelty during revisions.
+
+---
+
+### 3. Abstract Rewrite (Task 3.2 Verification)
+
+The abstract was completely rewritten to meet all five project constraints:
+1. **Length:** Exactly **226 words** (strictly $\le 250$ words).
+2. **Number Count:** Exactly **six numbers** ($61.3\%$, $83.3\%$, $20.5$\,FPS, $36.5\%$, $78.2$, $1.0\%$).
+3. **Lighting Separation:** Offline dataset benchmark explicitly separated from live trials: *"Robustness to adverse illumination was established offline using a multi-condition polymer currency dataset... In live trials on a commercial smartphone conducted under everyday ambient indoor lighting, CashVision attained 83.3\% verification accuracy without monetary valuation errors..."*
+4. **Blindfold Protocol Stated:** *"In an assistive user study with sighted participants under a blindfold protocol..."*
+5. **Computational Proxy Stated:** *"reduced the host computational energy proxy by 61.3\%"*
+6. **No Straw-Man Attribution:** *"whereas an author-implemented timer-triggered single-shot baseline yields low accuracy and frequent valuation errors."*
+
+---
+
+### 4. Highlights Rewrite and Character Count Audit (Task 3.3)
+
+Elsevier enforces a strict ceiling of **85 characters per bullet including spaces**. Below are the rewritten highlights and their exact character counts:
+
+| Bullet | Text in Manuscript | Raw Chars | LaTeX Chars | Compliance Status |
+|---|---|---|---|---|
+| **Bullet 1** | `Multi-condition polymer banknote benchmark: 1,812 dual-bbox images, 36 videos.` | 78 | 78 | **PASS** ($\le 85$) |
+| **Bullet 2** | `MQTone (19,686 params) automates edge tone conditioning under specular glare.` | 77 | 77 | **PASS** ($\le 85$) |
+| **Bullet 3** | `Adaptive cascade cuts host compute energy proxy by 61.3% in video benchmarks.` | 77 | 78 (with `\%`) | **PASS** ($\le 85$) |
+| **Bullet 4** | `Smartphone trials: 20.5 FPS preview, 36.5% active power cut under ambient light.` | 80 | 81 (with `\%`) | **PASS** ($\le 85$) |
+| **Bullet 5** | `Blindfolded user study: SUS 78.2, 42.3% lower workload, 1.0% financial hazard.` | 78 | 79 (with `\%`) | **PASS** ($\le 85$) |
+
+---
+
+### 5. Straw-Man Attribution Audit (Task 3.4)
+
+Every sentence previously attributing performance numbers to commercial applications was systematically rewritten to designate $B_1$ as an author-implemented timer-triggered baseline:
+
+| Location in Manuscript | Original Text / Issue | Corrected Text in Source |
+|---|---|---|
+| **Abstract (line 129)** | `...while blind timer-based single-shot capture (as adopted in static photo-assistive apps) achieves only 8.3% exact-match accuracy...` | `...whereas an author-implemented timer-triggered single-shot baseline yields low accuracy and frequent valuation errors.` |
+| **Intro item (b) (line 179)** | `Blind Timer-Based Single-Shot Capture ($B_1$): Conversely, triggering a single snapshot after a pre-programmed delay (e.g., $t = 1.0$\,s), as adopted in photo-assistive readers \cite{TapTapSee}, achieves only 8.3%...` | `Timer-Triggered Single-Shot Baseline ($B_1$): To model conventional snapshot capture without continuous video monitoring, we implement a timer-triggered single-shot baseline that executes detection after a pre-programmed delay ($t = 1.0$\,s). In continuous handheld video streams, this baseline achieves only 8.3%...` |
+| **Section 4.1 (line 835)** | `$B_1$ (Blind Single-Shot Delay Baseline): Emulates timer-based photo-assistive applications (e.g., TapTapSee \cite{TapTapSee}) by waiting a fixed blind delay ($1.0$\,s)...` | `$B_1$ (Timer-Triggered Single-Shot Baseline): An author-implemented baseline that evaluates snapshot capture by waiting a fixed delay ($1.0$\,s) before triggering full MQTone + YOLOv8n inference on a single static frame, modeling single-shot capture without adaptive sensory gating.` |
+| **Section 4.1 (line 860)** | `Performance Degradation of Single-Shot Capture ($B_1$): ...` | `Performance Degradation of the Single-Shot Baseline ($B_1$): ...` |
+| **Section 4.1 (line 864)** | `By contrast, blind single-shot capture ($B_1$) detected only 1 of the 12 torn notes...` | `By contrast, the timer-triggered single-shot baseline ($B_1$) detected only 1 of the 12 torn notes...` |
+| **Section 4.4 (line 1061)** | `Limitations of Blind Single-Shot Capture in Assistive Tasks:` | `Limitations of Timer-Triggered Single-Shot Capture in Assistive Tasks:` |
+| **Section 4.4 (line 1062)** | `...proposing instead a simple timer-based single-shot capture ($B_1$) to conserve mobile energy.` | `...proposing instead a simple timer-based single-shot baseline ($B_1$) to conserve mobile energy. Our empirical findings indicate that unguided timer-triggered single-shot capture is ill-suited...` |
+| **Section 4.4 (line 1063)** | `...$B_1$'s performance drops to an exact-match accuracy of 8.3%...` | `...this single-shot baseline's performance drops to an exact-match accuracy of 8.3%...` |
+| **Section 4.4 (line 1067)** | `...single-shot capture ($B_1$) generated precisely these hazardous errors...` | `...the single-shot baseline ($B_1$) generated precisely these hazardous errors...` |
+| **Conclusion (line 1089)** | `...improves exact recognition accuracy 9.3x over blind single-shot capture ($77.8\%$ vs.\ $8.3\%$)...` | `...improves exact recognition accuracy 9.3x over the timer-triggered single-shot baseline ($77.8\%$ vs.\ $8.3\%$)...` |
+| **Conclusion (line 1090)** | `...53.0% relative to single-shot capture...` | `...53.0% relative to the single-shot baseline...` |
+| **Conclusion (line 1093)** | `...or relying on blind single-shot capture...` | `...or relying on static single-shot triggering...` |
+
+---
+
+### 6. Register & Promotional Language Find-and-Replace Table (Task 3.5)
+
+In accordance with project rules, promotional language within the task boundary was systematically replaced with hedged, objective academic phrasing:
+
+| Original Phrasing in Manuscript | Replaced With | Location / Section | Rationale |
+|---|---|---|---|
+| `suffers acute vulnerability to specular glare` | `exhibits marked vulnerability to specular glare` | Contribution C1 (line 193) | Eliminates medical/hyperbolic "acute"; reports empirical vulnerability factually. |
+| `In rigorous 5-fold cross-validation` | `In 5-fold cross-validation` | Contribution C2 (line 194) | Strips self-congratulatory "rigorous". |
+| `unlocks the full camera preview cadence` | `sustains the camera preview cadence` | Contribution C3 (line 195) | Removes marketing term "unlocks"; describes sensor-limited preview cadence accurately. |
+| `slashes amortized frame compute latency by 97.9%` | `reduces amortized frame compute latency by 97.9%` | Contribution C3 (line 195) | Replaces informal/promotional "slashes". |
+| `significantly elevates usability to a SUS score` | `elevates usability to a SUS score` | Contribution C4 (line 196) | Avoids loose colloquial "significantly" when not tied to a formal paired test sentence. |
+| `without its severe latency and thermal costs` | `without its latency and thermal costs` | Contribution C4 (line 196) | Removes emotional intensifier "severe". |
+| `unlocks the full camera preview cadence of 20.5 FPS` | `sustained the camera preview cadence of 20.5 FPS` | Abstract (line 129) | Replaced marketing verb with objective descriptor. |
+| `matching exhaustive verification safety without its latency and thermal penalties` | `limited the financial hazard rate to 1.0%` | Abstract (line 129) | Stripped promotional comparison clause; stated empirical safety rate directly. |
+
+---
+
+### 7. Scope Discipline & Out-of-Scope Findings
+
+- **Edits Made:** Confined strictly to Abstract, Highlights, Introduction item (b), Contributions C1--C4, Section 4.1 ($B_1$ definition & text), Section 4.4 ($B_1$ discussion), and Conclusion items.
+- **Refused Actions:**
+  - Did not edit `.bib` or `.bbl` files.
+  - Did not alter any experimental data tables or numeric results.
+  - Did not renumber sections, equations, figures, or tables.
+- **Out-of-Scope Observations Logged for Subsequent Tasks:**
+  - *Promotional Language in Internal Sections:* The terms "pivotal" (lines 606, 952), "profound" (line 610), "exceptional" (line 682), "paradoxically" (line 678), "precipitous" (line 892), and "dramatically" (line 1041) remain in internal technical sections (Sections 3.2, 3.3, 4.1, 4.3). These should be cleaned when those respective sections are edited under future dedicated task boundaries.
+
+---
+
+### 8. What Remains Open for the Authors (Updated Action Checklist)
+
+- [ ] **MQTone Option Choice:** Confirm adoption of Option A (implemented by default in manuscript) or review `ALTERNATIVE_C2_FRAMING.md` to swap in Option B.
+- [ ] **Rule Sensitivity Sweep Experiments (Table~\ref{tab:rule_sensitivity}):** Run the one-at-a-time parameter sweeps on the 36 continuous video benchmark streams across the 5 thresholds ($\tau, K_{\text{opt}}, M_{\text{verify}}, \theta_{\text{texture}}, \theta_{\text{conf}}$).
+- [ ] **Title Choice:** Select one of the five proposed candidate titles in Task 2.
+- [ ] **Task 1 Open Items:** Quoc Thai Mai ORCID, ethics approval details, consent confirmation, CRediT verification, funding confirmation, AI writing declaration, non-AI artwork certification, data/code repository DOIs, and statutory currency reproduction citation.
+
+---
+
+### 9. Build and Verification Status
+
+- **Build Engine:** `latexmk -pdf elsarticle-template-harv.tex` (MiKTeX pdfTeX 4.27, Git Perl 5.38.2 on Windows).
+- **Exit Status:** Clean build, Exit Code 0.
+- **Output:** `elsarticle-template-harv.pdf` (37 pages, 23,166,512 bytes).
+- **Cross-References:** All labels, citations, and table references resolved cleanly with zero errors.
+
+
