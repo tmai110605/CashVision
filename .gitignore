@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -63,6 +63,14 @@ CV_JRTIP/*.synctex.gz
 CV_JRTIP/*.blg
 CV_JRTIP/template_out.*
 CV_JRTIP/temp.pdf
+CVS_ESWA/*.aux
+CVS_ESWA/*.log
+CVS_ESWA/*.out
+CVS_ESWA/*.synctex.gz
+CVS_ESWA/*.blg
+CVS_ESWA/*.fdb_latexmk
+CVS_ESWA/*.fls
+CVS_ESWA/*.spl
 
 CV_JRTIP/
 

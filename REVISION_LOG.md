@@ -541,5 +541,108 @@ The following items cannot be resolved by editorial text revision and require au
   - **Did NOT edit `.bib` or `.bbl` files:** All reference citations and keys preserved.
   - **Did NOT renumber labels, tables, or equations:** All cross-references remain intact.
 
+---
 
+## TASK 5: Experimental Design Defects and Protocol Formalization
 
+**Date:** 2026-09-21  
+**Target Journal:** Expert Systems with Applications (ESWA), Elsevier  
+**Status:** Completed and Verified with `latexmk -pdf` (Build: Zero Errors)  
+**Files Touched:**
+1. `CVS_ESWA/elsarticle-template-harv.tex` (Main LaTeX manuscript)
+2. `protocols/baseline_pretrained_protocol.md` (Protocol: Pretrained deep enhancer fine-tuning under Protocol B)
+3. `protocols/leave_specimen_out_protocol.md` (Protocol: Specimen-disjoint partition from existing benchmark captures)
+4. `protocols/sota_comparison_protocol.md` (Protocol: Benchmark against Al-Zu'bi et al., Dhar & Uddin, Ghanem et al.)
+5. `protocols/adverse_lighting_ondevice_protocol.md` (Protocol: Multi-condition live on-device testing)
+6. `.gitignore` (Added CVS_ESWA LaTeX auxiliary files)
+7. `REVISION_LOG.md` (Updated with Task 5 log, verdicts, and recommendations)
+
+**Total `\AUTHORACTION` Markers in Manuscript Source:** 31 active markers in text (+ 1 macro definition in preamble = 32 total occurrences). (3 new markers added in Task 5: Table 3 pretrained baselines, Table 6 specimen-disjoint benchmark, and Table 7 SOTA banknote systems).
+
+---
+
+### 1. Item-by-Item Analysis and Verdicts
+
+#### 5.1 Crippled Baselines
+- **Problem:** Table 3 reported high-capacity enhancement baselines (IAT at 26.94%, Afifi et al. at 36.23%, EnlightenGAN at 48.28%) far below the no-enhancer baseline (74.42%). Training a 10.2M-parameter GAN from scratch on 2,040 augmented instances and concluding it is fundamentally unsuitable for polymer banknote restoration is a straw-man comparison; unconstrained multi-channel models collapsed due to cold-start sample starvation, not inherent architectural invalidity. Figure 5 also presented a single cherry-picked sample where CLAHE actually achieved correct classification, requiring three defensive sentences.
+- **Action Taken:**
+  - Authored `protocols/baseline_pretrained_protocol.md`: specifies downloading official public checkpoints for Zero-DCE, Zero-DCE++, IAT, RetinexNet, EnlightenGAN, and Afifi et al., followed by fine-tuning under the identical Protocol B regime (learning rate warmup, layer freezing, photometric loss).
+  - Restructured Table 3 to report both regimes side-by-side: `(From Scratch)` and `w/ Pretrained Weights (Fine-Tuned)` for both Panel A (YOLOv8n) and Panel B (YOLO11n), leaving pretrained cells empty (`---`) with an explicit `\AUTHORACTION` marker.
+  - Rewrote Section 3.3 comparative analysis paragraphs: explicitly stated that from-scratch under-performance reflects cold-start optimization failure on edge-scale data, noted that published baselines rely on natural-image pretraining, and decoupled MQTone's architectural justification from the from-scratch collapse.
+  - Rewrote Figure 5 caption: eliminated defensive CLAHE apologies and framed the figure strictly as a qualitative transformation artifact case study rather than evidence of statistical generalization across banknotes.
+- **Recommendation for Figure 5:** We strongly recommend replacing the current single-specimen figure in future revisions with a multi-sample $3 \times 4$ or $4 \times 4$ visual grid spanning distinct denominations, tear severities, and lighting angles to prevent reviewer accusations of cherry-picking.
+- **VERDICT:** `requires new experiment`  
+  *(Text and table structure repaired by editing; populating fine-tuned pretrained numbers requires executing the computational fine-tuning and evaluation protocol).*
+
+#### 5.2 Specimen-Level Leakage
+- **Problem:** Protocol A partitioned frames randomly from continuous photoshoot sessions (same physical note in train and validation), producing an artificial 99.67%--100.0% ceiling. Similarly, the 552 canonical validation/test images share physical specimens with training, and `torn_clean` / `torn_bright` evaluate identical physical notes. Disclosure of leakage in prose does not repair the measurement: Tables 2 and 3 measure photometric and environmental invariance across known physical notes, not generalization to unseen physical banknotes.
+- **Action Taken:**
+  - Authored `protocols/leave_specimen_out_protocol.md`: specifies a specimen-disjoint partitioning protocol constructible entirely from existing 1,812 benchmark captures without new collection. Specifies clustering images into 10--12 physical banknote specimen clusters per denomination ($K \approx 60$--$72$ total physical notes) using invariant physical markers (serial numbers, distinctive micro-creases, ink wear, defect geometry). Strictly binds `torn_clean` and `torn_bright` pairs into the same specimen cluster.
+  - Created Section 3.6 (`subsec:specimen_disjoint_results`) with Table~\ref{tab:specimen_disjoint_results} skeleton reporting Seen Notes vs. Unseen Specimens across all six operational conditions, populated with empty cells (`---`) and an `\AUTHORACTION` marker.
+  - Rewrote every sentence in Abstract, C1, C2, Section 3.1, and Conclusion that touched these metrics, replacing claims of "generalization" with precise descriptions of what was measured: cross-condition degradation under domain shift and cross-condition photometric/environmental invariance across circulating banknote captures.
+- **VERDICT:** `requires new experiment`  
+  *(Split design and claim calibration completed by editing; generating specimen-disjoint accuracy metrics requires re-running training and evaluation on the disjoint splits).*
+
+#### 5.3 Missing Comparison with Prior Banknote Systems
+- **Problem:** Al-Zu'bi et al. (2023), Dhar & Uddin (2024), and Ghanem et al. (2025) were cited as the closest prior art for assistive banknote recognition, but were never quantitatively compared against on any dataset. Reviewers in applied expert systems require comparative benchmarking against domain-specific state of the art, not merely generic enhancement modules.
+- **Action Taken:**
+  - Authored `protocols/sota_comparison_protocol.md`: specifies the minimum viable comparison protocol, re-implementing their detector configurations on the CashVision 1,812-image polymer benchmark and 36 continuous video streams.
+  - Created Section 3.7 (`subsec:sota_banknote_comparison`) with Table~\ref{tab:sota_banknote_comparison} skeleton contrasting CashVision against Al-Zu'bi et al. (2023), Dhar & Uddin (2024), and Ghanem et al. (2025) across substrate scope, joint defect inspection, edge gating mechanism, parameter footprint, mobile CPU latency, indoor accuracy, overexposure accuracy, video exact accuracy, and active power draw. Populated known architectural attributes and marked benchmark performance cells with `---` and an `\AUTHORACTION` marker.
+- **VERDICT:** `requires new experiment`  
+  *(Comparative framework and qualitative matrix established by editing; empirical accuracy/latency on the polymer benchmark requires implementing and evaluating the prior detector pipelines).*
+
+#### 5.4 Adverse-Lighting On-Device Gap
+- **Problem:** Live on-device smartphone field trials (Section 4.2) and the blindfolded usability study (Section 4.3) were conducted exclusively under everyday ambient indoor lighting. The multi-condition adverse story (specular glare, directional backlight, overexposure) was validated only offline through static cross-validation and a host-PC video benchmark with a software compute proxy.
+- **Action Taken:**
+  - Authored `protocols/adverse_lighting_ondevice_protocol.md`: specifies the minimum viable on-device adverse test protocol across 3 adverse conditions (severe specular flash glare, directional window backlighting, and direct outdoor sunlight) with 18 live smartphone sessions per condition across 6 denominations (3 pristine, 3 damaged), logging Batterymanager power, preview FPS, thermal escalation, and valuation errors (324 physical runs total).
+  - Explicitly calibrated all on-device claims in Section 4.2, Section 4.4 (paragraph 4), Section 5 (Conclusion C3), and Limitation 7 to state that on-device telemetry reflects everyday ambient indoor lighting, and referenced `protocols/adverse_lighting_ondevice_protocol.md` as an open validation protocol for future execution.
+- **VERDICT:** `requires new experiment`  
+  *(Claim calibration and scope restriction completed by editing; live on-device numbers under adverse illumination require executing the physical smartphone protocol).*
+
+---
+
+### 2. Summary of Touched Sections in Manuscript
+
+1. **Title & Abstract:** Preserved word and number constraints while ensuring zero unhedged generalization claims.
+2. **Section 1 (Introduction):** Calibrated Contributions C1 and C2 to cross-condition degradation and cross-condition photometric invariance across circulating captures; updated roadmap to reflect Sections 3.6 and 3.7.
+3. **Section 3.1 (Experimental Setup and Protocols):** Formally defined Protocol A as baseline degradation under domain shift with shared specimens; defined Protocol B as cross-condition photometric invariance; cited `protocols/leave_specimen_out_protocol.md` and referenced Section 3.6.
+4. **Figure 5:** Rewrote caption to remove defensive CLAHE sentences and frame figure as an illustrative qualitative transformation artifact case study.
+5. **Table 3:** Restructured into from-scratch vs. pretrained fine-tuned sub-rows across both detector panels, marked with `\AUTHORACTION`.
+6. **Section 3.3:** Rewrote comparative analysis paragraph to acknowledge from-scratch cold-start optimization failure and reference `protocols/baseline_pretrained_protocol.md`.
+7. **Section 3.6 (New):** Added specimen-disjoint benchmark subsection and Table~\ref{tab:specimen_disjoint_results} skeleton with `\AUTHORACTION`.
+8. **Section 3.7 (New):** Added SOTA banknote system comparison subsection and Table~\ref{tab:sota_banknote_comparison} skeleton with `\AUTHORACTION`.
+9. **Section 4.2 & 4.4:** Scoped live smartphone field trials to everyday ambient lighting and cited `protocols/adverse_lighting_ondevice_protocol.md`.
+10. **Section 5 (Conclusion & Limitations):** Scoped C2 and C3 claims; updated Limitation 7 to cite the adverse on-device protocol.
+
+---
+
+### 3. Open Author Action Items Resulting from Task 5
+
+- [ ] **Pretrained Baseline Fine-Tuning (Table 3):** Execute `protocols/baseline_pretrained_protocol.md` to fine-tune pretrained checkpoints for Zero-DCE, Zero-DCE++, IAT, RetinexNet, EnlightenGAN, and Afifi et al., and populate empty cells in Table 3.
+- [ ] **Figure 5 Replacement:** Replace the single-specimen figure with a multi-sample visual grid ($3 \times 4$ or $4 \times 4$) across diverse denominations and defect states.
+- [ ] **Specimen-Disjoint Benchmark (Table 6):** Cluster the 1,812 static images into specimen IDs following `protocols/leave_specimen_out_protocol.md`, train/evaluate YOLOv8n and YOLO11n on the disjoint splits, and populate Table~\ref{tab:specimen_disjoint_results}.
+- [ ] **SOTA Banknote Benchmark (Table 7):** Implement the detection pipelines of Al-Zu'bi et al. (2023), Dhar & Uddin (2024), and Ghanem et al. (2025) on the polymer benchmark following `protocols/sota_comparison_protocol.md`, and populate Table~\ref{tab:sota_banknote_comparison}.
+- [ ] **Adverse On-Device Trials:** Run physical smartphone trials under adverse lighting (glare, backlight, sunlight) following `protocols/adverse_lighting_ondevice_protocol.md`.
+- [ ] **Prior Task Open Items:** Tasks 1--4 checklists (ORCID, ethics details, consent confirmation, CRediT roles, funding, AI declaration, non-AI artwork, repository DOIs, statutory currency citation, rule sensitivity sweeps in Table 5, and telemetry log frame-duration reconciliation).
+
+---
+
+### 4. Build and Verification Status
+
+- **Build Engine:** `latexmk -pdf elsarticle-template-harv.tex` (MiKTeX pdfTeX 4.27, Git Perl 5.38.2 on Windows).
+- **Exit Status:** Clean build, Exit Code 0.
+- **Output:** `elsarticle-template-harv.pdf` (39 pages, 23,211,016 bytes).
+- **Cross-References:** All section, table, figure, and citation cross-references resolved cleanly with zero errors.
+
+---
+
+### 5. Scope Discipline & Prohibitions Enforced
+
+- **Prohibitions Upheld:**
+  - **Zero fabricated experimental numbers:** All new experimental table cells populated with `---` and marked with `\AUTHORACTION`.
+  - **Zero numerical conflicts smoothed over silently:** Maintained all existing reported numbers.
+  - **Zero `.bib` or `.bbl` edits:** All existing bibliography entries unchanged.
+  - **Zero renumbered existing labels:** All pre-existing section, table, equation, and figure labels remain identical.
+- **Refused Actions:**
+  - Refused to invent accuracy or latency numbers for pretrained baselines, specimen-disjoint splits, SOTA comparisons, or adverse on-device trials.
+  - Refused to paper over the specimen leakage gap or adverse on-device gap in prose; established dedicated protocol files and explicit `\AUTHORACTION` markers instead.
