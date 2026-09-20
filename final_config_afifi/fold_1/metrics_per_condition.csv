@@ -1,7 +1,0 @@
-condition,num_samples,has_real_tears,accuracy_denom,banknote_avg_iou,banknote_map50,banknote_map50_95,banknote_miss_rate,binary_tear_acc,false_alarm_rate,torn_precision,torn_recall,torn_f1,mAP50_tear,mAP50_95_tear,avg_IoU_tear,miss_rate_tear
-indoor,120,False,45.0,88.61,89.17,79.01,8.33,91.67,8.33,0.0,0.0,0.0,,,,
-outdoor,350,False,37.43,87.61,83.43,73.09,14.86,97.14,2.86,0.0,0.0,0.0,,,,
-backlight,274,False,43.07,87.93,88.69,77.98,10.22,96.35,3.65,0.0,0.0,0.0,,,,
-overexposed,274,False,34.31,86.5,89.42,77.35,9.85,97.08,2.92,0.0,0.0,0.0,,,,
-torn_clean,60,True,26.67,87.73,93.33,81.88,6.67,46.67,0.0,100.0,46.67,63.64,42.19,33.53,79.49,57.81
-torn_bright,188,True,32.45,87.21,85.64,74.69,12.23,53.19,0.0,100.0,53.19,69.44,47.42,38.15,80.45,52.58
