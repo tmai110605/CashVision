@@ -168,24 +168,6 @@ python run_video_benchmark.py --fps 30.0 --cooldown 0.5
 python run_video_benchmark.py --limit 2
 ```
 
-#### 3. Run component ablation analysis:
-```bash
-# Evaluate 6 ablated cascade pipeline variants
-python recompute_video_benchmark.py
-```
-
-#### 4. Export video metrics and plots:
-```bash
-# Export summary metrics (FPS, Energy Joules, Latency ms, Time-to-Confirmation s)
-python export_video_tables.py
-
-# Generate Pareto curve between energy consumption and latency
-python plot_benchmark.py
-```
-Frame-by-frame JSONL telemetry logs are saved in `logs_sim/`.
-
----
-
 ## 7. Exporting ONNX Models & Android Application
 
 ### 1. Export PyTorch Models to Mobile ONNX
