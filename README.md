@@ -34,7 +34,7 @@ Camera Stream (30 FPS)
          │
          ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Tier-1 Spatial Texture Filter (σ_gray > 15.0)  [< 0.05 ms]   │──► Blank / Hand Occluded (Drop)
+│ Tier-1 Spatial Texture Filter (σ_gray > 15.0)  [< 0.05 ms]  │──► Blank / Hand Occluded (Drop)
 └─────────────────────────────────────────────────────────────┘
          │ (Pass)
          ▼
