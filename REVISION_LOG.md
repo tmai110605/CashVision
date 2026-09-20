@@ -141,3 +141,125 @@ Before final manuscript submission, the authors must address every `\AUTHORACTIO
 - **Out-of-Scope Observations Logged for Subsequent Tasks:**
   - *Table 8 / Table 5 references:* In later sections, verify cross-table references and statistical notation consistency.
   - *Promotional wording in Sections 1–4:* Manuscript contains hyperbolic terms ("slashes", "obliterates", "dramatically") that will be systematically addressed in Task 2 (Writing Register & Promotional Language Elimination).
+
+---
+
+## TASK 2: ESWA Scope Reframing and Canonical Expert-System Formalization
+
+**Date:** 2026-09-21  
+**Target Journal:** Expert Systems with Applications (ESWA), Elsevier  
+**Status:** Completed and Verified with `latexmk -pdf` (Build: Zero Errors)  
+**Files Touched:**
+1. `CVS_ESWA/elsarticle-template-harv.tex` (Manuscript source)
+2. `REVISION_LOG.md` (Revision tracking log updated)
+
+**Total `\AUTHORACTION` Markers Added in Task 2:** 3 new markers (Cumulative in text: 28 markers + 1 macro definition in preamble = 29 total occurrences)
+
+---
+
+### 1. Diagnosis Addressed: ESWA Scope and Desk-Rejection Risk
+
+ESWA prioritizes applied intelligent and expert systems that arbitrate decisions in real-world environments. When framed primarily around neural architecture modifications (e.g., "YOLOv8n plus an image restoration network plus heuristic thresholds"), the paper signals a generic computer vision or methods submission, risking desk rejection or rerouting to non-expert-system venues.
+
+To eliminate this vulnerability:
+1. The defensive opening definition in Section 2.2 was eradicated and replaced by a structural assertion of a canonical four-pillar expert system (Knowledge Base, Inference Engine, Meta-Level Control, Explanation Facility).
+2. All operational thresholds previously scattered across prose were compiled into an explicit, numbered rule base ($R_1$--$R_8$) in Table~\ref{tab:expert_rule_base} with rigorous knowledge-source attribution.
+3. The multimodal output channel was explicitly designated as the **Explanation Facility**.
+4. The execution supervisory cascade was explicitly formalized as **Meta-Level Control**.
+5. A comprehensive **Rule Sensitivity Analysis** protocol was added as Section 3.5, providing the experimental specification and empty table skeleton for parameter sweeps ($\tau, K_{\text{opt}}, M_{\text{verify}}, \theta_{\text{texture}}, \theta_{\text{conf}}$) and Pareto frontier mapping to refute "magic number" criticisms.
+6. The final paragraph of the Introduction was restructured into the canonical applied-systems sequence: *real-world decision problem $\to$ need for rule-governed arbitration layer $\to$ targeted neural contributions $\to$ empirical deployment evidence*.
+7. Five alternative titles foregrounding the applied decision-support system were proposed in `REVISION_LOG.md`, leaving the final choice to the authors via an `\AUTHORACTION` marker.
+
+---
+
+### 2. Five Candidate Titles in ESWA Register (Task 2.3)
+
+The current title (*"Seeing Through the Glare: A Real-Time, Energy-Efficient Mobile Banknote Inspector for Visually Impaired Assistance"*) reads as an image-processing / computer-vision methods paper focused narrowly on glare removal. Below are five alternative candidate titles structured in the established register of *Expert Systems with Applications*:
+
+1. **Candidate 1 (Applied Expert System & Illumination Robustness):**  
+   *An Energy-Aware Mobile Expert System for Autonomous Banknote Verification and Defect Inspection Under Adverse Illumination*
+2. **Candidate 2 (Rule-Governed Edge Vision & Assistive Devices):**  
+   *A Rule-Governed Edge Vision Expert System for Real-Time Currency Verification and Damage Inspection in Assistive Mobile Devices*
+3. **Candidate 3 (Intelligent Decision Support & System Name):**  
+   *CashVision: An Intelligent Decision-Support Mobile Expert System for Joint Banknote Identification and Structural Defect Localization*
+4. **Candidate 4 (Cognitive Vision, Energy-Gating, Usability Assurance):**  
+   *Energy-Gated Cognitive Vision Expert System for Real-Time Banknote Verification and Usability Assurance for Visually Impaired Users*
+5. **Candidate 5 (Multimodal Architecture & Temporal Consensus):**  
+   *A Multimodal Expert System for Autonomous Banknote Inspection: Integrating Adaptive Tone Mapping and Rule-Based Temporal Consensus on Mobile Edge SoCs*
+
+> **Recommendation:** Candidate 1 or Candidate 3 strongly signals core ESWA alignment by placing "Mobile Expert System" and the applied operational domain at the forefront. The manuscript title itself has been preserved untouched in source, appended with an `\AUTHORACTION` marker directing the author to this log.
+
+---
+
+### 3. Summary of Changes by Section
+
+#### 3.1 Title (Front Matter)
+- Appended a non-breaking `\AUTHORACTION` marker protected by `\texorpdfstring` to prevent hyperref bookmark corruption, directing the author to evaluate the five candidate titles proposed above.
+
+#### 3.2 Section 1 (Introduction, Final Paragraph & Roadmap)
+- Rewrote the transition paragraph preceding Contribution C1 to follow the requested four-stage narrative:
+  1. *Real-world decision problem:* Autonomous cash handling and defect inspection for blind users under unconstrained physical handling, polymer specular reflection, and motion blur without visual viewfinder feedback.
+  2. *Why a rule-governed arbitration layer is required:* Unconstrained video induces severe battery drain and thermal throttling under uniform inference, and catastrophic monetary valuation hazards under blind single-shot capture. This necessitates a rule-governed decision layer that monitors sensory readiness, gates deep computational execution, and accumulates multi-frame temporal consensus before committing to irreversible financial recommendations.
+  3. *What neural components contribute:* MQTone and dual-task YOLOv8n function as specialized perceptual subroutines under meta-level control.
+  4. *Deployment evidence:* Live smartphone trials (83.3% accuracy, 0/36 valuation errors, 20.5 FPS preview, 36.5% active power cut) and simulated visual impairment user study (SUS 78.2, 42.3--53.0% workload reduction, 1.0% hazard rate).
+- Removed promotional adjectives ("slashes", "obliterates", "dramatically").
+- Updated Section 1 roadmap sentence for Section 3 to explicitly include the decision rule sensitivity analysis protocol.
+
+#### 3.3 Section 2.2 (Proposed Real-Time CashVision Expert System Architecture)
+- Removed the defensive sentence: *"We use the term 'expert system' to denote the rule-based decision layer..."*.
+- Asserted the framework structurally in terms of four classical expert-system components:
+  - **Knowledge Base (KB):** Formally defined declarative rule set ($R_1$--$R_8$) codifying physical, photometric, and HCI constraints into Table~\ref{tab:expert_rule_base}.
+  - **Inference Engine:** Stateful 3-state FSM (\texttt{SEARCHING}, \texttt{READY\_TO\_VERIFY}, \texttt{CONFIRMED}) executing forward-chaining rules and multi-frame confidence-weighted voting.
+  - **Meta-Level Control:** Energy-aware execution supervisor that dynamically regulates neural model activations.
+  - **Explanation Facility:** Named the translative multimodal user interface that generates natural-language TTS speech and differentiated haptic alerts (single pulse for intact notes, dual pulses for detected tears).
+- Inserted **Table~\ref{tab:expert_rule_base}** (`The CashVision Knowledge Base: Formal Rule Set Governing Sensory Screening, State Transitions, Detection Arbitration, and Decision Explanation`), detailing:
+  - $R_1$: Spatial Texture Gating ($\sigma_{\text{gray}} \le \theta_{\text{texture}} = 15.0$) — *Photometric physics & texture entropy* \cite{Haralick1979,Gonzalez2008}
+  - $R_2$: Photometric Readiness ($q < \tau = 0.60$) — *Empirical calibration (dev set)*
+  - $R_3$: Temporal Stability ($c_{\text{stable}} \ge K_{\text{opt}} = 3$) — *HCI latency & motor tremor dampening* \cite{Nielsen1993}
+  - $R_4$: Verification Budget / Thermal Guard ($m \ge M_{\text{verify}} = 2$) — *HCI turnaround budget & mobile thermal envelope*
+  - $R_5$: Candidate Filtering ($\text{conf} < \theta_{\text{conf}} = 0.25$) — *Ultralytics YOLO default post-NMS threshold* \cite{Jocher2023}
+  - $R_6$: Denomination Consensus ($c^* = \arg\max \sum s_c$) — *Evidence accumulation theory*
+  - $R_7$: Two-Frame Defect Persistence ($\sum \mathbb{I} \ge 2$) — *Photometric physics of physical tears vs. specular glints*
+  - $R_8$: Dual-Condition Reset ($\sigma_{\text{gray}} \le \theta_{\text{texture}}$ or $|\Delta\bar{I}| > \theta_{\text{trans}} = 25.0$) — *Operational workflow heuristics*
+- Connected rules $R_1$--$R_8$ directly into the FSM state definitions, multi-frame consensus rules, and mobile runtime stack in Section 2.2.4.
+
+#### 3.4 Section 3.5 (Decision Rule Sensitivity Analysis and Hyperparameter Calibration Protocol)
+- Created a new dedicated subsection `\subsection{Decision Rule Sensitivity Analysis and Hyperparameter Calibration Protocol}` (`\label{subsec:rule_sensitivity}`) immediately following Section 3.4.
+- Specified one-at-a-time (OAT) parameter sweeps:
+  - $\tau \in [0.40, 0.80]$ (step $0.05$, 9 points)
+  - $K_{\text{opt}} \in \{1, 2, 3, 4, 5\}$ (5 points)
+  - $M_{\text{verify}} \in \{1, 2, 3, 4\}$ (4 points)
+  - $\theta_{\text{texture}} \in [5.0, 30.0]$ (step $5.0$, 6 points)
+  - $\theta_{\text{conf}} \in [0.15, 0.50]$ (step $0.05$, 8 points)
+- Defined six per-setting evaluation metrics: $\text{Acc}_{\text{denom}}$, $\text{Acc}_{\text{exact}}$, Trigger Rate $P_{\text{active}}$, Energy Work Proxy $E_{\text{session}}$, Interaction Time-to-Confirmation $\text{TTC}$, and Financial Valuation Hazard Rate.
+- Formulated the Accuracy--Energy--Latency Pareto frontier analysis.
+- Inserted **Table~\ref{tab:rule_sensitivity}** with empty parameter-sweep skeleton cells (`---`), wrapped in an explicit `\AUTHORACTION` marker directing authors to execute the sensitivity sweeps.
+
+---
+
+### 4. What Remains Open for the Authors (Task 2 Action Checklist)
+
+- [ ] **Title Choice:** Select one of the five proposed candidate titles in Section 2 of this log (or propose an equivalent ESWA-focused title) and update line 101.
+- [ ] **Rule Sensitivity Sweep Experiments (Table~\ref{tab:rule_sensitivity}):** Run the one-at-a-time parameter sweeps on the 36 continuous video benchmark streams across the 5 thresholds ($\tau, K_{\text{opt}}, M_{\text{verify}}, \theta_{\text{texture}}, \theta_{\text{conf}}$), record the 6 metrics, populate the cells in Table~\ref{tab:rule_sensitivity}, and generate the corresponding multi-panel sensitivity / Pareto curve figure.
+- [ ] **Task 1 Open Items:** ORCID, ethics approval details, consent confirmation, CRediT verification, funding confirmation, AI writing declaration, non-AI artwork certification, data/code repository DOIs, and statutory currency reproduction citation.
+
+---
+
+### 5. Build and Verification Status
+
+- **Build Engine:** `latexmk -pdf elsarticle-template-harv.tex` (via MiKTeX pdfTeX 4.27, Git Perl 5.38.2 on Windows).
+- **Exit Status:** Clean build, Exit Code 0.
+- **Output:** `elsarticle-template-harv.pdf` (37 pages, 23,168,364 bytes).
+- **Cross-References:** All section, table, and equation cross-references resolved cleanly (`\ref{tab:expert_rule_base}`, `\ref{tab:rule_sensitivity}`, `\ref{subsec:rule_sensitivity}`) with zero undefined references and zero undefined citations.
+
+---
+
+### 6. Scope Discipline & Prohibitions Enforced
+
+- **Edits Made:** Strictly bounded to Section 2.2 opening, Table~\ref{tab:expert_rule_base}, Section 2.2.4 rule references, Section 3.5 sensitivity analysis and Table~\ref{tab:rule_sensitivity}, title `\AUTHORACTION` marker, and Section 1 final paragraph.
+- **Refused Actions:**
+  - Did not alter the manuscript title text (left to the author via `\AUTHORACTION`).
+  - Did not fabricate or estimate numbers for the unrun sensitivity sweeps in Table~\ref{tab:rule_sensitivity} (empty skeleton with `---` populated, marked with `\AUTHORACTION`).
+  - Did not add external citations not present in `references.bib`.
+  - Did not edit `.bib`, `.bbl`, or renumber any existing tables/figures.
+
