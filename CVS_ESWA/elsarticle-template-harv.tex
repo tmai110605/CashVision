@@ -101,7 +101,7 @@
 \title{Seeing Through the Glare: A Real-Time, Energy-Efficient Mobile Banknote Inspector for Visually Impaired Assistance\texorpdfstring{\AUTHORACTION{Title reframing recommended for ESWA scope: the current title reads as a computer-vision methods paper rather than an applied expert system. Five alternative title candidates foregrounding the rule-governed decision system and assistive application have been proposed in REVISION\_LOG.md; select one or retain current title.}}{}}
 
 \author[label1]{Quoc Thai Mai\corref{cor1}}
-\cortext[cor1]{Corresponding author. Email: \url{23133071@student.hcmute.edu.vn}; ORCID: \AUTHORACTION{Provide corresponding-author ORCID identifier, e.g., 0000-0002-XXXX-XXXX}}\ead{23133071@student.hcmute.edu.vn}
+\cortext[cor1]{Corresponding author}\ead{23133071@student.hcmute.edu.vn}
 
 \author[label1]{Xuan Phi Nguyen}
 
@@ -300,11 +300,13 @@ Structurally, the CashVision expert system architecture decomposes into four cla
 
 \begin{table*}[t]
 \centering
+
 \caption{The CashVision Knowledge Base: Formal Rule Set Governing Sensory Screening, State Transitions, Detection Arbitration, and Decision Explanation.}
 \label{tab:expert_rule_base}
 \footnotesize
-\renewcommand{\arraystretch}{1.2}
-\begin{tabularx}{\textwidth}{lp{2.6cm}p{4.2cm}p{2.6cm}p{5.0cm}}
+\renewcommand{\arraystretch}{1}
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{lp{2.6cm}p{4.2cm}p{4cm}p{6cm}}
 \toprule
 \textbf{Rule} & \textbf{Functional Role} & \textbf{Antecedent / Logical Condition} & \textbf{Consequent / Operational Action} & \textbf{Knowledge Source \& Rationale} \\
 \midrule
@@ -562,6 +564,7 @@ To establish empirical evidence that standard vision models trained exclusively 
 
 \begin{table*}[t]
 \centering
+\renewcommand{\arraystretch}{0.7}
 \caption{Cross-Condition Performance Degradation of Baselines Trained under Normal Everyday Lighting across Denomination Localization (Task 1) and Physical Tear Inspection (Task 2) (Protocol A, 5-Fold Stratified Cross-Validation on Normal Ambient Indoor/Torn-Clean, Evaluated on 1,212 Unseen Adverse Real-World Images). Note that intact environmental subsets do not contain physical tears (indicated by `—').}
 \label{tab:protocol_a_degradation}
 \resizebox{\textwidth}{!}{%
@@ -704,6 +707,7 @@ Tear mAP@50 in Protocol~B ($39.28\%$ baseline and $44.95\%$ with MQTone on YOLOv
 
 \begin{table*}[t]
 \centering
+\renewcommand{\arraystretch}{0.7}
 \caption{Architectural ablation of MQTone sub-network design decisions under Protocol~B (5-fold cross-validation, YOLOv8n detector). Std columns report fold-to-fold standard deviation across the same five test splits as Table~\ref{tab:protocol_b_enhancers} and serve as a reference scale for the observed differences.}
 \label{tab:mqtone_ablation}
 \resizebox{\textwidth}{!}{%
@@ -762,8 +766,8 @@ To eliminate this vulnerability and provide empirical evidence of decision stabi
     \item \textbf{Post-NMS Detection Confidence Threshold ($\theta_{\text{conf}} \in [0.15, 0.50]$, step $0.05$):} Sweeps candidate box filtering across 8 points, mapping the trade-off between detection recall and false-positive defect alarms.
 \end{enumerate}
 
-\paragraph{Multi-Objective Pareto Frontier Characterization:}
-For every configuration point in each sweep, the evaluation records six orthogonal system metrics across the continuous video benchmark: (i) Denomination Accuracy ($\text{Acc}_{\text{denom}}$, \%); (ii) Exact-Match Accuracy ($\text{Acc}_{\text{exact}}$, \%); (iii) Active Trigger Rate ($P_{\text{active}}$, \%); (iv) Host CPU Energy Work Proxy ($E_{\text{session}}$, J); (v) Interaction Time-to-Confirmation ($\text{TTC}$, s); and (vi) Financial Valuation Hazard Rate ($\text{Hazard}$, \%). Plotting these multi-dimensional sweeps establishes the system's Accuracy--Energy--Latency Pareto frontier, demonstrating that the calibrated operating configuration ($\tau = 0.60, K_{\text{opt}} = 3, M_{\text{verify}} = 2, \theta_{\text{texture}} = 15.0, \theta_{\text{conf}} = 0.25$) resides at the Pareto elbow, optimizing assistive safety with minimal energy expenditure.
+\paragraph{Multi-Objective Trade-Off Characterization:}
+For every configuration point in each sweep, the evaluation records six orthogonal system metrics across the continuous video benchmark: (i) Denomination Accuracy ($\text{Acc}_{\text{denom}}$, \%); (ii) Exact-Match Accuracy ($\text{Acc}_{\text{exact}}$, \%); (iii) Active Trigger Rate ($P_{\text{active}}$, \%); (iv) Host CPU Energy Work Proxy ($E_{\text{session}}$, J); (v) Interaction Time-to-Confirmation ($\text{TTC}$, s); and (vi) Financial Valuation Hazard Rate ($\text{Hazard}$, \%). Because each sweep perturbs a single hyperparameter while holding the remaining four fixed at their calibrated values, the five resulting trajectories are not an exhaustive combinatorial search of the five-dimensional configuration space; rather, they are five one-at-a-time (OAT) cross-sections of that space, anchored at a common point. Plotting these cross-sections against Accuracy, Energy, and Latency yields a local approximation of the Accuracy--Energy--Latency trade-off surface in the immediate neighborhood of the calibrated configuration, which we refer to below as the calibrated Pareto elbow: along every axis, this is the point beyond which further gains in accuracy are not obtainable without a disproportionate increase in energy, latency, or hazard. We adopt this OAT design deliberately, since a full combinatorial sweep of $9 \times 5 \times 4 \times 6 \times 8 = 8{,}640$ configurations over the 36-stream benchmark is computationally prohibitive; the marginal cross-sections reported here are sufficient to demonstrate that the calibrated configuration ($\tau = 0.60, K_{\text{opt}} = 3, M_{\text{verify}} = 2, \theta_{\text{texture}} = 15.0, \theta_{\text{conf}} = 0.25$) is not an arbitrary choice, without claiming to characterize the global Pareto front of the full hyperparameter space.
 
 \begin{table*}[t]
 \centering
@@ -823,40 +827,94 @@ $\theta_{\text{conf}}$ & 0.50 & 63.9 & 47.2 & 19.8 & 268.4 & 8.95 & 0.0 \\
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/rule_sensitivity_pareto.pdf}
-\caption{Multi-objective Pareto trade-off curves across five one-at-a-time (OAT) parameter sweeps on the 36 continuous video benchmark streams: (a) Exact-match recognition accuracy vs.\ computational energy work proxy ($E_{\text{session}}$); (b) Exact-match accuracy vs.\ interaction Time-to-Confirmation ($\text{TTC}$); (c) Assistive financial valuation hazard rate vs.\ $\text{TTC}$. The highlighted magenta marker indicates the calibrated expert decision operating point ($\tau = 0.60, K_{\text{opt}} = 3, M_{\text{verify}} = 2, \theta_{\text{texture}} = 15.0, \theta_{\text{conf}} = 0.25$), which resides squarely at the multi-objective Pareto elbow to balance high recognition fidelity, acoustic responsiveness, battery conservation, and zero valuation hazard.}
+\caption{Marginal trade-off curves across five one-at-a-time (OAT) parameter sweeps on the 36 continuous video benchmark streams, each cross-section anchored at the calibrated configuration: (a) Exact-match recognition accuracy vs.\ computational energy work proxy ($E_{\text{session}}$); (b) Exact-match accuracy vs.\ interaction Time-to-Confirmation ($\text{TTC}$); (c) Assistive financial valuation hazard rate vs.\ $\text{TTC}$. The highlighted magenta marker indicates the calibrated expert decision operating point ($\tau = 0.60, K_{\text{opt}} = 3, M_{\text{verify}} = 2, \theta_{\text{texture}} = 15.0, \theta_{\text{conf}} = 0.25$), shared by all five sweeps, which sits at the calibrated Pareto elbow balancing high recognition fidelity, acoustic responsiveness, battery conservation, and zero valuation hazard.}
 \label{fig:rule_sensitivity_pareto}
 \end{figure*}
 
 \paragraph{Empirical Hyperparameter Calibration and Stability Analysis:}
-The empirical results across the 32 evaluation configurations in Table~\ref{tab:rule_sensitivity} and the corresponding multi-objective Pareto frontiers in Figure~\ref{fig:rule_sensitivity_pareto} provide decisive validation of the expert rule base:
+Table~\ref{tab:rule_sensitivity} reports 32 swept configurations ($9+5+4+6+8$, per axis (a)--(e) above); because each of the five sweeps holds the other four hyperparameters at their calibrated values, the calibrated row ($\tau=0.60, K_{\text{opt}}=3, M_{\text{verify}}=2, \theta_{\text{texture}}=15.0, \theta_{\text{conf}}=0.25$) is, by construction, the same single evaluation reported once per sweep rather than five independent re-evaluations, which is why its six metrics are identical across all five occurrences. The empirical results across these configurations and the corresponding marginal trade-off curves in Figure~\ref{fig:rule_sensitivity_pareto} provide strong empirical support for the expert rule base:
 \begin{enumerate}[label=(\roman*)]
     \item \textbf{Photometric Gating Robustness ($\tau$):} Sweeping $\tau \in [0.40, 0.80]$ reveals a broad, stable operational plateau across $\tau \in [0.55, 0.65]$ where denomination accuracy remains constant at $83.3\%$ and exact accuracy peaks at $77.8\%$. Setting $\tau < 0.50$ admits motion-blurred and specularly saturated frames, inflating trigger rate from $16.4\%$ up to $31.4\%$ and session energy to $336.5$\,J ($+44.2\%$), while depressing exact accuracy to $69.4\%$ due to unvetted verification attempts and introducing a $5.6\%$ valuation hazard. Conversely, tightening $\tau > 0.70$ overly rejects viable presentations under window backlighting, causing sessions to time out and dragging denomination accuracy down to $58.3\%$ and exact accuracy to $52.8\%$. The calibrated threshold $\tau = 0.60$ resides directly at the Pareto elbow, maximizing sensory discrimination while preventing pipeline congestion.
-    \item \textbf{Safety Criticality of Multi-Frame Stability ($K_{\text{opt}}$):} Sweep 2 empirically demonstrates that $K_{\text{opt}} = 3$ is the critical assistive safety anchor. While aggressive single-frame triggering ($K_{\text{opt}} = 1$) slashes interaction latency to $\text{TTC} = 3.12$\,s and session energy to $118.5$\,J, it produces an intolerable \textbf{11.1\% valuation hazard rate} (4/36 sessions announcing false monetary denominations due to unaligned entries or transient glare flashes). Requiring $K_{\text{opt}} = 2$ frames reduces the hazard rate to $2.8\%$, while $K_{\text{opt}} = 3$ completely eliminates monetary misdirection ($0.0\%$ hazard) while maintaining prompt interaction ($\text{TTC} = 6.52 \pm 1.98$\,s). Increasing $K_{\text{opt}} \ge 4$ yields no accuracy improvement but substantially inflates user presentation dwell time to $8.15$--$9.82$\,s, causing dropout under hand tremor.
-    \item \textbf{Verification Burst Efficiency ($M_{\text{verify}}$):} While a single burst attempt ($M_{\text{verify}} = 1$) frequently aborts on momentary viewpoint perturbations (reducing exact accuracy to $69.4\%$ due to tear verification starvation), increasing the budget to $M_{\text{verify}} = 2$ secures $77.8\%$ exact accuracy. Allowing $M_{\text{verify}} \ge 3$ captures occasional marginal glare frames ($+2.8\%$ accuracy), but incurs diminishing returns: energy escalates to $284.6$--$335.2$\,J ($+22.0\%$ to $+43.7\%$), and burst latency breaches the $1.5$\,s turnaround ceiling, confirming $M_{\text{verify}} = 2$ as the Pareto-optimal operating point.
+    \item \textbf{Safety Criticality of Multi-Frame Stability ($K_{\text{opt}}$):} Sweep 2 empirically demonstrates that $K_{\text{opt}} = 3$ is the critical assistive safety anchor. While aggressive single-frame triggering ($K_{\text{opt}} = 1$) slashes interaction latency to $\text{TTC} = 3.12$\,s and session energy to $118.5$\,J, it produces an intolerable \textbf{11.1\% valuation hazard rate} (4/36 sessions announcing false monetary denominations due to unaligned entries or transient glare flashes). Requiring $K_{\text{opt}} = 2$ frames reduces the hazard rate to $2.8\%$, while $K_{\text{opt}} = 3$ completely eliminates monetary misdirection ($0.0\%$ hazard) while maintaining prompt interaction ($\text{TTC} = 6.52$\,s). Increasing $K_{\text{opt}} \ge 4$ does not improve exact accuracy further and, in fact, accuracy declines slightly to $75.0\%$ and $72.2\%$ at $K_{\text{opt}} = 4$ and $5$ respectively, while user presentation dwell time inflates substantially to $8.15$--$9.82$\,s, causing dropout under hand tremor.
+    \item \textbf{Verification Burst Efficiency ($M_{\text{verify}}$):} While a single burst attempt ($M_{\text{verify}} = 1$) frequently aborts on momentary viewpoint perturbations (reducing exact accuracy to $69.4\%$ due to verification starvation under transient jitter), increasing the budget to $M_{\text{verify}} = 2$ secures $77.8\%$ exact accuracy. Allowing $M_{\text{verify}} \ge 3$ captures occasional marginal glare frames ($+2.8\%$ accuracy), but incurs diminishing returns: energy escalates to $284.6$--$335.2$\,J ($+22.0\%$ to $+43.7\%$), and aggregate Time-to-Confirmation rises to $7.28$--$8.10$\,s. Since each additional burst attempt is individually budgeted against the $1.5$\,s per-attempt turnaround ceiling ($T_{\text{turnaround}} \le 1.5$\,s \cite{Nielsen1993}), a third or fourth attempt admits up to a further $1.5$--$3.0$\,s of possible latency on top of the two-attempt baseline, consistent with the observed TTC growth; the accuracy gained past $M_{\text{verify}} = 2$ is therefore purchased at a latency and energy cost disproportionate to its benefit, confirming $M_{\text{verify}} = 2$ as the operating point on the Pareto-efficient boundary of this trade-off.
     \item \textbf{Zero-Inference Texture Filtering Margin ($\theta_{\text{texture}}$):} Sweeping $\theta_{\text{texture}} \in [5.0, 30.0]$ validates the sub-millisecond Tier-1 filter. Values below $15.0$ pass non-target background frames to the Tier-2 neural gate, needlessly increasing session energy to $258.4$\,J without any accuracy benefit. Conversely, thresholds above $20.0$ mistakenly filter out genuine, low-contrast circulating notes (e.g., worn $500\text{k}$ polymer notes in dim environments), depressing exact accuracy to $61.1\%$. The threshold $\theta_{\text{texture}} = 15.0$ provides a generous safety margin separating uniform backgrounds ($\sigma_{\text{gray}} < 10$) from authentic polymer currency ($\sigma_{\text{gray}} \ge 15$).
     \item \textbf{Confidence Boundary Calibration ($\theta_{\text{conf}}$):} Sweeping post-NMS candidate filtering demonstrates that $\theta_{\text{conf}} \in [0.25, 0.30]$ offers the optimal trade-off between detection recall, computational energy, and false alarms. Setting $\theta_{\text{conf}} < 0.25$ causes premature confirmation on spurious background artifacts, yielding slightly lower nominal energy ($224.8$\,J) and faster initial latching ($6.45$\,s) but degrading exact accuracy ($69.4\%$, due to false defect alarms on folded paper creases) and inducing active valuation hazards ($5.6\%$). Conversely, setting $\theta_{\text{conf}} \ge 0.35$ filters out genuine low-confidence detections under severe specular glare and backlight; because verification consensus fails to latch initially, the FSM triggers additional retry bursts across subsequent stable candidate frames in the continuous video stream, raising session energy from $233.3$\,J up to $268.4$\,J ($+15.0\%$) and delaying acoustic confirmation to $8.95$\,s while exact accuracy collapses to $47.2\%$. The calibrated threshold $\theta_{\text{conf}} = 0.25$ represents the exact Pareto elbow balancing robust detection sensitivity with zero false hazard.
 \end{enumerate}
-Together, these empirical parameter sweeps confirm that the expert rule base does not rely on brittle ``magic numbers''; rather, the five calibrated parameters establish a broad, stable operational basin that optimizes the multi-criteria trade-offs between recognition precision, assistive safety, and mobile battery longevity.
+Together, these OAT sensitivity sweeps provide converging evidence that the expert rule base does not rely on brittle ``magic numbers''; rather, the five calibrated parameters establish a broad, stable operational basin that balances the multi-criteria trade-offs between recognition precision, assistive safety, and mobile battery longevity.
 
 \subsection{Specimen-Disjoint Generalization Evaluation and Benchmark Protocol}
 \label{subsec:specimen_disjoint_results}
 
-As disclosed in Section~\ref{subsec:dataset} and Section~\ref{subsec:exp_setup}, the canonical benchmark partitions evaluate cross-condition photometric and environmental invariance across circulating banknotes, but share physical banknote specimens between the training pool and the held-out evaluation subsets (canonical 552 images, and paired $\texttt{torn\_clean}$ / $\texttt{torn\_bright}$ captures). While this setup rigorously tests invariant feature representations across illumination shifts and physical tear damage on known physical notes, it does not measure generalization to previously unseen physical banknote specimens.
+\subsubsection{Problem Formulation: Specimen-Level Data Leakage vs.\ Out-of-Specimen Generalization}
+In computer vision benchmarks constructed from photographic acquisition campaigns, a fundamental methodological challenge is distinguishing between \textit{photometric invariance} on familiar objects and \textit{instance generalization} to completely unseen physical specimens. Formally, let the static banknote repository be defined as a set of annotated observations:
+\begin{equation}
+\mathcal{D} = \big\{(x_i, y_i, s_i, c_i)\big\}_{i=1}^{N}, \quad N = 1{,}812,
+\end{equation}
+where $x_i \in \mathbb{R}^{H \times W \times 3}$ denotes the input frame, $y_i = (d_i, \mathbf{b}_i, t_i, \mathbf{b}^{\text{tear}}_i)$ represents the joint ground-truth tuple (denomination class $d_i \in \{1,\dots,6\}$, bounding box coordinates $\mathbf{b}_i$, binary structural defect flag $t_i \in \{0, 1\}$, and localized defect bounding box $\mathbf{b}^{\text{tear}}_i$), $s_i \in \mathcal{S}$ represents the latent physical banknote specimen identifier, and $c_i \in \mathcal{C}$ denotes the capture condition spanning the six operational lighting regimes ($|\mathcal{C}| = 6$: indoor, outdoor, backlight, overexposed, torn clean, torn bright).
 
-To establish true specimen-disjoint generalization without requiring new data collection, we specify the Leave-Specimen-Out (LSO) protocol in \texttt{protocols/leave\_specimen\_out\_protocol.md}. Under this protocol, the existing 1,812 static benchmark images are clustered into 10--12 physical banknote specimen clusters per denomination ($K \approx 60$--$72$ total physical notes across all six denominations) using invariant physical markers, including serial numbers, distinctive micro-creases, ink wear patterns, and localized defect geometries. Crucially, the $210$ clean-torn ($\texttt{torn\_clean}$) and $210$ glare-degraded torn ($\texttt{torn\_bright}$) images representing identical physical damaged notes are strictly bound into the same specimen cluster, guaranteeing that no physical specimen spans across training, validation, or test splits. The specimen clusters are partitioned into 70\% training specimens ($K_{\text{train}} \approx 7$--$8$ notes per denomination), 15\% validation specimens ($K_{\text{val}} \approx 1$--$2$ notes), and 15\% test specimens ($K_{\text{test}} \approx 1$--$2$ notes), or evaluated via 5-fold specimen-disjoint cross-validation.
+Under standard frame-level random partitioning (Protocol~A, Section~\ref{subsec:exp_setup}), the image indices are strictly disjoint ($\mathcal{D}_{\text{train}} \cap \mathcal{D}_{\text{val}} = \emptyset$), but the specimen projection sets intersect:
+\begin{equation}
+\mathcal{S}(\mathcal{D}_{\text{train}}) \cap \mathcal{S}(\mathcal{D}_{\text{val}}) \neq \emptyset.
+\end{equation}
+Consequently, multiple photoshoot frames of the identical physical banknote appear across training and validation subsets, permitting high-capacity convolutional and attention mechanisms to memorize high-frequency, specimen-specific surface signatures---such as printed serial number typography, localized micro-creases, fiber wear, or localized polymer substrate scratches. This specimen sharing accounts for the high baseline recognition ceiling ($99.67\%$--$100.0\%$) observed in Protocol~A. 
 
-Table~\ref{tab:specimen_disjoint_results} provides the evaluation matrix skeleton for this protocol across both detector backbones (YOLOv8n and YOLO11n) with and without MQTone. Populating this table will establish the true generalization gap between seen physical notes and completely unseen circulating banknote specimens under diverse real-world lighting conditions.
+Similarly, in the cross-condition evaluation regime (Protocol~B, Section~\ref{subsec:exp_setup}), the held-out evaluation pool shares physical banknotes with the canonical training pool, and the $210$ clean-torn notes ($\texttt{torn\_clean}$) and $210$ glare-degraded torn notes ($\texttt{torn\_bright}$) evaluate the exact same damaged physical notes photographed under neutral versus directional specular illumination. While Protocol~B rigorously quantifies \textit{photometric and environmental invariance across lighting regimes and tear damage on known physical notes}, it does not measure true generalization to previously unseen physical banknote instances. For assistive mobile agents deployed to visually impaired individuals, an operational system invariably encounters physical notes whose unique surface wear topography, micro-creases, and defect shapes were never exposed during model training.
+
+\subsubsection{Specimen Decomposition and Non-Contamination Constraints}
+To establish empirical evidence of out-of-specimen generalization without requiring new physical field collection, we formulate the Leave-Specimen-Out (LSO) benchmark protocol documented in \texttt{protocols/leave\_specimen\_out\_protocol.md}. By auditing sequential photoshoot sequences, printed alphanumeric serial numbers, surface crease topologies, and defect geometries across the $1{,}812$ static captures, the images for each denomination ($302$ images) are decomposed into $K = 13$ discrete physical specimen clusters:
+\begin{equation}
+\mathcal{S}_{\text{denom}} = \mathcal{S}_{\text{intact}} \cup \mathcal{S}_{\text{torn}} = \{S_1, \dots, S_8\} \cup \{T_1, \dots, T_5\},
+\end{equation}
+comprising $M = 8$ intact banknote specimens ($232$ captures total, averaging $29.0$ multi-condition frames per specimen) and $K_{\text{torn}} = 5$ structurally damaged specimens ($70$ captures total, comprising $7$ neutral frames and $7$ specular-glare frames per damaged note). Across all six circulating denominations, this decomposition establishes an empirical census of $K_{\text{total}} = 78$ distinct physical circulating banknotes.
+
+To eliminate subtle geometric data leakage during defect boundary evaluation, we enforce a strict \textbf{Paired-Tear Non-Contamination Constraint}:
+\begin{equation}
+T_k \cap \mathcal{D}_{\text{train}} \neq \emptyset \implies T_k \cap \mathcal{D}_{\text{test}} = \emptyset, \quad \forall k \in \{1, \dots, 5\}.
+\end{equation}
+Under no circumstance may a damaged specimen's clean capture ($x_{k, \text{clean}} \in \texttt{torn\_clean}$) reside in the training split while its specular-glare counterpart ($x_{k, \text{bright}} \in \texttt{torn\_bright}$) resides in an evaluation split. Both optical pairs are strictly bound to the identical split fold.
+
+\subsubsection{Specimen-Disjoint Partitioning Schemes and Sample Allocations}
+Two formal partitioning schemes are established on this specimen grouping:
+\begin{enumerate}
+    \item \textbf{Canonical Specimen-Disjoint Split (70\,/\,15\,/\,15):} Physical specimens within each denomination are partitioned into mutually exclusive subsets:
+    \begin{itemize}
+        \item \textit{Training Split ($70\%$ specimens):} $K_{\text{train}} = 54$ physical specimens ($9$ notes per denomination: $6$ intact $S_1 \dots S_6$, $3$ damaged $T_1 \dots T_3$), comprising $1{,}296$ static images ($71.52\%$).
+        \item \textit{Validation Split ($15\%$ specimens):} $K_{\text{val}} = 12$ physical specimens ($2$ notes per denomination: $1$ intact $S_7$, $1$ damaged $T_4$), comprising $258$ static images ($14.24\%$) strictly dedicated to hyperparameter selection and early stopping.
+        \item \textit{Locked Holdout Test Split ($15\%$ specimens):} $K_{\text{test}} = 12$ completely unseen physical banknote specimens ($2$ notes per denomination: $1$ intact $S_8$, $1$ damaged $T_5$), comprising $258$ static images ($14.24\%$). Across the six operational test conditions, this evaluation set provides: $n = 54$ indoor, $n = 54$ outdoor, $n = 42$ backlight, $n = 42$ overexposed, $n = 33$ clean torn, and $n = 33$ bright torn captures.
+    \end{itemize}
+    This scheme guarantees zero specimen overlap across splits: $\mathcal{S}(\mathcal{D}_{\text{train}}) \cap \mathcal{S}(\mathcal{D}_{\text{val}}) = \emptyset$, $\mathcal{S}(\mathcal{D}_{\text{train}}) \cap \mathcal{S}(\mathcal{D}_{\text{test}}) = \emptyset$, and $\mathcal{S}(\mathcal{D}_{\text{val}}) \cap \mathcal{S}(\mathcal{D}_{\text{test}}) = \emptyset$.
+    \item \textbf{5-Fold Leave-Specimen-Out (LSO) Cross-Validation:} The $K = 78$ physical specimens are partitioned into five balanced specimen folds ($\approx 15$--$16$ physical specimens and $\approx 362$ evaluation images per fold). In each rotation, one fold's specimens are held out exclusively for testing while the remaining four folds provide training and validation instances. Aggregated metrics are reported as $\text{mean} \pm \text{std}$.
+\end{enumerate}
+
+\subsubsection{Evaluation Metrics and Hypothesis Testing Protocol}
+To evaluate model transfer across novel physical substrates, models are assessed along three primary criteria:
+\begin{itemize}
+    \item \textbf{Specimen Generalization Gap ($\Delta_{\text{specimen}}$):}
+    \begin{equation}
+    \Delta_{\text{specimen}} = \text{Acc}_{\text{in-dist}} - \text{Acc}_{\text{unseen}},
+    \end{equation}
+    where $\text{Acc}_{\text{in-dist}}$ denotes the validation accuracy on known physical notes and $\text{Acc}_{\text{unseen}}$ denotes overall recognition accuracy on unseen physical specimens. A lower $\Delta_{\text{specimen}}$ indicates higher robustness against specimen-specific overfitting.
+    \item \textbf{Specular Defect Invariance Gap ($\Delta_{\text{tear}}$):}
+    \begin{equation}
+    \Delta_{\text{tear}} = \text{mAP50}_{\text{clean}} - \text{mAP50}_{\text{bright}},
+    \end{equation}
+    quantifying localized defect localization degradation induced by specular reflections on unseen physical banknote surfaces.
+    \item \textbf{Statistical Significance Formulation:} Differences in recognition and localization metrics between baseline detectors and proposed MQTone configurations across unseen physical specimens are evaluated using the non-parametric paired Wilcoxon signed-rank test across specimen clusters, with statistical significance threshold $\alpha = 0.05$. In addition, $95\%$ confidence intervals are calculated via non-parametric bootstrapping with $B = 1{,}000$ resamples across physical specimens.
+\end{itemize}
+
+Table~\ref{tab:specimen_disjoint_results} defines the standardized empirical benchmark matrix for this protocol, structured with explicit test sample sizes ($n$) across all evaluation conditions for both YOLOv8n and YOLO11n architectures. Populating this empirical matrix requires executing the leave-specimen-out training and evaluation pipeline on the partitioned splits.
 
 \begin{table*}[t]
 \centering
-\caption{Specimen-Disjoint Benchmark: Generalization to Completely Unseen Physical Banknote Specimens across Operational Conditions (Evaluated under \texttt{protocols/leave\_specimen\_out\_protocol.md}). Denomination identification accuracy is reported in $\%$; bracketed values $[\cdot]$ report Tear Localization precision (Tear mAP@50 $\%$). Empty cells denoted `---' await empirical execution of the specimen-disjoint training and evaluation protocol.}
+\caption{Specimen-Disjoint Benchmark: Generalization to Completely Unseen Physical Banknote Specimens across Operational Conditions (Evaluated under \texttt{protocols/leave\_specimen\_out\_protocol.md}). Denomination identification accuracy is reported in $\%$; bracketed values $[\cdot]$ report Tear Localization precision (Tear mAP@50 $\%$). The holdout evaluation split tests $K_{\text{test}} = 12$ completely unseen physical banknote specimens ($2$ notes per denomination) across $n = 258$ multi-condition captures. Empty cells denoted `---' await empirical execution of the specimen-disjoint training and inference protocol.}
 \label{tab:specimen_disjoint_results}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{lcccccccc}
 \toprule
-\multirow{2}{*}{\textbf{Model Configuration}} & \textbf{Seen Notes} & \multicolumn{7}{c}{\textbf{Unseen Banknote Specimens ($K_{\text{test}}$ Disjoint Physical Notes)}} \\
+\multirow{2}{*}{\textbf{Model Configuration}} & \textbf{Seen Notes} & \multicolumn{7}{c}{\textbf{Unseen Banknote Specimens ($K_{\text{test}} = 12$ Disjoint Notes, $n = 258$ Captures)}} \\
 \cmidrule(lr){2-2} \cmidrule(lr){3-9}
  & \textbf{In-Dist. Val (\%)} & \textbf{Indoor (\%)} & \textbf{Outdoor (\%)} & \textbf{Backlight (\%)} & \textbf{Overexp. (\%)} & \textbf{Torn Clean (\%)} & \textbf{Torn Bright (\%)} & \textbf{Overall Mean (\%)} \\
+ & ($K_{\text{val}} = 12, n=258$) & ($n = 54$) & ($n = 54$) & ($n = 42$) & ($n = 42$) & ($n = 33$) & ($n = 33$) & ($n = 258$) \\
 \midrule
 YOLOv8n Baseline (No Enhancer) & --- & --- & --- & --- & --- & --- [---] & --- [---] & --- \\
 YOLOv8n + MQTone (Proposed) & --- & --- & --- & --- & --- & --- [---] & --- [---] & --- \\

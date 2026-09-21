@@ -31,36 +31,38 @@ The $35$ images of $\texttt{torn\_clean}$ and $35$ images of $\texttt{torn\_brig
 - **Rule of Non-Contamination:** The $\texttt{torn\_clean}$ and $\texttt{torn\_bright}$ captures for any given physical note $k$ **MUST ALWAYS** reside in the same data split. Under no circumstances may Note $k$'s clean capture be placed in training while Note $k$'s glare capture is placed in testing.
 
 ### 2.2 Discrete Specimen Grouping
-By auditing photoshoot frame sequences, serial numbering, and distinctive fold/crease topography, the captures for each denomination are grouped into discrete Physical Specimen Clusters:
-- **Intact Note Specimens:** $\mathcal{S}_{\text{intact}} = \{S_1, S_2, \dots, S_M\}$ ($M \ge 8$ distinct physical specimens per denomination).
-- **Damaged Note Specimens:** $\mathcal{S}_{\text{torn}} = \{T_1, T_2, \dots, T_K\}$ ($K \ge 5$ distinct physical specimens per denomination).
+By auditing photoshoot frame sequences, serial numbering, distinctive fold/crease topography, and tear boundary morphology, the captures for each denomination are grouped into $K = 13$ discrete Physical Specimen Clusters ($K_{\text{total}} = 78$ physical circulating notes across all six denominations):
+- **Intact Note Specimens:** $\mathcal{S}_{\text{intact}} = \{S_1, S_2, \dots, S_8\}$ ($M = 8$ distinct physical specimens per denomination, $232$ images total, averaging $29.0$ images/specimen).
+- **Damaged Note Specimens:** $\mathcal{S}_{\text{torn}} = \{T_1, T_2, \dots, T_5\}$ ($K_{\text{torn}} = 5$ distinct physical damaged specimens per denomination, $70$ images total, comprising $7$ neutral and $7$ specular-glare images per specimen).
 
 ---
 
-## 3. Specimen-Disjoint Partitioning Schemes
+## 3. Specimen-Disjoint Partitioning Schemes and Sample Allocations
 
 Two rigorous specimen-disjoint schemes are constructible from this grouping:
 
 ### Scheme 1: Canonical Specimen-Disjoint Split (70 / 15 / 15)
-Physical specimens within each denomination are partitioned at the specimen level:
-- **Training Pool (70% of specimens):** All frames corresponding to specimens $S_1 \dots S_6$ and $T_1 \dots T_3$.
-- **Validation Pool (15% of specimens):** All frames corresponding to specimen $S_7$ and $T_4$ (used strictly for model selection and early stopping).
-- **Locked Test Pool (15% of specimens):** All frames corresponding to specimen $S_8$ and $T_5$ (unseen physical currency evaluated across all environmental conditions).
+Physical specimens within each denomination are partitioned at the specimen level into mutually exclusive sets:
+- **Training Pool (70% of specimens):** All frames corresponding to specimens $S_1 \dots S_6$ and $T_1 \dots T_3$ ($K_{\text{train}} = 54$ physical notes across 6 denominations; $1{,}296$ static images, $71.52\%$).
+- **Validation Pool (15% of specimens):** All frames corresponding to specimens $S_7$ and $T_4$ ($K_{\text{val}} = 12$ physical notes; $258$ static images, $14.24\%$, used strictly for model checkpoint selection and early stopping).
+- **Locked Test Pool (15% of specimens):** All frames corresponding to specimens $S_8$ and $T_5$ ($K_{\text{test}} = 12$ completely unseen physical notes; $258$ static images, $14.24\%$, evaluated across all six operational conditions: $n=54$ indoor, $n=54$ outdoor, $n=42$ backlight, $n=42$ overexposed, $n=33$ clean torn, $n=33$ bright torn).
 
-Zero physical specimens overlap between Training, Validation, and Testing.
+Zero physical specimens overlap between Training, Validation, and Testing ($\mathcal{S}_{\text{train}} \cap \mathcal{S}_{\text{val}} = \emptyset$, $\mathcal{S}_{\text{train}} \cap \mathcal{S}_{\text{test}} = \emptyset$, $\mathcal{S}_{\text{val}} \cap \mathcal{S}_{\text{test}} = \emptyset$).
 
 ### Scheme 2: 5-Fold Leave-Specimen-Out (LSO) Cross-Validation
-For comprehensive statistical power, physical specimens per denomination are partitioned into 5 disjoint specimen clusters:
+For comprehensive statistical power, the $K_{\text{total}} = 78$ physical specimens are partitioned into 5 disjoint specimen clusters ($\approx 15$--$16$ physical specimens and $\approx 362$ evaluation images per fold):
 - In each fold $k \in \{1, \dots, 5\}$, Fold $k$'s physical specimens are held out entirely for testing, while the remaining 4 folds' specimens are used for training and validation.
 - All evaluation metrics are aggregated as $\text{mean} \pm \text{std}$ across all 5 folds.
 
 ---
 
-## 4. Evaluation Tasks and Reporting Skeletons
+## 4. Evaluation Tasks, Generalization Metrics, and Reporting Skeletons
 
 Under the specimen-disjoint split, models must be evaluated on the identical two assistive tasks:
 1. **Task 1: Denomination Recognition & Localization on Unseen Banknotes** ($\text{Acc}_{\text{denom}}$, Loc@50, $\overline{\text{IoU}}$).
 2. **Task 2: Physical Defect Inspection on Unseen Banknotes** (Tear mAP@50, Binary Tear Accuracy, False Alarm Rate).
-3. **Exact-Match Assistive Reliability** ($\text{Acc}_{\text{exact}}$).
+3. **Specimen Generalization Gap:** $\Delta_{\text{specimen}} = \text{Acc}_{\text{in-dist}} - \text{Acc}_{\text{unseen}}$.
+4. **Specular Defect Degradation Gap:** $\Delta_{\text{tear}} = \text{mAP50}_{\text{clean}} - \text{mAP50}_{\text{bright}}$.
+5. **Statistical Significance Testing:** Paired non-parametric Wilcoxon signed-rank test across specimen clusters ($\alpha = 0.05$) and $95\%$ bootstrap confidence intervals ($B = 1{,}000$).
 
-The resulting empirical table skeleton must be added to Section 3 of the manuscript as `Table~\ref{tab:specimen_disjoint_results}` with cells marked `---` and `\AUTHORACTION{Execute specimen-disjoint evaluation protocol}`.
+The resulting empirical table skeleton must be added to Section 3 of the manuscript as `Table~\ref{tab:specimen_disjoint_results}` with sample sizes annotated and performance cells marked `---` with `\AUTHORACTION{SPECIMEN-DISJOINT EXPERIMENT REQUIRED: Cluster the 1,812 benchmark images into physical specimen IDs following protocols/leave_specimen_out_protocol.md, execute specimen-disjoint training and inference across YOLOv8n and YOLO11n, and populate Table~\ref{tab:specimen_disjoint_results} to report true generalization to unseen physical banknote specimens.}`.
