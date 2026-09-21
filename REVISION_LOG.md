@@ -1348,5 +1348,55 @@ In accordance with the academic register required by Elsevier and *Expert System
   - **Zero renumbered equations, tables, figures, or sections.**
   - **Zero deleted or modified `\label` or `\cite` keys.**
 
+---
 
+## TASK 19: Prioritize Physical Smartphone Telemetry over Host PC Energy Proxy in Abstract and Highlights
 
+**Date:** 2026-09-22  
+**Target Journal:** Expert Systems with Applications (ESWA), Elsevier  
+**Status:** Completed and Verified with `latexmk -pdf` (Build: Zero Errors, Exit Code 0)  
+**Files Touched:**
+1. `CVS_ESWA/elsarticle-template-harv.tex` (Reframed Abstract, Highlights, Section 1 Contribution C3, and Section 5 Conclusion to lead with physical smartphone measurements: 36.5% active power draw cut and 34.6% session energy reduction on Samsung Galaxy A54, positioning the 61.3% figure as a complementary offline host PC video compute proxy)
+2. `CVS_ESWA/elsarticle-template-harv.pdf` (Compiled manuscript PDF, 37 pages, 23,262,063 bytes)
+3. `REVISION_LOG.md` (Appended Task 19 log)
+
+**Total `\AUTHORACTION` Markers in Manuscript Source:** 1 active marker in text (`figures/graphical_abstract_SPEC.md` placeholder) + 1 macro definition in preamble.
+
+---
+
+### 1. Summary of Changes and Epistemic Rationale
+
+- **Epistemic Rationale:**
+  The 61.3% energy reduction metric reported in Table 5 is derived from an offline continuous video benchmark evaluated on a host PC workstation, functioning as a software compute energy proxy estimated from ~22 W CPU TDP. By contrast, CashVision is explicitly engineered for on-device execution on commodity mobile smartphones. Presenting the 61.3% proxy in isolation or ahead of real physical smartphone telemetry in the Abstract and Highlights creates potential reviewer skepticism regarding measurement authenticity on embedded hardware. Therefore, the physical on-device telemetry on the Samsung Galaxy A54 (36.5% active power draw reduction, 34.6% session energy savings) is prioritized upfront, while the 61.3% proxy is explicitly contextualized as a complementary offline benchmark metric.
+
+- **Detailed Textual Modifications:**
+  1. **Abstract (Line 134):**
+     Restructured the results sentence to state on-device physical smartphone telemetry first:
+     *"In live field trials on a commercial smartphone (Samsung Galaxy A54) under everyday ambient indoor lighting, CashVision attained $83.3\%$ verification accuracy without monetary valuation errors, sustained the camera preview cadence of $20.5$\,FPS, and lowered active power draw by $36.5\%$ ($34.6\%$ session energy reduction) while preventing thermal throttling. In complementary offline multi-condition video benchmarks, the adaptive cascade similarly reduced the host computational energy proxy by $61.3\%$."*
+  2. **Research Highlights (Lines 151--157):**
+     Restructured Bullets 3 and 4 to present smartphone trials first and distinguish the offline proxy, strictly respecting Elsevier's 85-character-per-bullet constraint:
+     - Bullet 3: `\item Smartphone trials: 20.5 FPS preview, 36.5\% power and 34.6\% energy reduction.` (76 characters, $\le 85$).
+     - Bullet 4: `\item Adaptive cascade cuts offline video compute energy proxy by 61.3\%.` (66 characters, $\le 85$).
+  3. **Introduction, Contribution C3 (Line 200):**
+     Restructured Contribution (C3) so that live on-device field trials on Samsung Galaxy A54 ($83.3\%$ accuracy, $0$ valuation errors, $20.5$\,FPS preview cadence, $36.5\%$ active power cut, $34.6\%$ session energy savings) lead the description, followed by the $61.3\%$ host computational energy proxy on the complementary offline video benchmark.
+  4. **Conclusion, Contribution 3 (Line 1328):**
+     Aligned the concluding summary with the same prioritization: highlighting full offline deployment on Samsung Galaxy A54 ($20.5$\,FPS, $36.5\%$ active power, $34.6\%$ session energy reduction, 0 valuation errors) before noting the $61.3\%$ host computational energy proxy in offline evaluation.
+
+---
+
+### 2. Build and Verification Status
+
+- **Build Engine:** `latexmk -pdf elsarticle-template-harv.tex` (MiKTeX pdfTeX 4.27, Git Perl 5.38.2 on Windows).
+- **Exit Status:** Clean build, Exit Code 0.
+- **Output:** `elsarticle-template-harv.pdf` (37 pages, 23,262,063 bytes).
+- **Cross-References:** All labels, figures, tables, and citations resolve with zero LaTeX errors.
+
+---
+
+### 3. Scope Discipline & Prohibitions Enforced
+
+- **Prohibitions Upheld:**
+  - **Zero numbers altered or fabricated:** Physical smartphone values ($36.5\%$, $34.6\%$, $20.5$\,FPS, $0/36$) and offline proxy value ($61.3\%$) were preserved exactly from Tables 5, 7, and 8 without modification.
+  - **Zero changes to `.bib` or `.bbl` files.**
+  - **Zero renumbered equations, tables, figures, or sections.**
+  - **Zero deleted or modified `\label` or `\cite` keys.**
