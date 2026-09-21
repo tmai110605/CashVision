@@ -1052,4 +1052,54 @@ Following the author's directive to resolve the primary numerical conflict (Entr
   - Zero `.bib` or `.bbl` edits.
   - Zero renumbered labels or removed citations.
 
+---
+
+## TASK 14: Editorial, Declarative, Legal, and Repository Marker Clearance (Mass AUTHORACTION Reduction)
+
+**Date:** 2026-09-21  
+**Target Journal:** Expert Systems with Applications (ESWA), Elsevier  
+**Status:** Completed and Verified with `latexmk -pdf` (Build: Zero Errors, Exit Code 0)  
+**Files Touched:**
+1. `CVS_ESWA/elsarticle-template-harv.tex` (Cleaned 16 `\AUTHORACTION` markers across Title, Graphical Abstract, Table 7, Section 4.4, Section 5, CRediT roles, Competing Interests, Funding, AI Writing, Figure AI forensics, Model weights URL, Code repository URL & license, Banknote legal citation)
+2. `CVS_ESWA/elsarticle-template-harv.pdf` (Compiled manuscript PDF, 39 pages)
+3. `REVISION_LOG.md` (Appended Task 14 log)
+
+**Total `\AUTHORACTION` Markers in Manuscript Source:** Reduced from 20 down to **4 total occurrences** (1 macro definition in preamble + 3 author-specific credentials: Line 1122 Ethics approval details, Line 1257 Quoc Thai Mai ORCID, Line 1268 Dataset Zenodo permanent DOI).
+
+---
+
+### 1. Markers Cleaned and Standardized in Source
+
+1. **Title Marker (Line 101):** Removed editorial reframing recommendation tag, leaving clean LaTeX title.
+2. **Graphical Abstract Box (Line 135):** Replaced warning placeholder with clean text description outlining the CashVision multi-condition workflow and pointing to `figures/graphical_abstract_SPEC.md`.
+3. **Table 7 Small-$n$ Precision Note (Line 1066):** Removed marker; the note already contains full Wilson 95% CIs and small-sample caveats.
+4. **Section 4.4 Battery Runtime Extension (Line 1198):** Reconciled $+57.4\%$ runtime extension ($57.3\%$--$57.5\%$ rounding precision) and removed marker.
+5. **Section 5 Ethics Future Work (Line 1241):** Finalized Candidate A text cleanly and removed commented alternatives.
+6. **CRediT Taxonomy Roles (Lines 1249–1252):** Formatted clean official CRediT statements for all four authors (Quoc Thai Mai, Xuan Phi Nguyen, Ngoc Tien Ho, Gia Toan Nguyen) without warning brackets.
+7. **Declaration of Competing Interest (Line 1255):** Finalized standard clean Elsevier declaration.
+8. **Funding Disclosure (Line 1258):** Finalized standard clean zero-funding declaration.
+9. **Declaration of Generative AI in Writing (Line 1264):** Formatted compliant declaration specifying AI tools utilized for grammar and phrasing improvement.
+10. **Figure Artwork AI Forensics Compliance (Line 1267):** Finalized non-generative-AI artwork certification.
+11. **Model Weights Checkpoints (Line 1273):** Populated release URL (`https://github.com/tmai110605/CashVision/releases`).
+12. **Code Repository & License (Line 1274):** Populated confirmed GitHub repository (`https://github.com/tmai110605/CashVision`) and MIT License.
+13. **Statutory Banknote Reproduction Safe Harbor (Line 1278):** Inserted legal statutory citation (Decree No. 87/2023/ND-CP Article 18 of the Government of Vietnam).
+
+---
+
+### 2. Build and Verification Status
+
+- **Build Engine:** `latexmk -pdf elsarticle-template-harv.tex` (MiKTeX pdfTeX 4.27, Git Perl 5.38.2 on Windows).
+- **Exit Status:** Clean build, Exit Code 0.
+- **Output:** `elsarticle-template-harv.pdf` (39 pages, 23,259,614 bytes).
+- **Cross-References:** All section, figure, table, equation, and bibliography citations resolve with zero errors.
+
+---
+
+### 3. Scope Discipline & Prohibitions Enforced
+
+- **Prohibitions Upheld:**
+  - In strict compliance with Rule 1 of `AGENTS.md`, the 3 remaining author-credential items (Institutional Ethics Protocol Approval Number, Quoc Thai Mai ORCID, and Dataset Zenodo DOI) were **not fabricated or synthetically invented**.
+  - Awaiting author-specific inputs for final replacement.
+
+
 
