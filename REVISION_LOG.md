@@ -1261,4 +1261,92 @@ In response to the author providing the official RetinexNet repository link (`ht
   - Zero edits to `.bib` or `.bbl` files.
   - Zero renumbered sections, equations, tables, or figures.
 
+---
+
+## TASK 18: Tone Calibration and Emphatic Language Reduction
+
+**Date:** 2026-09-22  
+**Target Journal:** Expert Systems with Applications (ESWA), Elsevier  
+**Status:** Completed and Verified with `latexmk -pdf` (Build: Zero Errors, Exit Code 0)  
+**Files Touched:**
+1. `CVS_ESWA/elsarticle-template-harv.tex` (Main LaTeX manuscript: calibrated tone, attenuated hyperbolic adjectives, and replaced unhedged emphatic assertions across Sections 1, 2.2, 3.1, 3.2, 3.5, 3.6, 3.7, 4.1, 4.3, 4.4, and 5)
+2. `CVS_ESWA/elsarticle-template-harv.pdf` (Compiled manuscript PDF, 36 pages, 23,261,001 bytes)
+3. `REVISION_LOG.md` (Appended Task 18 log)
+
+**Total `\AUTHORACTION` Markers in Manuscript Source:** 1 active marker in text (`figures/graphical_abstract_SPEC.md` placeholder) + 1 macro definition in preamble.
+
+---
+
+### 1. Summary of Changes and Epistemic Calibration
+
+In accordance with the academic register required by Elsevier and *Expert Systems with Applications* (ESWA), the manuscript was systematically audited for emphatic qualifiers, unhedged promotional terms, and absolute assertions where experimental evidence was insufficient or exploratory.
+
+#### 1.1 Emphatic Modifiers and Adjectives Removed/Replaced
+- **"strictly":** Replaced 14 instances across methodology, protocols, and discussion ("strictly adhering", "strictly bounded", "strictly satisfying", "strictly enforced", "strictly compliant", "strictly quarantined", "strictly partitioned", "strictly restricted", "strictly disjoint", "strictly bound", "strictly dedicated", "strictly pseudonymized", "strictly comparable") with neutral, precise phrasing ("adhering", "bounded", "satisfying", "enforced", "compliant", "quarantined", "partitioned", "restricted", "disjoint", "assigned", "dedicated", "pseudonymized", "directly comparable").
+- **"rigorous" / "rigorously":** Replaced occurrences claiming excessive rigor ("rigorous one-at-a-time parameter sweep" $\to$ "systematic one-at-a-time (OAT) parameter sweep"; "rigorously quantifies" $\to$ "quantifies"; "rigorously refutes the hypothesis" $\to$ "indicates that high recognition rates do not primarily stem from...").
+- **"decisive":** Section 3.6 originally claimed "three decisive scientific insights" on the basis of a paired Wilcoxon signed-rank test across $N=12$ specimen clusters ($W = 2.0, p = 0.188$ one-sided, $p = 0.375$ two-sided, where 8 specimens tie at ceiling). Replaced with "three key empirical observations" and hedged the findings accordingly.
+- **"exact":** Removed emphatic and overprecise uses ("exact same damaged physical notes" $\to$ "same damaged physical notes"; "this exact 2,040-image" $\to$ "the same 2,040-image"; "exact identity transformation" $\to$ "identity transformation"; "exact Pareto elbow" $\to$ "empirical trade-off point"; "with exactly one stream" $\to$ "with one stream"; "produced exactly such errors" $\to$ "produced such errors"). All remaining occurrences of "exact" in the manuscript are strictly restricted to standard mathematical and metric definitions ("Exact-Match Accuracy", $\text{Acc}_{\text{exact}}$, or "exact for the first 12 participants").
+- **Promotional & Hyperbolic Vocabulary:** Replaced "slashes" $\to$ "reduces", "acute" $\to$ "severe" / "sharp" / "critical", "completely suppressed" $\to$ "suppressed", "obliterate" $\to$ "obscure", "profound" $\to$ removed/rephrased mechanistically, "pivotal" $\to$ "notable", "intolerable" $\to$ "elevated", "completely eliminates" $\to$ "yielded zero monetary misdirection in these benchmark streams", and "attributable almost entirely to" $\to$ "driven primarily by".
+
+#### 1.2 Section-by-Section Tone Refinement
+1. **Introduction & Contributions (Section 1):**
+   - Softened "theoretically eliminates algorithmic misses" $\to$ "theoretically minimizes algorithmic misses".
+   - Calibrated Contribution C3: "by eliminating compute-bound inference bottlenecks" $\to$ "by avoiding compute-bound inference bottlenecks".
+   - Calibrated Contribution C4: "and suppresses the assistive financial hazard rate to $1.0\%$" $\to$ "and limits the assistive financial hazard rate to $1.0\%$".
+2. **Methodology (Section 2.2):**
+   - Replaced overclaimed photometric guarantees: "to guarantee photometric invariance" $\to$ "to improve photometric invariance".
+   - Softened spatial transitions: "To guarantee smooth spatial transitions" $\to$ "To ensure smooth spatial transitions".
+   - Hedged consensus mechanisms: "to eliminate acoustic fluttering while suppressing redundant deep neural invocations" $\to$ "to mitigate acoustic fluttering while suppressing redundant deep neural invocations".
+3. **Experimental Setup & Protocols (Section 3.1):**
+   - Replaced "guarantees that checkpoint selection is governed" $\to$ "ensures that checkpoint selection is guided".
+   - Replaced "guarantee strict determinism" $\to$ "promote reproducible training".
+   - Replaced "rather than generalization to completely unseen physical banknote specimens. True specimen-disjoint generalization" $\to$ "rather than generalization to unseen physical banknote specimens. Specimen-disjoint generalization".
+4. **MQTone Evaluation & Baselines (Section 3.2):**
+   - Replaced "near-perfect recognition" $\to$ "high recognition accuracy".
+   - Replaced "pivotal finding" $\to$ "notable contrast", "acute specular glare" $\to$ "severe specular glare".
+   - Replaced promotional prose regarding "profound", "obliterated", and "indispensable necessity" with an objective discussion of the physical mechanism of specular reflection on non-porous polymer substrates.
+5. **Rule Sensitivity Analysis (Section 3.5):**
+   - Replaced "To eliminate this vulnerability" $\to$ "To address this vulnerability".
+   - Replaced "slashes interaction latency" $\to$ "reduces interaction latency".
+   - Replaced "intolerable 11.1% valuation hazard rate" $\to$ "elevated 11.1% valuation hazard rate".
+   - Replaced "completely eliminates monetary misdirection" $\to$ "yielded zero monetary misdirection in these benchmark streams".
+   - Replaced "exact Pareto elbow" $\to$ "empirical trade-off point".
+6. **Specimen-Disjoint Evaluation (Section 3.6):**
+   - Replaced "completely unseen" $\to$ "unseen", "strictly disjoint" $\to$ "disjoint", "exact same" $\to$ "same", "true generalization" $\to$ "generalization".
+   - Replaced "guarantees zero specimen overlap" $\to$ "ensures zero specimen overlap".
+   - Replaced "decisive scientific insights" $\to$ "key empirical observations".
+   - Finding (i): "near-perfect" $\to$ "high", "rigorously refutes the hypothesis" $\to$ "indicates that high recognition rates do not primarily stem from...", "attributable almost entirely to" $\to$ "driven primarily by".
+   - Finding (ii): "occurs almost exclusively" $\to$ "occurs primarily", "almost entirely unaccounted for" $\to$ "largely unexplained by", "primary bottleneck is ... rather than ..." $\to$ "environmental illumination dynamics represent a more substantial operational challenge for mobile banknote inspection than physical banknote instance variability."
+   - Finding (iii): "The most acute" $\to$ "A critical", "by a substantial +6.67" $\to$ "by +6.67", "comes at no cost to defect localization" $\to$ "incurs no observable penalty on defect localization in this split: Tear mAP@50 is unchanged".
+   - Concluding paragraph: "strong empirical evidence that CashVision achieves genuine out-of-specimen generalization" $\to$ "empirical evidence supporting out-of-specimen generalization", explicitly noting the cluster sample size and wide confidence intervals.
+7. **SOTA Comparisons, Video Benchmark, Telemetry, and User Study (Sections 3.7, 4.1, 4.3, 4.4, and 5):**
+   - Section 3.7: "not strictly comparable" $\to$ "not directly comparable" (in both text and Table 8 caption).
+   - Section 4.1: "with exactly one stream" $\to$ "with one stream".
+   - Section 4.1: "confirming that reliable defect screening requires" $\to$ "indicating that reliable defect screening benefits from".
+   - Section 4.3: "strictly pseudonymized" $\to$ "pseudonymized".
+   - Section 4.3: "under acute folding" $\to$ "under sharp folding".
+   - Section 4.4: "produced exactly such errors" $\to$ "produced such errors".
+   - Section 5 (Conclusion): "attributable almost entirely to" $\to$ "driven primarily by".
+
+---
+
+### 2. Build and Verification Status
+
+- **Build Engine:** `latexmk -pdf elsarticle-template-harv.tex` (MiKTeX pdfTeX 4.27, Git Perl 5.38.2 on Windows).
+- **Exit Status:** Clean build, Exit Code 0.
+- **Output:** `elsarticle-template-harv.pdf` (36 pages, 23,261,001 bytes).
+- **Cross-References:** All labels, figures, tables, and citations resolve with zero LaTeX errors and zero warnings.
+
+---
+
+### 3. Scope Discipline & Prohibitions Enforced
+
+- **Prohibitions Upheld:**
+  - **Zero modified numbers:** Every experimental figure, accuracy value, confidence interval, latency, and test statistic was preserved untouched.
+  - **Zero numerical conflicts created or resolved silently:** All arithmetic and data remain intact.
+  - **Zero changes to `.bib` or `.bbl` files.**
+  - **Zero renumbered equations, tables, figures, or sections.**
+  - **Zero deleted or modified `\label` or `\cite` keys.**
+
+
 
