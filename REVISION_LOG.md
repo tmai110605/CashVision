@@ -1101,5 +1101,68 @@ Following the author's directive to resolve the primary numerical conflict (Entr
   - In strict compliance with Rule 1 of `AGENTS.md`, the 3 remaining author-credential items (Institutional Ethics Protocol Approval Number, Quoc Thai Mai ORCID, and Dataset Zenodo DOI) were **not fabricated or synthetically invented**.
   - Awaiting author-specific inputs for final replacement.
 
+---
 
+## TASK 15: Removal of Internal Repository File Path References
 
+**Date:** 2026-09-22  
+**Target Journal:** Expert Systems with Applications (ESWA), Elsevier  
+**Status:** Completed and Verified with `latexmk -pdf` (Build: Zero Errors, Exit Code 0)  
+**Files Touched:**
+1. `CVS_ESWA/elsarticle-template-harv.tex` (Eliminated 4 explicit occurrences of `protocols/leave_specimen_out_protocol.md` in text, table caption, and table note; removed internal script and log references `scratch/compute_specimen_disjoint_statistics.py` and `logs_sim/specimen_disjoint_statistical_results.json` in LaTeX comments)
+2. `CVS_ESWA/elsarticle-template-harv.pdf` (Compiled manuscript PDF, 36 pages, 23,244,504 bytes)
+3. `REVISION_LOG.md` (Appended Task 15 log)
+
+**Total `\AUTHORACTION` Markers in Manuscript Source:** 1 active marker in text (`figures/graphical_abstract_SPEC.md` in graphical abstract placeholder) + 1 macro definition in preamble.
+
+---
+
+### 1. Internal References Cleaned and Rephrased
+
+1. **Protocol B Description (Section 3.1, Line 530):**
+   - *Previous:* `...is formulated in Section~\ref{subsec:specimen_disjoint_results} following the dedicated protocol in \texttt{protocols/leave\_specimen\_out\_protocol.md}.`
+   - *Revised:* `...is formulated in Section~\ref{subsec:specimen_disjoint_results} under a dedicated Leave-Specimen-Out evaluation protocol.`
+   - *Rationale:* Replaced internal file path with formal academic protocol reference linking directly to Section 3.6.
+
+2. **Specimen Decomposition Introduction (Section 3.6, Line 869):**
+   - *Previous:* `...we formulate the Leave-Specimen-Out (LSO) benchmark protocol documented in \texttt{protocols/leave\_specimen\_out\_protocol.md}.`
+   - *Revised:* `...we formulate a Leave-Specimen-Out (LSO) benchmark protocol.`
+   - *Rationale:* Section 3.6 already provides the comprehensive mathematical, physical, and cluster decomposition; referencing an internal markdown document is inappropriate for a peer-reviewed submission.
+
+3. **LaTeX Comment above Table 7 (Section 3.6, Line 916):**
+   - *Previous:* `% Empirical statistical validation values computed via scratch/compute_specimen_disjoint_statistics.py and logged to logs_sim/specimen_disjoint_statistical_results.json (paired Wilcoxon signed-rank tests and B=1,000 cluster bootstrap 95% CIs across physical specimens).`
+   - *Revised:* `% Empirical statistical validation values: paired Wilcoxon signed-rank tests and B=1,000 cluster bootstrap 95% CIs across physical specimens.`
+   - *Rationale:* Removed internal repository script and log paths (`scratch/`, `logs_sim/`) from LaTeX source comments.
+
+4. **Table 7 Caption (Line 919):**
+   - *Previous:* `\caption{Specimen-Disjoint Benchmark: Generalization to Completely Unseen Physical Banknote Specimens across Operational Conditions (Evaluated under \texttt{protocols/leave\_specimen\_out\_protocol.md}). ...}`
+   - *Revised:* `\caption{Specimen-Disjoint Benchmark: Generalization to Completely Unseen Physical Banknote Specimens across Operational Conditions (Leave-Specimen-Out Protocol). ...}`
+   - *Rationale:* Standardized table caption to Elsevier style without raw file path syntax.
+
+5. **Table 7 Footnote / Note (Line 937):**
+   - *Previous:* `...Evaluated under the protocol specified in \texttt{protocols/leave\_specimen\_out\_protocol.md}.}}`
+   - *Revised:* `...Evaluated under the Leave-Specimen-Out (LSO) benchmark protocol described in Section~\ref{subsec:specimen_disjoint_results}.}}`
+   - *Rationale:* Replaced markdown path with an internal section cross-reference.
+
+6. **Audit of `REVISION_LOG.md` in Manuscript:**
+   - A systematic search confirmed that `REVISION_LOG.md` does not appear anywhere within `elsarticle-template-harv.tex` or any other `.tex` file in the manuscript directory.
+
+---
+
+### 2. Build and Verification Status
+
+- **Build Engine:** `latexmk -pdf elsarticle-template-harv.tex` (MiKTeX pdfTeX 4.27, Git Perl 5.38.2 on Windows).
+- **Exit Status:** Clean build, Exit Code 0.
+- **Output:** `elsarticle-template-harv.pdf` (36 pages, 23,244,504 bytes).
+- **Cross-References:** All labels, figures, tables, and citations resolve with zero LaTeX errors and zero warnings.
+
+---
+
+### 3. Scope Discipline & Out-of-Scope Findings
+
+- **Prohibitions Upheld:**
+  - Zero experimental numbers, statistical test statistics ($W, p$, bootstrap CIs), or table entries were modified.
+  - Zero citations or labels were altered or removed.
+  - No edits made to `.bib` or `.bbl` files.
+- **Out-of-Scope Findings:**
+  - *Back-matter declarations block:* Observed that the mandatory Elsevier back-matter sections (CRediT authorship statement, declaration of competing interest, funding disclosure, generative-AI declaration, data/code availability statement) present in commit `ee5fd2b` are not in the current working draft around line 1345. Logged for author review prior to final submission.
