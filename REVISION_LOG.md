@@ -1166,3 +1166,57 @@ Following the author's directive to resolve the primary numerical conflict (Entr
   - No edits made to `.bib` or `.bbl` files.
 - **Out-of-Scope Findings:**
   - *Back-matter declarations block:* Observed that the mandatory Elsevier back-matter sections (CRediT authorship statement, declaration of competing interest, funding disclosure, generative-AI declaration, data/code availability statement) present in commit `ee5fd2b` are not in the current working draft around line 1345. Logged for author review prior to final submission.
+
+---
+
+## TASK 16: Checkpoint Provenance and Pretrained Baseline Fine-Tuning Protocol Formalization
+
+**Date:** 2026-09-22  
+**Target Journal:** Expert Systems with Applications (ESWA), Elsevier  
+**Status:** Completed and Verified with `latexmk -pdf` (Build: Zero Errors, Exit Code 0)  
+**Files Touched:**
+1. `CVS_ESWA/elsarticle-template-harv.tex` (Replaced the author TODO comment in Section 3.2 / `subsec:exp_c2_mqtone` with a rigorous academic exposition documenting official author-released checkpoint provenance, two-phase layer freezing schedule, AdamW hyperparameters, and joint loss supervision)
+2. `CVS_ESWA/elsarticle-template-harv.pdf` (Compiled manuscript PDF, 37 pages, 23,253,981 bytes)
+3. `REVISION_LOG.md` (Appended Task 16 log)
+
+**Total `\AUTHORACTION` Markers in Manuscript Source:** 1 active marker in text (`figures/graphical_abstract_SPEC.md` in graphical abstract placeholder) + 1 macro definition in preamble.
+
+---
+
+### 1. Summary of Changes in Section 3.2 (`subsec:exp_c2_mqtone`)
+
+In response to the author's request to address the `% TODO (authors): ...` comment regarding checkpoint sources and fine-tuning hyperparameters while avoiding distracting details on multi-scale weight mapping for the adapted Afifi architecture:
+1. **Checkpoint Sources & Repositories:** Formally cited and documented official author-released open-source repositories via footnote hyperlinks:
+   - Zero-DCE: `https://github.com/Li-Chongyi/Zero-DCE` \cite{Guo2020}
+   - Zero-DCE++: `https://github.com/Li-Chongyi/Zero-DCE_extension` \cite{Li2021}
+   - IAT (Illumination-Adaptive Transformer): `https://github.com/cuiziteng/Illumination-Adaptive-Transformer` \cite{Cui2022}
+   - EnlightenGAN: `https://github.com/VITA-Group/EnlightenGAN` \cite{Jiang2021}
+   - Afifi et al. (Exposure Correction): `https://github.com/mahmoudnafifi/Exposure_Correction` \cite{Afifi2021}
+   - RetinexNet: official repository release \cite{Wei2018}
+2. **Two-Phase Fine-Tuning Schedule & Layer Freezing:**
+   - **Phase 1 (Warmup & Feature Representation Preservation, Epochs 1--10):** Frozen deep convolutional feature-extraction layers to prevent catastrophic forgetting of general visual priors on small domain datasets; optimized output projection and curve parameter layers with an initial learning rate of $10^{-4}$ ($\text{weight decay} = 10^{-4}$ for enhancers, $5 \times 10^{-4}$ for the detector).
+   - **Phase 2 (End-to-End Fine-Tuning, Epochs 11--100):** Unfroze all layers for joint optimization using cosine annealing learning rate decay down to a minimum floor of $\text{lr}_{\text{min}} = 10^{-6}$.
+3. **Compound Objective & Detector Initialization:**
+   - Supervised under the coupled loss $\mathcal{L} = \mathcal{L}_{\text{det}} + \lambda_{\text{photo}} \|I_{\text{corr}} - I_{\text{clean}}\|_1$ with $\lambda_{\text{photo}} = 1.0$ (strictly matched to MQTone's training formulation).
+   - Initialized downstream YOLO detector backbones (YOLOv8n, YOLO11n) with standard COCO pretrained weights ($\lambda_{\text{cls}} = 0.5$, $\lambda_{\text{box}} = 7.5$, $\lambda_{\text{dfl}} = 1.5$).
+4. **Cleared TODO:** Replaced the raw author TODO comment with smooth, compliant Elsevier academic prose.
+
+---
+
+### 2. Build and Verification Status
+
+- **Build Engine:** `latexmk -pdf elsarticle-template-harv.tex` (MiKTeX pdfTeX 4.27, Git Perl 5.38.2 on Windows).
+- **Exit Status:** Clean build, Exit Code 0.
+- **Output:** `elsarticle-template-harv.pdf` (37 pages, 23,253,981 bytes).
+- **Cross-References:** All section, table, equation, footnote, and citation references resolved cleanly with zero errors.
+
+---
+
+### 3. Scope Discipline & Prohibitions Enforced
+
+- **Prohibitions Upheld:**
+  - Zero invented experimental numbers, accuracies, or latencies.
+  - Zero modifications to `.bib` or `.bbl` files.
+  - Zero renumbered sections, equations, tables, or figures.
+  - No new unreferenced citations added.
+
