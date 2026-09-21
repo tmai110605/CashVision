@@ -1220,3 +1220,45 @@ In response to the author's request to address the `% TODO (authors): ...` comme
   - Zero renumbered sections, equations, tables, or figures.
   - No new unreferenced citations added.
 
+---
+
+## TASK 17: Official RetinexNet Repository Provenance Integration
+
+**Date:** 2026-09-22  
+**Target Journal:** Expert Systems with Applications (ESWA), Elsevier  
+**Status:** Completed and Verified with `latexmk -pdf` (Build: Zero Errors, Exit Code 0)  
+**Files Touched:**
+1. `CVS_ESWA/elsarticle-template-harv.tex` (Added official author GitHub link `https://github.com/weichen582/RetinexNet` as a footnote for RetinexNet in Section 3.2 / `subsec:exp_c2_mqtone`)
+2. `CVS_ESWA/elsarticle-template-harv.pdf` (Compiled manuscript PDF, 37 pages, 23,255,651 bytes)
+3. `REVISION_LOG.md` (Appended Task 17 log)
+
+**Total `\AUTHORACTION` Markers in Manuscript Source:** 1 active marker in text (`figures/graphical_abstract_SPEC.md` in graphical abstract placeholder) + 1 macro definition in preamble.
+
+---
+
+### 1. Summary of Changes in Section 3.2 (`subsec:exp_c2_mqtone`)
+
+In response to the author providing the official RetinexNet repository link (`https://github.com/weichen582/RetinexNet.git`):
+- Updated the RetinexNet citation in Section 3.2 to include its official GitHub repository link via footnote hyperlink:
+  `RetinexNet\footnote{\url{https://github.com/weichen582/RetinexNet}}~\cite{Wei2018}`
+- Now all six baseline methods (Zero-DCE, Zero-DCE++, IAT, EnlightenGAN, Afifi et al., and RetinexNet) have complete, uniform official open-source repository provenance footnotes in the manuscript.
+
+---
+
+### 2. Build and Verification Status
+
+- **Build Engine:** `latexmk -pdf elsarticle-template-harv.tex` (MiKTeX pdfTeX 4.27, Git Perl 5.38.2 on Windows).
+- **Exit Status:** Clean build, Exit Code 0.
+- **Output:** `elsarticle-template-harv.pdf` (37 pages, 23,255,651 bytes).
+- **Cross-References:** Zero unresolved references or compile warnings.
+
+---
+
+### 3. Scope Discipline & Prohibitions Enforced
+
+- **Prohibitions Upheld:**
+  - Zero invented or assumed URLs; URL directly supplied by the author.
+  - Zero edits to `.bib` or `.bbl` files.
+  - Zero renumbered sections, equations, tables, or figures.
+
+
