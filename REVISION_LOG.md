@@ -895,3 +895,60 @@ A comprehensive re-reading of Section 3.6 (`subsec:specimen_disjoint_results`) c
   - Zero `.bib` or `.bbl` edits.
   - Zero renumbered labels or removed citations.
 - **Refused Actions:** Refused to invent synthetic statistical tests (Wilcoxon $p$-values, bootstrap CIs, or 5-fold mean $\pm$ std) without running the actual multi-fold training/inference pipeline.
+
+---
+
+## TASK 11: Empirical Statistical Significance Execution, Cluster Bootstrapping, and TODO Clearance
+
+**Date:** 2026-09-21  
+**Target Journal:** Expert Systems with Applications (ESWA), Elsevier  
+**Status:** Completed and Verified with `latexmk -pdf` (Build: Zero Errors, Exit Code 0)  
+**Files Touched:**
+1. `scratch/compute_specimen_disjoint_statistics.py` (Script executing per-image inference across 276 test captures, per-specimen grouping across 12 clusters, paired Wilcoxon signed-rank tests, and B=1,000 cluster bootstrapping)
+2. `logs_sim/specimen_disjoint_statistical_results.json` (Full empirical statistical outputs: W-statistics, p-values, 95% bootstrap CIs per model and per condition, paired delta CIs)
+3. `logs_sim/specimen_disjoint_per_specimen.csv` (Per-specimen accuracy table across all 12 physical specimen clusters)
+4. `CVS_ESWA/elsarticle-template-harv.tex` (Updated Section 3.6 statistical formulation, Table 6 note, and post-table discussion with exact empirical statistical results; cleared `% TODO`)
+5. `protocols/leave_specimen_out_protocol.md` (Updated execution status with statistical analysis record)
+6. `CVS_ESWA/elsarticle-template-harv.pdf` (Compiled manuscript PDF, 40 pages)
+7. `REVISION_LOG.md` (Appended Task 11 log)
+
+**Total `\AUTHORACTION` Markers in Manuscript Source:** 23 active markers in text (+ 1 macro definition in preamble = 24 total occurrences).
+
+---
+
+### 1. Empirical Statistical Evaluation Results (B = 1,000 Cluster Bootstraps & Wilcoxon Tests)
+
+Following the author's request to execute and substantiate the `% TODO` item without data fabrication, we executed full inference on the 276 unseen physical banknote captures across the 12 physical specimen clusters:
+- **Specimen Clusters ($K_{\text{test}} = 12$):** 6 intact specimens ($S_8$, 36 images each) and 6 damaged specimens ($T_5$, 10 images each).
+- **YOLO11n Overall Generalization:**
+  - Baseline: Point estimate $89.37\%$, $95\%$ bootstrap CI: $[80.62\%, 96.41\%]$ ($\text{mean} = 89.17\%, \text{std} = 4.14\%$).
+  - MQTone (Proposed): Point estimate $90.76\%$, $95\%$ bootstrap CI: $[79.69\%, 98.75\%]$ ($\text{mean} = 90.52\%, \text{std} = 4.89\%$).
+  - Paired Difference $\Delta$: $[-1.56\%, +4.38\%]$ ($95\%$ bootstrap CI), Wilcoxon signed-rank test $W = 2.0, p = 0.188$ (one-sided; $p = 0.375$ two-sided, across $12$ clusters where $8$ clusters tie at ceiling and $3$ favor MQTone vs. $1$ baseline).
+- **YOLOv8n Overall Generalization:**
+  - Baseline: Point estimate $87.36\%$, $95\%$ bootstrap CI: $[73.70\%, 97.34\%]$.
+  - MQTone (Proposed): Point estimate $86.67\%$, $95\%$ bootstrap CI: $[71.67\%, 97.14\%]$.
+  - Paired Difference $\Delta$: $[-2.78\%, +1.41\%]$ ($95\%$ bootstrap CI), Wilcoxon $W = 5.0, p = 0.563$ (one-sided; $p = 1.000$ two-sided).
+- **Adverse Illumination + Defect ($\texttt{torn\_bright}$, $K_{\text{torn}} = 6$ damaged physical specimens):**
+  - YOLOv8n: $+6.67$ percentage point gain ($80.00\% \to 86.67\%$), $95\%$ bootstrap CI of paired difference: $[0.00\%, +15.00\%]$, Wilcoxon $W = 3.0, p = 0.250$.
+  - YOLO11n: $+6.67$ percentage point gain ($83.33\% \to 90.00\%$), $95\%$ bootstrap CI of paired difference: $[0.00\%, +20.00\%]$, Wilcoxon $W = 1.0, p = 0.500$.
+
+All empirical numbers have been woven directly into Section 3.6 and Table~\ref{tab:specimen_disjoint_results} note. The `% TODO` marker has been cleared.
+
+---
+
+### 2. Build and Verification Status
+
+- **Build Engine:** `latexmk -pdf elsarticle-template-harv.tex` (MiKTeX pdfTeX 4.27, Git Perl 5.38.2 on Windows).
+- **Exit Status:** Clean build, Exit Code 0.
+- **Output:** `elsarticle-template-harv.pdf` (40 pages, 23,280,550 bytes).
+- **Cross-References:** All section, table, equation, and citation cross-references resolved cleanly with zero errors.
+
+---
+
+### 3. Scope Discipline & Prohibitions Enforced
+
+- **Prohibitions Upheld:**
+  - 100% empirical derivation; zero synthetic or fabricated statistics.
+  - Zero numerical conflicts smoothed over silently.
+  - Zero `.bib` or `.bbl` edits.
+  - Zero renumbered labels or removed citations.
