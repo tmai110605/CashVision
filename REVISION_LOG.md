@@ -1003,3 +1003,53 @@ Following the author's directive to resolve the primary numerical conflict (Entr
   - Zero `.bib` or `.bbl` edits.
   - Zero renumbered labels or removed citations.
 
+---
+
+## TASK 13: Full Technical Exposition of Physical Battery Telemetry Integration (Entry 2 Formalization)
+
+**Date:** 2026-09-21  
+**Target Journal:** Expert Systems with Applications (ESWA), Elsevier  
+**Status:** Completed and Verified with `latexmk -pdf` (Build: Zero Errors, Exit Code 0)  
+**Files Touched:**
+1. `CVS_ESWA/elsarticle-template-harv.tex` (Updated Section 4.2 text with trapezoidal integration formula $\sum P(t_k)\Delta t_k$ and explicit percentage comparisons; renamed Table 8 column header to `\textbf{Session Energy $E_{\text{session}}$ (J)}`; refined Table 8 note)
+2. `NUMERICAL_CONFLICTS.md` (Updated Entry 2 with comparative verification table across all 3 paradigms)
+3. `CVS_ESWA/elsarticle-template-harv.pdf` (Compiled manuscript PDF, 39 pages)
+4. `REVISION_LOG.md` (Appended Task 13 log)
+
+**Total `\AUTHORACTION` Markers in Manuscript Source:** 19 active markers in text (+ 1 macro definition in preamble = 20 total occurrences).
+
+---
+
+### 1. Technical Formalization of Entry 2 (Session Energy vs. Mean Power)
+
+1. **Explicit Mathematical Derivation in Manuscript Body (Section 4.2):**
+   - Stated that active power $P$ represents mean electrical power sampled over time, whereas total session energy $E_{\text{session}}$ is computed via on-device numerical trapezoidal integration ($\sum_{k} P(t_k)\Delta t_k$) across discrete `BatteryManager` hardware polling events ($\Delta t \approx 100$--$500$\,ms).
+   - Documented explicit nominal comparisons in text:
+     - $B_0$: $4.39\text{ W} \times 30.0\text{ s} = 131.70\text{ J}$ (measured $130.54 \pm 10.79\text{ J}$, delta $-1.16\text{ J}$, $-0.88\%$).
+     - $B_1$: $2.44\text{ W} \times 30.0\text{ s} = 73.20\text{ J}$ (measured $73.65 \pm 1.02\text{ J}$, delta $+0.45\text{ J}$, $+0.61\%$).
+     - Cascade: $2.79\text{ W} \times 30.0\text{ s} = 83.70\text{ J}$ (measured $85.36 \pm 2.14\text{ J}$, delta $+1.66\text{ J}$, $+1.98\%$).
+2. **Table 8 Header Clarity:**
+   - Changed `\textbf{Avg Energy (J)}` to `\textbf{Session Energy $E_{\text{session}}$ (J)}`, establishing exact notation alignment with the manuscript equations and text.
+3. **Table 8 Footnote Refinement:**
+   - Explicitly clarified that $E_{\text{session}}$ is trapezoidally integrated directly from Android hardware counters rather than being an algebraic scalar product $P \times 30.0$\,s, eliminating any perception of calculation error.
+
+---
+
+### 2. Build and Verification Status
+
+- **Build Engine:** `latexmk -pdf elsarticle-template-harv.tex` (MiKTeX pdfTeX 4.27, Git Perl 5.38.2 on Windows).
+- **Exit Status:** Clean build, Exit Code 0.
+- **Output:** `elsarticle-template-harv.pdf` (39 pages, 23,266,679 bytes).
+- **Cross-References:** Zero unresolved references or compile warnings.
+
+---
+
+### 3. Scope Discipline & Prohibitions Enforced
+
+- **Prohibitions Upheld:**
+  - Zero altered experimental numbers; empirical telemetry preserved 100%.
+  - Pure mathematical and measurement clarification; no synthetic or estimated values.
+  - Zero `.bib` or `.bbl` edits.
+  - Zero renumbered labels or removed citations.
+
+
