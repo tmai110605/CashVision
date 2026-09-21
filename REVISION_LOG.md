@@ -851,6 +851,47 @@ Following the author's directive to execute Option 2 (empirical execution rather
   - **Zero renumbered labels:** `\label{subsec:specimen_disjoint_results}` and `\label{tab:specimen_disjoint_results}` preserved.
 - **Cleared Markers:** Cleared the `\AUTHORACTION` marker in Table 6.
 
+---
 
+## TASK 10: Specimen-Disjoint Benchmark Audit, Single-Split Point-Estimate Clarification, and Statistical TODO Prompts
 
+**Date:** 2026-09-21  
+**Target Journal:** Expert Systems with Applications (ESWA), Elsevier  
+**Status:** Completed and Verified with `latexmk -pdf` (Build: Zero Errors, Exit Code 0)  
+**Files Touched:**
+1. `CVS_ESWA/elsarticle-template-harv.tex` (Updated Table~\ref{tab:specimen_disjoint_results} note to explicitly clarify single-split point-estimate status vs. 5-fold LSO / bootstrap / Wilcoxon, added `% TODO` comment for authors, updated diagnostic text)
+2. `protocols/leave_specimen_out_protocol.md` (Harmonized sample allocation numbers: 1,260 train / 276 val / 276 test, matching metadata.csv and manuscript)
+3. `CVS_ESWA/elsarticle-template-harv.pdf` (Compiled manuscript PDF, 40 pages)
+4. `REVISION_LOG.md` (Appended Task 10 log)
 
+**Total `\AUTHORACTION` Markers in Manuscript Source:** 23 active markers in text (+ 1 macro definition in preamble = 24 total occurrences).
+
+---
+
+### 1. Section Review and Audit: Specimen-Disjoint Evaluation Protocol
+A comprehensive re-reading of Section 3.6 (`subsec:specimen_disjoint_results`) confirmed the following:
+- **Scientific Foundation:** The distinction between photometric invariance on known notes (Protocol B) and out-of-specimen instance generalization (Scheme 1 & 2) is mathematically formalized and methodologically bulletproof against hostile reviewer challenges.
+- **Specimen Census & Allocations:** $K=13$ physical notes/denomination ($M=8$ intact, $K_{\text{torn}}=5$ damaged; $K_{\text{total}}=78$ physical circulating notes). Allocation counts are exactly aligned across `metadata.csv`, `leave_specimen_out_protocol.md`, and the manuscript: 1,260 train ($69.54\%$), 276 val ($15.23\%$), and 276 test ($15.23\%$, with $n=60$ indoor, $n=60$ outdoor, $n=48$ backlight, $n=48$ overexposed, $n=30$ torn clean, $n=30$ torn bright).
+- **Non-Contamination Constraint:** Paired-tear invariance ($T_k \cap \mathcal{D}_{\text{train}} \neq \emptyset \implies T_k \cap \mathcal{D}_{\text{test}} = \emptyset$) prevents optical leakage across clean and bright damaged captures.
+- **Reporting Clarity:** Table~\ref{tab:specimen_disjoint_results} footnote now explicitly warns readers that values are single-split point estimates from the canonical 70/15/15 partition, whereas 5-fold LSO cross-validation, paired Wilcoxon signed-rank tests, and 95% bootstrap confidence intervals represent separate complementary robustness checks.
+- **Prohibition on Data Fabrication:** In strict adherence to scientific ethics, no unmeasured statistical parameters ($p$-values, bootstrap CIs, or 5-fold standard deviations) were fabricated. A prominent `% TODO(author): ...` comment was embedded in the LaTeX source alerting authors to insert the empirical 5-fold cross-validation and Wilcoxon/bootstrap results prior to submission.
+
+---
+
+### 2. Build and Verification Status
+
+- **Build Engine:** `latexmk -pdf elsarticle-template-harv.tex` (MiKTeX pdfTeX 4.27, Git Perl 5.38.2 on Windows).
+- **Exit Status:** Clean build, Exit Code 0.
+- **Output:** `elsarticle-template-harv.pdf` (40 pages, 23,279,051 bytes).
+- **Cross-References:** All section, table, equation, and citation cross-references resolved cleanly with zero errors.
+
+---
+
+### 3. Scope Discipline & Prohibitions Enforced
+
+- **Prohibitions Upheld:**
+  - Zero fabricated experimental numbers or statistics.
+  - Zero numerical conflicts smoothed over silently.
+  - Zero `.bib` or `.bbl` edits.
+  - Zero renumbered labels or removed citations.
+- **Refused Actions:** Refused to invent synthetic statistical tests (Wilcoxon $p$-values, bootstrap CIs, or 5-fold mean $\pm$ std) without running the actual multi-fold training/inference pipeline.

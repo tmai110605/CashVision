@@ -43,9 +43,9 @@ Two rigorous specimen-disjoint schemes are constructible from this grouping:
 
 ### Scheme 1: Canonical Specimen-Disjoint Split (70 / 15 / 15)
 Physical specimens within each denomination are partitioned at the specimen level into mutually exclusive sets:
-- **Training Pool (70% of specimens):** All frames corresponding to specimens $S_1 \dots S_6$ and $T_1 \dots T_3$ ($K_{\text{train}} = 54$ physical notes across 6 denominations; $1{,}296$ static images, $71.52\%$).
-- **Validation Pool (15% of specimens):** All frames corresponding to specimens $S_7$ and $T_4$ ($K_{\text{val}} = 12$ physical notes; $258$ static images, $14.24\%$, used strictly for model checkpoint selection and early stopping).
-- **Locked Test Pool (15% of specimens):** All frames corresponding to specimens $S_8$ and $T_5$ ($K_{\text{test}} = 12$ completely unseen physical notes; $258$ static images, $14.24\%$, evaluated across all six operational conditions: $n=54$ indoor, $n=54$ outdoor, $n=42$ backlight, $n=42$ overexposed, $n=33$ clean torn, $n=33$ bright torn).
+- **Training Pool (70% of specimens):** All frames corresponding to specimens $S_1 \dots S_6$ and $T_1 \dots T_3$ ($K_{\text{train}} = 54$ physical notes across 6 denominations; $1{,}260$ static images, $69.54\%$).
+- **Validation Pool (15% of specimens):** All frames corresponding to specimens $S_7$ and $T_4$ ($K_{\text{val}} = 12$ physical notes; $276$ static images, $15.23\%$, used strictly for model checkpoint selection and early stopping).
+- **Locked Test Pool (15% of specimens):** All frames corresponding to specimens $S_8$ and $T_5$ ($K_{\text{test}} = 12$ completely unseen physical notes; $276$ static images, $15.23\%$, evaluated across all six operational conditions: $n=60$ indoor, $n=60$ outdoor, $n=48$ backlight, $n=48$ overexposed, $n=30$ clean torn, $n=30$ bright torn).
 
 Zero physical specimens overlap between Training, Validation, and Testing ($\mathcal{S}_{\text{train}} \cap \mathcal{S}_{\text{val}} = \emptyset$, $\mathcal{S}_{\text{train}} \cap \mathcal{S}_{\text{test}} = \emptyset$, $\mathcal{S}_{\text{val}} \cap \mathcal{S}_{\text{test}} = \emptyset$).
 
