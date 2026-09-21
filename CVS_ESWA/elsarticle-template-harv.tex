@@ -774,7 +774,7 @@ For every configuration point in each sweep, the evaluation records six orthogon
 \caption{Rule Base Sensitivity Analysis: Empirical One-at-a-Time (OAT) Sweeps of Decision Thresholds across Accuracy, Energy, Latency, and Assistive Safety Metrics on the 36 Continuous Video Benchmark Streams.}
 \label{tab:rule_sensitivity}
 \scriptsize
-\renewcommand{\arraystretch}{1.15}
+\renewcommand{\arraystretch}{0.7}
 \begin{tabular}{llcccccc}
 \toprule
 \textbf{Parameter} & \textbf{Swept Value} & \textbf{Denom Acc (\%)} & \textbf{Exact Acc (\%)} & \textbf{Trigger Rate $P_{\text{active}}$ (\%)} & \textbf{Energy Proxy $E_{\text{session}}$ (J)} & \textbf{Est.\ TTC (s)} & \textbf{Hazard Rate (\%)} \\
@@ -926,6 +926,14 @@ YOLO11n + MQTone (Proposed) & --- & --- & --- & --- & --- & --- [---] & --- [---
 }
 \flushleft{\footnotesize \textit{Note: \AUTHORACTION{SPECIMEN-DISJOINT EXPERIMENT REQUIRED: Cluster the 1,812 benchmark images into physical specimen IDs following protocols/leave\_specimen\_out\_protocol.md, execute specimen-disjoint training and inference across YOLOv8n and YOLO11n, and populate Table~\ref{tab:specimen_disjoint_results} to report true generalization to unseen physical banknote specimens.}}}
 \end{table*}
+
+\paragraph{Expected Generalization Trajectories and Diagnostic Interpretation:}
+When the empirical specimen-disjoint benchmark is executed, the resulting evaluation matrix serves two diagnostic purposes for assistive system verification:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Quantifying Substrate Overfitting vs.\ Invariant Representation:} Comparing in-distribution validation accuracy against unseen physical specimens ($\Delta_{\text{specimen}}$) directly quantifies the extent to which the deep feature extractor relies on specimen-specific surface signatures (such as localized fiber wear, ink abrasions, or printed serial numbers) versus canonical banknote invariants (such as macroscopic denomination portraits, tactile emblems, and guilloche geometry). On benign indoor captures, baseline models are hypothesized to exhibit minor degradation ($\Delta_{\text{specimen}} \le 3\%$) owing to the distinct typographic clarity of Vietnamese polymer currency.
+    \item \textbf{Decoupling Photometric Degradation on Novel Substrates:} Under adverse illumination regimes (especially directional backlight, specular overexposure, and $\texttt{torn\_bright}$), evaluating unseen banknotes isolates the compounding impact of novel physical surface topography and optical saturation. While unenhanced baseline detectors are expected to suffer compounding drops in both denomination classification and defect delineation ($\Delta_{\text{tear}} > 10\%$), integrating MQTone is formulated to stabilize dynamic range prior to feature extraction, thereby bounding the generalization gap across both familiar and novel physical currency.
+\end{enumerate}
+Establishing this standardized specimen-disjoint partition and empirical reporting protocol provides an uncompromising, reproducible foundation for evaluating mobile assistive vision systems under realistic, out-of-specimen distribution shifts.
 
 \subsection{Comparison with State-of-the-Art Assistive Banknote Recognition Systems}
 \label{subsec:sota_banknote_comparison}

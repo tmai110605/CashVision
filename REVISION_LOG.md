@@ -760,6 +760,8 @@ While model performance metrics cannot be fabricated, the section required thoro
    - Defined Specimen Generalization Gap: $\Delta_{\text{specimen}} = \text{Acc}_{\text{in-dist}} - \text{Acc}_{\text{unseen}}$.
    - Defined Specular Defect Degradation Gap: $\Delta_{\text{tear}} = \text{mAP50}_{\text{clean}} - \text{mAP50}_{\text{bright}}$.
    - Formalized non-parametric Paired Wilcoxon Signed-Rank Test across physical specimens ($\alpha = 0.05$) and 95% bootstrap confidence intervals ($B = 1{,}000$ resamples).
+5. **Post-Table Diagnostic Synthesis:**
+   - Added paragraph *Expected Generalization Trajectories and Diagnostic Interpretation* detailing how $\Delta_{\text{specimen}}$ isolates substrate overfitting vs. canonical representation, and how MQTone bounds $\Delta_{\text{tear}}$ under adverse lighting on novel physical banknotes.
 
 ---
 
@@ -767,7 +769,7 @@ While model performance metrics cannot be fabricated, the section required thoro
 
 - **Build Engine:** `latexmk -pdf elsarticle-template-harv.tex` (MiKTeX pdfTeX 4.27, Git Perl 5.38.2 on Windows).
 - **Exit Status:** Clean build, Exit Code 0.
-- **Output:** `elsarticle-template-harv.pdf` (39 pages, 23,269,387 bytes).
+- **Output:** `elsarticle-template-harv.pdf` (39 pages, 23,271,461 bytes).
 - **Cross-References:** All section, table, equation, and citation cross-references resolved cleanly with zero errors.
 
 ---
@@ -781,5 +783,6 @@ While model performance metrics cannot be fabricated, the section required thoro
   - **Zero renumbered labels:** Cross-reference labels (`\label{subsec:specimen_disjoint_results}`, `\label{tab:specimen_disjoint_results}`) preserved.
 - **Refused Actions:**
   - Refused to invent artificial model accuracy numbers for Table 6.
+
 
 
