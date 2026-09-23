@@ -1,4 +1,4 @@
-\begin{thebibliography}{62}
+\begin{thebibliography}{58}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\href}[2]{#2}
@@ -29,27 +29,6 @@
 \newblock \bibinfo{journal}{Artificial Life and Robotics} \bibinfo{volume}{8},
   \bibinfo{pages}{133--139}.
 %Type = Article
-\bibitem[{Ahmetovic et~al.(2020)Ahmetovic, Gleason, Ruan, Kitani, Takagi and
-  Asakawa}]{Ahmetovic2020}
-\bibinfo{author}{Ahmetovic, D.}, \bibinfo{author}{Gleason, C.},
-  \bibinfo{author}{Ruan, C.}, \bibinfo{author}{Kitani, K.},
-  \bibinfo{author}{Takagi, H.}, \bibinfo{author}{Asakawa, C.},
-  \bibinfo{year}{2020}.
-\newblock \bibinfo{title}{{NavCog3}: An evaluation of a smartphone-based blind
-  indoor navigation assistant with large arrival areas}.
-\newblock \bibinfo{journal}{ACM Transactions on Accessible Computing}
-  \bibinfo{volume}{13}, \bibinfo{pages}{1--29}.
-%Type = Article
-\bibitem[{Al-Zu'bi et~al.(2023)Al-Zu'bi, Alauthman, Al-Gharaibeh and
-  Al-Zinati}]{AlZuBi2023}
-\bibinfo{author}{Al-Zu'bi, S.}, \bibinfo{author}{Alauthman, M.},
-  \bibinfo{author}{Al-Gharaibeh, M.}, \bibinfo{author}{Al-Zinati, M.},
-  \bibinfo{year}{2023}.
-\newblock \bibinfo{title}{An intelligent real-time banknote recognition system
-  for visually impaired people using deep convolutional neural networks}.
-\newblock \bibinfo{journal}{Multimedia Tools and Applications}
-  \bibinfo{volume}{82}, \bibinfo{pages}{27435--27457}.
-%Type = Article
 \bibitem[{Bangor et~al.(2008)Bangor, Kortum and Miller}]{Bangor2008}
 \bibinfo{author}{Bangor, A.}, \bibinfo{author}{Kortum, P.T.},
   \bibinfo{author}{Miller, J.T.}, \bibinfo{year}{2008}.
@@ -67,7 +46,18 @@
 %Type = Article
 \bibitem[{Bourne et~al.(2017)Bourne, Flaxman, Braithwaite, Cicinelli, Das,
   Jonas, Keeffe, Kempen, Leasher, Limburg, Naidoo, Pesudovs, Resnikoff,
-  Silvester, Stevens, Tahhan, Wong and Taylor}]{Bourne2017}
+  Silvester, Stevens, Tahhan, Wong, Taylor, Bourne, Ackland, Arditi, Barkana,
+  Bozkurt, BRAITHWAITE, Bron, Budenz, Cai, Casson, Chakravarthy, Choi,
+  Cicinelli, Congdon, Dana, Dandona, Dandona, Das, Dekaris, {Del Monte}, Deva,
+  Dreer, Ellwein, Frazier, Frick, Friedman, Furtado, Gao, Gazzard, George,
+  Gichuhi, Gonzalez, Hammond, Hartnett, He, Hejtmancik, Hirai, Huang, Ingram,
+  Javitt, Jonas, Joslin, Keeffe, Kempen, Khairallah, Khanna, Kim, Lambrou,
+  Lansingh, Lanzetta, Leasher, Lim, LIMBURG, Mansouri, Mathew, Morse, Munoz,
+  Musch, Naidoo, Nangia, PALAIOU, Parodi, Pena, Pesudovs, Peto, Quigley, Raju,
+  Ramulu, Resnikoff, Robin, Rossetti, Saaddine, SANDAR, Serle, Shen, Shetty,
+  Sieving, Silva, Silvester, Sitorus, Stambolian, Stevens, Taylor, Tejedor,
+  Tielsch, Tsilimbaris, {van Meurs}, Varma, Virgili, Volmink, Wang, Wang, West,
+  Wiedemann, Wong, Wormald and Zheng}]{Bourne2017}
 \bibinfo{author}{Bourne, R.R.A.}, \bibinfo{author}{Flaxman, S.R.},
   \bibinfo{author}{Braithwaite, T.}, \bibinfo{author}{Cicinelli, M.V.},
   \bibinfo{author}{Das, A.}, \bibinfo{author}{Jonas, J.B.},
@@ -77,9 +67,57 @@
   \bibinfo{author}{Resnikoff, S.}, \bibinfo{author}{Silvester, A.},
   \bibinfo{author}{Stevens, G.A.}, \bibinfo{author}{Tahhan, N.},
   \bibinfo{author}{Wong, T.Y.}, \bibinfo{author}{Taylor, H.R.},
-  \bibinfo{year}{2017}.
+  \bibinfo{author}{Bourne, R.}, \bibinfo{author}{Ackland, P.},
+  \bibinfo{author}{Arditi, A.}, \bibinfo{author}{Barkana, Y.},
+  \bibinfo{author}{Bozkurt, B.}, \bibinfo{author}{BRAITHWAITE, T.},
+  \bibinfo{author}{Bron, A.}, \bibinfo{author}{Budenz, D.},
+  \bibinfo{author}{Cai, F.}, \bibinfo{author}{Casson, R.},
+  \bibinfo{author}{Chakravarthy, U.}, \bibinfo{author}{Choi, J.},
+  \bibinfo{author}{Cicinelli, M.V.}, \bibinfo{author}{Congdon, N.},
+  \bibinfo{author}{Dana, R.}, \bibinfo{author}{Dandona, R.},
+  \bibinfo{author}{Dandona, L.}, \bibinfo{author}{Das, A.},
+  \bibinfo{author}{Dekaris, I.}, \bibinfo{author}{{Del Monte}, M.},
+  \bibinfo{author}{Deva, J.}, \bibinfo{author}{Dreer, L.},
+  \bibinfo{author}{Ellwein, L.}, \bibinfo{author}{Frazier, M.},
+  \bibinfo{author}{Frick, K.}, \bibinfo{author}{Friedman, D.},
+  \bibinfo{author}{Furtado, J.}, \bibinfo{author}{Gao, H.},
+  \bibinfo{author}{Gazzard, G.}, \bibinfo{author}{George, R.},
+  \bibinfo{author}{Gichuhi, S.}, \bibinfo{author}{Gonzalez, V.},
+  \bibinfo{author}{Hammond, B.}, \bibinfo{author}{Hartnett, M.E.},
+  \bibinfo{author}{He, M.}, \bibinfo{author}{Hejtmancik, J.},
+  \bibinfo{author}{Hirai, F.}, \bibinfo{author}{Huang, J.},
+  \bibinfo{author}{Ingram, A.}, \bibinfo{author}{Javitt, J.},
+  \bibinfo{author}{Jonas, J.}, \bibinfo{author}{Joslin, C.},
+  \bibinfo{author}{Keeffe, J.}, \bibinfo{author}{Kempen, J.},
+  \bibinfo{author}{Khairallah, M.}, \bibinfo{author}{Khanna, R.},
+  \bibinfo{author}{Kim, J.}, \bibinfo{author}{Lambrou, G.},
+  \bibinfo{author}{Lansingh, V.C.}, \bibinfo{author}{Lanzetta, P.},
+  \bibinfo{author}{Leasher, J.}, \bibinfo{author}{Lim, J.},
+  \bibinfo{author}{LIMBURG, H.}, \bibinfo{author}{Mansouri, K.},
+  \bibinfo{author}{Mathew, A.}, \bibinfo{author}{Morse, A.},
+  \bibinfo{author}{Munoz, B.}, \bibinfo{author}{Musch, D.},
+  \bibinfo{author}{Naidoo, K.}, \bibinfo{author}{Nangia, V.},
+  \bibinfo{author}{PALAIOU, M.}, \bibinfo{author}{Parodi, M.B.},
+  \bibinfo{author}{Pena, F.Y.}, \bibinfo{author}{Pesudovs, K.},
+  \bibinfo{author}{Peto, T.}, \bibinfo{author}{Quigley, H.},
+  \bibinfo{author}{Raju, M.}, \bibinfo{author}{Ramulu, P.},
+  \bibinfo{author}{Resnikoff, S.}, \bibinfo{author}{Robin, A.},
+  \bibinfo{author}{Rossetti, L.}, \bibinfo{author}{Saaddine, J.},
+  \bibinfo{author}{SANDAR, M.}, \bibinfo{author}{Serle, J.},
+  \bibinfo{author}{Shen, T.}, \bibinfo{author}{Shetty, R.},
+  \bibinfo{author}{Sieving, P.}, \bibinfo{author}{Silva, J.C.},
+  \bibinfo{author}{Silvester, A.}, \bibinfo{author}{Sitorus, R.S.},
+  \bibinfo{author}{Stambolian, D.}, \bibinfo{author}{Stevens, G.},
+  \bibinfo{author}{Taylor, H.}, \bibinfo{author}{Tejedor, J.},
+  \bibinfo{author}{Tielsch, J.}, \bibinfo{author}{Tsilimbaris, M.},
+  \bibinfo{author}{{van Meurs}, J.}, \bibinfo{author}{Varma, R.},
+  \bibinfo{author}{Virgili, G.}, \bibinfo{author}{Volmink, J.},
+  \bibinfo{author}{Wang, Y.X.}, \bibinfo{author}{Wang, N.L.},
+  \bibinfo{author}{West, S.}, \bibinfo{author}{Wiedemann, P.},
+  \bibinfo{author}{Wong, T.}, \bibinfo{author}{Wormald, R.},
+  \bibinfo{author}{Zheng, Y.}, \bibinfo{year}{2017}.
 \newblock \bibinfo{title}{Magnitude, temporal trends, and projections of the
-  global prevalence of blindness and distance and vision impairment: a
+  global prevalence of blindness and distance and near vision impairment: a
   systematic review and meta-analysis}.
 \newblock \bibinfo{journal}{The Lancet Global Health} \bibinfo{volume}{5},
   \bibinfo{pages}{e888--e897}.
@@ -118,14 +156,6 @@
   mobile devices}, in: \bibinfo{booktitle}{Proceedings of the 13th ACM
   Conference on Embedded Networked Sensor Systems (SenSys)}, pp.
   \bibinfo{pages}{155--168}.
-%Type = Article
-\bibitem[{Chen et~al.(2024)Chen, Xu and Zhang}]{Chen2024}
-\bibinfo{author}{Chen, Z.}, \bibinfo{author}{Xu, J.}, \bibinfo{author}{Zhang,
-  Y.}, \bibinfo{year}{2024}.
-\newblock \bibinfo{title}{Lightweight deep learning for mobile banknote
-  inspection and fitness classification}.
-\newblock \bibinfo{journal}{IEEE Transactions on Instrumentation and
-  Measurement} \bibinfo{volume}{73}, \bibinfo{pages}{1--12}.
 %Type = Misc
 \bibitem[{{CloudSight Inc.}(2013)}]{TapTapSee}
 \bibinfo{author}{{CloudSight Inc.}}, \bibinfo{year}{2013}.
@@ -146,17 +176,10 @@
   \bibinfo{author}{Su, S.}, \bibinfo{author}{Gao, P.}, \bibinfo{author}{Jiang,
   Z.}, \bibinfo{author}{Qiao, Y.}, \bibinfo{author}{Harada, T.},
   \bibinfo{year}{2022}.
-\newblock \bibinfo{title}{You only need 90k parameters to adapt light: A light
+\newblock \bibinfo{title}{You only need 90k parameters to adapt light: a light
   weight transformer for image enhancement and exposure correction}, in:
-  \bibinfo{booktitle}{British Machine Vision Conference (BMVC)}.
-%Type = Article
-\bibitem[{Dhar and Uddin(2024)}]{Dhar2024}
-\bibinfo{author}{Dhar, P.K.}, \bibinfo{author}{Uddin, M.S.},
-  \bibinfo{year}{2024}.
-\newblock \bibinfo{title}{Deep learning based currency recognition system for
-  visually impaired persons: A comprehensive review}.
-\newblock \bibinfo{journal}{Expert Systems with Applications}
-  \bibinfo{volume}{238}, \bibinfo{pages}{121876}.
+  \bibinfo{booktitle}{33rd British Machine Vision Conference 2022, {BMVC} 2022,
+  London, UK, November 21-24, 2022}, \bibinfo{publisher}{{BMVA} Press}.
 %Type = Article
 \bibitem[{Dunai et~al.(2017)Dunai, Pérez, Peris-Fajarnés and
   Lengua}]{Dunai2017}
@@ -166,15 +189,15 @@
 \newblock \bibinfo{title}{Euro banknote recognition system for blind people}.
 \newblock \bibinfo{journal}{Sensors} \bibinfo{volume}{17},
   \bibinfo{pages}{184}.
-%Type = Article
-\bibitem[{Fu et~al.(2023)Fu, Zhang, Zhu, Xiao and Li}]{Fu2023}
+%Type = Inproceedings
+\bibitem[{Fu et~al.(2021)Fu, Zhang, Zhu, Li and Xiao}]{Fu2021}
 \bibinfo{author}{Fu, G.}, \bibinfo{author}{Zhang, Q.}, \bibinfo{author}{Zhu,
-  L.}, \bibinfo{author}{Xiao, C.}, \bibinfo{author}{Li, P.},
-  \bibinfo{year}{2023}.
-\newblock \bibinfo{title}{Multi-task specular highlight removal for real-world
-  images}.
-\newblock \bibinfo{journal}{IEEE Transactions on Image Processing}
-  \bibinfo{volume}{32}, \bibinfo{pages}{5123--5136}.
+  L.}, \bibinfo{author}{Li, P.}, \bibinfo{author}{Xiao, C.},
+  \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{A multi-task network for joint specular highlight
+  detection and removal}, in: \bibinfo{booktitle}{2021 IEEE/CVF Conference on
+  Computer Vision and Pattern Recognition (CVPR)}, pp.
+  \bibinfo{pages}{7748--7757}.
 %Type = Article
 \bibitem[{Gai et~al.(2013)Gai, Yang and Wan}]{Gai2013}
 \bibinfo{author}{Gai, S.}, \bibinfo{author}{Yang, G.}, \bibinfo{author}{Wan,
@@ -192,7 +215,6 @@
   visual impairment using deep learning models}.
 \newblock \bibinfo{journal}{Scientific Reports} \bibinfo{volume}{15},
   \bibinfo{pages}{34288}.
-\newblock \DOIprefix\doi{10.1038/s41598-025-20646-x}.
 %Type = Book
 \bibitem[{Gonzalez and Woods(2008)}]{Gonzalez2008}
 \bibinfo{author}{Gonzalez, R.C.}, \bibinfo{author}{Woods, R.E.},
@@ -201,16 +223,15 @@
 \newblock \bibinfo{edition}{3rd} ed., \bibinfo{publisher}{Prentice Hall},
   \bibinfo{address}{Upper Saddle River, NJ, USA}.
 %Type = Inproceedings
-\bibitem[{Guerreiro et~al.(2019)Guerreiro, Sato, Asakawa, Takagi, Kitani and
+\bibitem[{Guerreiro et~al.(2019)Guerreiro, Sato, Asakawa, Dong, Kitani and
   Asakawa}]{Guerreiro2019}
 \bibinfo{author}{Guerreiro, J.}, \bibinfo{author}{Sato, D.},
-  \bibinfo{author}{Asakawa, S.}, \bibinfo{author}{Takagi, H.},
+  \bibinfo{author}{Asakawa, S.}, \bibinfo{author}{Dong, H.},
   \bibinfo{author}{Kitani, K.M.}, \bibinfo{author}{Asakawa, C.},
   \bibinfo{year}{2019}.
-\newblock \bibinfo{title}{{CaBot}: Designing and evaluating an autonomous
-  navigation robot for blind people}, in: \bibinfo{booktitle}{Proceedings of
-  the 21st International ACM SIGACCESS Conference on Computers and
-  Accessibility (ASSETS)}, pp. \bibinfo{pages}{237--249}.
+\newblock \bibinfo{title}{Cabot: Designing and evaluating an autonomous
+  navigation robot for blind people}, \bibinfo{publisher}{Association for
+  Computing Machinery}. p. \bibinfo{pages}{68–82}.
 %Type = Inproceedings
 \bibitem[{Guo et~al.(2020)Guo, Li, Guo, Loy, Hou, Kwong and Cong}]{Guo2020}
 \bibinfo{author}{Guo, C.}, \bibinfo{author}{Li, C.}, \bibinfo{author}{Guo, J.},
@@ -263,14 +284,15 @@
   \bibinfo{booktitle}{IEEE/CVF International Conference on Computer Vision
   (ICCV)}, pp. \bibinfo{pages}{1314--1324}.
 %Type = Inproceedings
-\bibitem[{Huang et~al.(2023)Huang, Liu, Zhao, Yan and Xiong}]{Huang2023}
+\bibitem[{Huang et~al.(2022)Huang, Liu, Zhao, Yan, Zhang, Huang, Zhou and
+  Xiong}]{Huang2022}
 \bibinfo{author}{Huang, J.}, \bibinfo{author}{Liu, Y.}, \bibinfo{author}{Zhao,
-  F.}, \bibinfo{author}{Yan, K.}, \bibinfo{author}{Xiong, Z.},
-  \bibinfo{year}{2023}.
-\newblock \bibinfo{title}{Deep fourier-based exposure correction with dual
-  illumination estimation}, in: \bibinfo{booktitle}{Proceedings of the IEEE/CVF
-  Conference on Computer Vision and Pattern Recognition (CVPR)}, pp.
-  \bibinfo{pages}{13723--13732}.
+  F.}, \bibinfo{author}{Yan, K.}, \bibinfo{author}{Zhang, J.},
+  \bibinfo{author}{Huang, Y.}, \bibinfo{author}{Zhou, M.},
+  \bibinfo{author}{Xiong, Z.}, \bibinfo{year}{2022}.
+\newblock \bibinfo{title}{Deep fourier-based exposure correction network
+  with spatial-frequency interaction}, in: \bibinfo{booktitle}{Computer Vision
+  -- ECCV 2022}, pp. \bibinfo{pages}{163--180}.
 %Type = Inproceedings
 \bibitem[{Ignatov et~al.(2018)Ignatov, Timofte, Chou, Wang, Wu, Hartley and
   Gool}]{Ignatov2018}
@@ -317,6 +339,15 @@
   object recognizers: Feasibility and challenges}, in:
   \bibinfo{booktitle}{Proceedings of the 2017 CHI Conference on Human Factors
   in Computing Systems}, pp. \bibinfo{pages}{5839--5849}.
+%Type = Inproceedings
+\bibitem[{Kamikubo et~al.(2024)Kamikubo, Kacorri and Asakawa}]{kamikubo2024}
+\bibinfo{author}{Kamikubo, R.}, \bibinfo{author}{Kacorri, H.},
+  \bibinfo{author}{Asakawa, C.}, \bibinfo{year}{2024}.
+\newblock \bibinfo{title}{"we are at the mercy of others' opinion": Supporting
+  blind people in recreational window shopping with ai-infused technology}, in:
+  \bibinfo{booktitle}{Proceedings of the 21st International Web for All
+  Conference}, \bibinfo{publisher}{Association for Computing Machinery}. p.
+  \bibinfo{pages}{45–58}.
 %Type = Article
 \bibitem[{Lakens(2013)}]{Lakens2013}
 \bibinfo{author}{Lakens, D.}, \bibinfo{year}{2013}.
@@ -344,22 +375,22 @@
   sensors}.
 \newblock \bibinfo{journal}{Sensors} \bibinfo{volume}{17}.
 %Type = Article
-\bibitem[{Li et~al.(2022)Li, Guo and Loy}]{Li2021}
+\bibitem[{Li et~al.(2022a)Li, Guo, Han, Jiang, Cheng, Gu and Loy}]{Li2022}
+\bibinfo{author}{Li, C.}, \bibinfo{author}{Guo, C.}, \bibinfo{author}{Han, L.},
+  \bibinfo{author}{Jiang, J.}, \bibinfo{author}{Cheng, M.M.},
+  \bibinfo{author}{Gu, J.}, \bibinfo{author}{Loy, C.C.}, \bibinfo{year}{2022}a.
+\newblock \bibinfo{title}{Low-light image and video enhancement using deep
+  learning: A survey}.
+\newblock \bibinfo{journal}{IEEE Transactions on Pattern Analysis and Machine
+  Intelligence} \bibinfo{volume}{44}, \bibinfo{pages}{9396--9416}.
+%Type = Article
+\bibitem[{Li et~al.(2022b)Li, Guo and Loy}]{Li2021}
 \bibinfo{author}{Li, C.}, \bibinfo{author}{Guo, C.}, \bibinfo{author}{Loy,
-  C.C.}, \bibinfo{year}{2022}.
+  C.C.}, \bibinfo{year}{2022}b.
 \newblock \bibinfo{title}{Learning to enhance low-light image via
   zero-reference deep curve estimation}.
 \newblock \bibinfo{journal}{IEEE Transactions on Pattern Analysis and Machine
   Intelligence} \bibinfo{volume}{44}, \bibinfo{pages}{4225--4238}.
-%Type = Article
-\bibitem[{Li et~al.(2023)Li, Guo, Han, Jiang, Cheng, Gu and Loy}]{Li2023}
-\bibinfo{author}{Li, C.}, \bibinfo{author}{Guo, C.L.}, \bibinfo{author}{Han,
-  L.}, \bibinfo{author}{Jiang, J.}, \bibinfo{author}{Cheng, M.M.},
-  \bibinfo{author}{Gu, J.}, \bibinfo{author}{Loy, C.C.}, \bibinfo{year}{2023}.
-\newblock \bibinfo{title}{Low-light image and video enhancement using deep
-  learning: A survey}.
-\newblock \bibinfo{journal}{IEEE Transactions on Pattern Analysis and Machine
-  Intelligence} \bibinfo{volume}{45}, \bibinfo{pages}{10291--10312}.
 %Type = Inproceedings
 \bibitem[{Li et~al.(2020)Li, Padmanabhan, Zhao, Wang, Xu and
   Netravali}]{Li2020}
@@ -382,7 +413,9 @@
 \bibinfo{author}{Miller, R.B.}, \bibinfo{year}{1968}.
 \newblock \bibinfo{title}{Response time in man-computer conversational
   transactions}, in: \bibinfo{booktitle}{Proceedings of the December 9-11,
-  1968, Fall Joint Computer Conference, Part I}, pp. \bibinfo{pages}{267--277}.
+  1968, Fall Joint Computer Conference, Part I},
+  \bibinfo{publisher}{Association for Computing Machinery}. p.
+  \bibinfo{pages}{267–277}.
 %Type = Inproceedings
 \bibitem[{Morris et~al.(2018)Morris, Johnson, Bennett and Cutrell}]{Morris2018}
 \bibinfo{author}{Morris, M.R.}, \bibinfo{author}{Johnson, J.},
@@ -414,6 +447,12 @@
 \newblock \bibinfo{title}{Diatom autofocusing in brightfield microscopy: A
   comparative study}, pp. \bibinfo{pages}{314--317}.
 %Type = Article
+\bibitem[{Park and Park(2023)}]{park2023}
+\bibinfo{author}{Park, C.}, \bibinfo{author}{Park, K.R.}, \bibinfo{year}{2023}.
+\newblock \bibinfo{title}{Mbdm: Multinational banknote detecting model for
+  assisting visually impaired people}.
+\newblock \bibinfo{journal}{Mathematics} \bibinfo{volume}{11}.
+%Type = Article
 \bibitem[{Pham et~al.(2017)Pham, Lee and Park}]{Pham2017}
 \bibinfo{author}{Pham, T.D.}, \bibinfo{author}{Lee, D.E.},
   \bibinfo{author}{Park, K.R.}, \bibinfo{year}{2017}.
@@ -437,14 +476,6 @@
   intensity in perception, crts, film, and video}.
 \newblock \bibinfo{journal}{SMPTE Journal} \bibinfo{volume}{102},
   \bibinfo{pages}{1099--1108}.
-%Type = Article
-\bibitem[{Rao et~al.(2023)Rao, Srinivas and Rao}]{Rao2023}
-\bibinfo{author}{Rao, P.V.}, \bibinfo{author}{Srinivas, K.},
-  \bibinfo{author}{Rao, T.V.M.}, \bibinfo{year}{2023}.
-\newblock \bibinfo{title}{Assistive computer vision for the blind and visually
-  impaired: A survey of edge-{AI} architectures and usability challenges}.
-\newblock \bibinfo{journal}{IEEE Access} \bibinfo{volume}{11},
-  \bibinfo{pages}{89210--89231}.
 %Type = Inproceedings
 \bibitem[{Redmon et~al.(2016)Redmon, Divvala, Girshick and
   Farhadi}]{Redmon2016}
@@ -461,6 +492,15 @@
 \newblock \bibinfo{edition}{3rd} ed., \bibinfo{publisher}{Artech House},
   \bibinfo{address}{Boston, MA, USA}.
 %Type = Inproceedings
+\bibitem[{Saini et~al.(2022)Saini, Goyal, Pokhrel, Singh and Kumar}]{saini2022}
+\bibinfo{author}{Saini, P.}, \bibinfo{author}{Goyal, A.},
+  \bibinfo{author}{Pokhrel, B.}, \bibinfo{author}{Singh, J.},
+  \bibinfo{author}{Kumar, N.}, \bibinfo{year}{2022}.
+\newblock \bibinfo{title}{Indian currency recognition:a lightweight transfer
+  learning approach for visually impaired}, in: \bibinfo{booktitle}{2022
+  Seventh International Conference on Parallel, Distributed and Grid Computing
+  (PDGC)}, pp. \bibinfo{pages}{248--252}.
+%Type = Inproceedings
 \bibitem[{Sandler et~al.(2018)Sandler, Howard, Zhu, Zhmoginov and
   Chen}]{Sandler2018}
 \bibinfo{author}{Sandler, M.}, \bibinfo{author}{Howard, A.},
@@ -469,21 +509,31 @@
 \newblock \bibinfo{title}{{MobileNetV2}: Inverted residuals and linear
   bottlenecks}, in: \bibinfo{booktitle}{IEEE/CVF Conference on Computer Vision
   and Pattern Recognition (CVPR)}, pp. \bibinfo{pages}{4510--4520}.
+%Type = Article
+\bibitem[{Sato et~al.(2019)Sato, Oh, Guerreiro, Ahmetovic, Naito, Takagi,
+  Kitani and Asakawa}]{Sato2019}
+\bibinfo{author}{Sato, D.}, \bibinfo{author}{Oh, U.},
+  \bibinfo{author}{Guerreiro, J.}, \bibinfo{author}{Ahmetovic, D.},
+  \bibinfo{author}{Naito, K.}, \bibinfo{author}{Takagi, H.},
+  \bibinfo{author}{Kitani, K.M.}, \bibinfo{author}{Asakawa, C.},
+  \bibinfo{year}{2019}.
+\newblock \bibinfo{title}{Navcog3 in the wild: Large-scale blind indoor
+  navigation assistant with semantic features}.
+\newblock \bibinfo{journal}{ACM Trans. Access. Comput.} \bibinfo{volume}{12}.
 %Type = Inproceedings
 \bibitem[{Tan and Le(2021)}]{Tan2021}
 \bibinfo{author}{Tan, M.}, \bibinfo{author}{Le, Q.V.}, \bibinfo{year}{2021}.
 \newblock \bibinfo{title}{{EfficientNetV2}: Smaller models and faster
   training}, in: \bibinfo{booktitle}{International Conference on Machine
   Learning (ICML)}, pp. \bibinfo{pages}{10096--10106}.
-%Type = Article
-\bibitem[{V{\'a}zquez et~al.(2024)V{\'a}zquez, Azenkot and
-  Asakawa}]{Vazquez2024}
-\bibinfo{author}{V{\'a}zquez, M.}, \bibinfo{author}{Azenkot, S.},
-  \bibinfo{author}{Asakawa, C.}, \bibinfo{year}{2024}.
-\newblock \bibinfo{title}{Human-centered design of interactive assistive vision
-  agents in daily retail environments}.
-\newblock \bibinfo{journal}{ACM Transactions on Computer-Human Interaction}
-  \bibinfo{volume}{31}, \bibinfo{pages}{1--32}.
+%Type = Inproceedings
+\bibitem[{Tasnim et~al.(2021)Tasnim, Pritha, Das and Dey}]{tasnim2021}
+\bibinfo{author}{Tasnim, R.}, \bibinfo{author}{Pritha, S.T.},
+  \bibinfo{author}{Das, A.}, \bibinfo{author}{Dey, A.}, \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{Bangladeshi banknote recognition in real-time using
+  convolutional neural network for visually impaired people}, in:
+  \bibinfo{booktitle}{2021 2nd International Conference on Robotics, Electrical
+  and Signal Processing Techniques (ICREST)}, pp. \bibinfo{pages}{388--393}.
 %Type = Inproceedings
 \bibitem[{Wei et~al.(2018)Wei, Wang, Yang and Liu}]{Wei2018}
 \bibinfo{author}{Wei, C.}, \bibinfo{author}{Wang, W.}, \bibinfo{author}{Yang,
@@ -498,22 +548,6 @@
 \newblock \bibinfo{type}{Technical Report}. World Health Organization.
   \bibinfo{address}{Geneva, Switzerland}.
 %Type = Inproceedings
-\bibitem[{Wu et~al.(2024)Wu, Liu, Deng and Zhang}]{Wu2024}
-\bibinfo{author}{Wu, Z.}, \bibinfo{author}{Liu, J.}, \bibinfo{author}{Deng,
-  X.}, \bibinfo{author}{Zhang, X.}, \bibinfo{year}{2024}.
-\newblock \bibinfo{title}{Physics-guided specular highlight removal on
-  high-reflectance planar surfaces}, in: \bibinfo{booktitle}{Proceedings of the
-  IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, pp.
-  \bibinfo{pages}{26814--26823}.
-%Type = Article
-\bibitem[{Yuan et~al.(2023)Yuan, Dong and Guo}]{Yuan2023}
-\bibinfo{author}{Yuan, K.}, \bibinfo{author}{Dong, W.}, \bibinfo{author}{Guo,
-  F.}, \bibinfo{year}{2023}.
-\newblock \bibinfo{title}{A real-time edge-computing banknote defect detection
-  method based on lightweight convolutional neural network}.
-\newblock \bibinfo{journal}{Measurement} \bibinfo{volume}{216},
-  \bibinfo{pages}{112932}.
-%Type = Inproceedings
 \bibitem[{Zhang et~al.(2017)Zhang, Ananthanarayanan, Bodik, Philipose, Bahl and
   Freedman}]{Zhang2017}
 \bibinfo{author}{Zhang, H.}, \bibinfo{author}{Ananthanarayanan, G.},
@@ -524,14 +558,6 @@
   delay-tolerance}, in: \bibinfo{booktitle}{Proceedings of the 14th USENIX
   Conference on Networked Systems Design and Implementation (NSDI)}, pp.
   \bibinfo{pages}{377--392}.
-%Type = Article
-\bibitem[{Zhang et~al.(2024)Zhang, Zhao, Chen and Xiong}]{Zhang2024}
-\bibinfo{author}{Zhang, Y.}, \bibinfo{author}{Zhao, F.}, \bibinfo{author}{Chen,
-  J.}, \bibinfo{author}{Xiong, Z.}, \bibinfo{year}{2024}.
-\newblock \bibinfo{title}{Learning symmetrically boosted {Retinex}
-  representation for exposure correction and low-light enhancement}.
-\newblock \bibinfo{journal}{IEEE Transactions on Pattern Analysis and Machine
-  Intelligence} \bibinfo{volume}{46}, \bibinfo{pages}{5678--5694}.
 %Type = Inbook
 \bibitem[{Zuiderveld(1994)}]{Zuiderveld1994}
 \bibinfo{author}{Zuiderveld, K.}, \bibinfo{year}{1994}.
