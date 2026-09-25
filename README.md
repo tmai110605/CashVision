@@ -69,12 +69,12 @@ Incoming Camera Stream (Android CameraX @ 20.5 FPS)
 └─────────────────────────────────────────────────────────────┘
          │ (Consensus verified -> Latch confirmation - R8)
          ▼
-┌─────────────────────────────────────────────────────────────┐
-│ 4. EXPLANATION FACILITY (TRANSLATIVE MULTIMODAL INTERFACE)   │
-│    • Natural Speech Synthesis (Android TTS: English & VN)   │
+┌───────────────────────────────────────────────────────────────┐
+│ 4. EXPLANATION FACILITY (TRANSLATIVE MULTIMODAL INTERFACE)    │
+│    • Natural Speech Synthesis (Android TTS: English & VN)    │
 │    • Structured Haptic Feedback (Single: Intact / Dual: Torn)│
 │    • Dynamic Bounding Box Overlay & Live Rules Monitor (R1-R8)│
-└─────────────────────────────────────────────────────────────┘
+└───────────────────────────────────────────────────────────────┘
 ```
 
 ---
