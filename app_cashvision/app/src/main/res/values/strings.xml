@@ -1,8 +1,27 @@
 <resources>
-    <string name="app_name">CashVision Benchmark</string>
-    <string name="mode_cascade">Cascade</string>
-    <string name="mode_b0">B0 (Full)</string>
-    <string name="mode_b1">B1 (Single)</string>
-    <string name="start_bench">▶ START BENCHMARK (30s)</string>
-    <string name="stop_bench">⏳ STOP BENCHMARK (RUNNING)</string>
+    <string name="app_name">CashVision</string>
+    <string name="app_subtitle">Autonomous Banknote Inspector</string>
+    
+    <!-- FSM State Badges -->
+    <string name="state_searching">SEARCHING FOR BANKNOTE</string>
+    <string name="state_verifying">VERIFYING OPTICAL STABILITY</string>
+    <string name="state_confirmed">VERIFIED &amp; CONFIRMED</string>
+
+    <!-- Structural Integrity Status -->
+    <string name="defect_intact">✔ BANKNOTE INTACT</string>
+    <string name="defect_torn">⚠️ TORN DEFECT DETECTED</string>
+
+    <!-- Assistive Lighting Guidance -->
+    <string name="lighting_good">Optimal Lighting • Scanning Active</string>
+    <string name="lighting_over">Warning: Specular Glare • Tilt Slightly</string>
+    <string name="lighting_under">Warning: Low Light • Turn on Torch</string>
+
+    <!-- Interactive Actions -->
+    <string name="action_repeat">🔊 Repeat Result</string>
+    <string name="action_reset">🔄 Scan New Note</string>
+    <string name="action_telemetry">Knowledge Base &amp; Telemetry</string>
+
+    <!-- Benchmark Actions -->
+    <string name="start_bench">▶ START TELEMETRY BENCHMARK (30S)</string>
+    <string name="stop_bench">⏳ STOP BENCHMARK</string>
 </resources>

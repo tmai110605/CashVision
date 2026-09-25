@@ -22,7 +22,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-*.gitignore
+
 # Large Datasets
 train/
 valid/
@@ -32,20 +32,8 @@ test/
 *.pt
 *.pth
 *.onnx.data
-
-# Training runs & checkpoint caches
-runs/
-resultsv8n/
-resultsv11n/
-
-# IDE & OS files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db
+checkpointyolov8n/
+final_config_afifi/
 
 # Android build outputs & local configs
 app_cashvision/.gradle/
@@ -55,30 +43,46 @@ app_cashvision/.idea/
 app_cashvision/**/*.iml
 .cxx/
 
-# LaTeX auxiliary files (keep final .pdf and source .tex, .bib, .bst, .cls)
-CV_JRTIP/*.aux
-CV_JRTIP/*.log
-CV_JRTIP/*.out
-CV_JRTIP/*.synctex.gz
-CV_JRTIP/*.blg
-CV_JRTIP/template_out.*
-CV_JRTIP/temp.pdf
-CVS_ESWA/*.aux
-CVS_ESWA/*.log
-CVS_ESWA/*.out
-CVS_ESWA/*.synctex.gz
-CVS_ESWA/*.blg
-CVS_ESWA/*.fdb_latexmk
-CVS_ESWA/*.fls
-CVS_ESWA/*.spl
-
+# Manuscript / LaTeX Papers
+CVS_ESWA/
 CV_JRTIP/
 
+# Video Continuous Streaming Benchmark
+video_test/
+sim_engine/
+run_video_benchmark.py
+export_video_tables.py
 
+# Mobile Telemetry & Standalone Export
+models_mobile/
 logs_phone_real/
-
 logs_sim/
+audit_phone_logs.py
+parse_phone_logs.py
+export_mobile_onnx.py
 
-checkpointyolov8n/
+# Simulation, Quality-Gate & Sweeps
+quality_gate.py
+resultv8n/
+resultv11n/
+run_benchmark.py
+run_rule_sensitivity_sweeps.py
+export_tables.py
+plot_benchmark.py
+figures/
 
-final_config_afifi/
+# Non-MQTone Deep Enhancement Baselines (C2)
+IAT_enhance/
+
+# Protocols & Scratch Work
+protocols/
+scratch/
+
+# IDE & OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

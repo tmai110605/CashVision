@@ -1,149 +1,407 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout 
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_dark">
 
-    <!-- 1. Benchmark Mode Selector -->
-    <RadioGroup
-        android:id="@+id/rgMode"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@color/card_dark"
-        android:padding="6dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <RadioButton
-            android:id="@+id/rbCascade"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:checked="true"
-            android:text="Cascade"
-            android:textColor="@color/white"
-            android:textSize="13sp" />
-
-        <RadioButton
-            android:id="@+id/rbB0"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="B0 (Full)"
-            android:textColor="@color/white"
-            android:textSize="13sp" />
-
-        <RadioButton
-            android:id="@+id/rbB1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="B1 (Single)"
-            android:textColor="@color/white"
-            android:textSize="13sp" />
-    </RadioGroup>
-
-    <!-- 2. Camera Preview -->
+    <!-- 1. Full-Screen CameraX Preview -->
     <androidx.camera.view.PreviewView
         android:id="@+id/previewView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/rgMode"
-        app:layout_constraintBottom_toTopOf="@id/hudCard"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Cascade Status Badge (SEARCHING, READY, CONFIRMED) -->
-    <TextView
-        android:id="@+id/tvStateBadge"
+    <!-- 2. Interactive Real-Time Bounding Box & Viewfinder HUD Overlay -->
+    <com.cashvision.app.OverlayView
+        android:id="@+id/overlayView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="@id/previewView"
+        app:layout_constraintBottom_toBottomOf="@id/previewView"
+        app:layout_constraintStart_toStartOf="@id/previewView"
+        app:layout_constraintEnd_toEndOf="@id/previewView" />
+
+    <!-- 3. Top Header Bar -->
+    <LinearLayout
+        android:id="@+id/headerBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="36dp"
+        android:paddingBottom="12dp"
+        android:background="#990B0F17"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CashVision"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.02" />
+
+            <TextView
+                android:id="@+id/tvSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_subtitle"
+                android:textColor="@color/accent_cyan"
+                android:textSize="11sp"
+                android:letterSpacing="0.05" />
+        </LinearLayout>
+
+        <!-- Flashlight / Torch Toggle -->
+        <ImageButton
+            android:id="@+id/btnTorch"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_icon_button"
+            android:contentDescription="Torch Toggle"
+            android:src="@android:drawable/ic_menu_camera"
+            app:tint="@color/white" />
+
+        <!-- Speech Audio Mute Toggle -->
+        <ImageButton
+            android:id="@+id/btnMute"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_icon_button"
+            android:contentDescription="Speech Toggle"
+            android:src="@android:drawable/ic_lock_silent_mode_off"
+            app:tint="@color/accent_cyan" />
+
+        <!-- Knowledge Base & Diagnostics Toggle -->
+        <ImageButton
+            android:id="@+id/btnTelemetryToggle"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_icon_button"
+            android:contentDescription="Diagnostics Toggle"
+            android:src="@android:drawable/ic_menu_info_details"
+            app:tint="@color/accent_green" />
+    </LinearLayout>
+
+    <!-- 4. Floating FSM State & Optical Guidance Banner -->
+    <LinearLayout
+        android:id="@+id/statusContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:background="#CC000000"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="6dp"
-        android:text="STATE: SEARCHING"
-        android:textColor="@color/accent_green"
-        android:textSize="13sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/rgMode"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/headerBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- 3. Real-time Telemetry HUD Table -->
+        <!-- Primary FSM State Badge -->
+        <TextView
+            android:id="@+id/tvStateBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_badge_state"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:text="🔍 SEARCHING FOR BANKNOTE"
+            android:textColor="@color/accent_cyan"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:elevation="4dp" />
+
+        <!-- Optical Sensory Guidance Pill -->
+        <TextView
+            android:id="@+id/tvOpticalGuidance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="#B30B0F17"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:text="@string/lighting_good"
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- 5. Bottom Hero Banknote Verification Panel -->
     <LinearLayout
-        android:id="@+id/hudCard"
+        android:id="@+id/heroCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_glass_card"
+        android:padding="20dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toTopOf="@id/telemetryCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="VERIFICATION RESULT"
+                android:textColor="@color/text_muted"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.08" />
+
+            <!-- Defect Status Pill (Intact / Torn) -->
+            <TextView
+                android:id="@+id/tvDefectStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_pill_intact"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp"
+                android:text="@string/defect_intact"
+                android:textColor="@color/accent_green"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Prominent Hero Denomination Display -->
+        <TextView
+            android:id="@+id/tvHeroDenomination"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="--- ₫"
+            android:textColor="@color/white"
+            android:textSize="38sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.02" />
+
+        <TextView
+            android:id="@+id/tvVerificationNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Present banknote before camera • Automated expert verification"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+
+        <!-- Multimodal Accessibility Actions -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/btnRepeatTts"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/bg_btn_action"
+                android:text="@string/action_repeat"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnScanNew"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_btn_secondary"
+                android:text="@string/action_reset"
+                android:textColor="@color/accent_cyan"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 6. Diagnostic Telemetry & Knowledge Base Rules Panel (Collapsible) -->
+    <LinearLayout
+        android:id="@+id/telemetryCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@color/card_dark"
-        android:padding="14dp"
-        app:layout_constraintBottom_toTopOf="@id/btnRecord"
+        android:padding="16dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="📊 TELEMETRY HUD (OFFLINE ON-DEVICE)"
-            android:textColor="@color/text_muted"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.05" />
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="4dp">
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="📊 KNOWLEDGE BASE &amp; TELEMETRY (R1–R8)"
+                android:textColor="@color/accent_cyan"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05" />
 
             <TextView
                 android:id="@+id/tvFps"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Speed: 0.0 FPS"
-                android:textColor="@color/white"
-                android:textSize="13sp" />
-
-            <TextView
-                android:id="@+id/tvCalledFull"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Full Calls: 0 / 0 (0.0%)"
-                android:textColor="@color/white"
-                android:textSize="13sp"
-                android:gravity="end" />
+                android:text="20.5 FPS"
+                android:textColor="@color/accent_green"
+                android:textStyle="bold"
+                android:textSize="12sp" />
         </LinearLayout>
 
+        <!-- Rules R1 - R8 Live Status Chips -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/chipR1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_rule_chip"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:text="R1 Texture: OK"
+                    android:textColor="@color/text_primary"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/chipR2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_rule_chip"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:text="R2 Light: 85%"
+                    android:textColor="@color/text_primary"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/chipR3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_rule_chip"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:text="R3 Dwell: 3/3"
+                    android:textColor="@color/text_primary"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/chipR4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_rule_chip"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:text="R4 Burst: 1/2"
+                    android:textColor="@color/text_primary"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/chipR6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_rule_chip"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:text="R6 Consensus: Pass"
+                    android:textColor="@color/text_primary"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/chipR7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_rule_chip"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:text="R7 Defect: Intact"
+                    android:textColor="@color/text_primary"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/chipR8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_rule_chip"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:text="R8 Latch: Active"
+                    android:textColor="@color/text_primary"
+                    android:textSize="10sp" />
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <!-- Real-time Latencies & Energy Measurements -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="3dp">
+            android:layout_marginTop="8dp">
 
             <TextView
                 android:id="@+id/tvLatencyBreakdown"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:text="Light: 0ms | MQ: 0ms | YOLO: 0ms"
+                android:text="Light: 1.7ms | MQ: 23.2ms | YOLO: 180ms"
                 android:textColor="@color/accent_gold"
-                android:textSize="12sp" />
+                android:textSize="11sp" />
 
             <TextView
                 android:id="@+id/tvTotalLatency"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Total: 0ms"
+                android:text="Amort: 6.5 ms"
                 android:textColor="@color/white"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:gravity="end" />
         </LinearLayout>
 
@@ -158,46 +416,33 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Pin: 0 mA | 0 mW"
+                android:text="Pin: 620 mA | 2.79 W"
                 android:textColor="@color/white"
-                android:textSize="13sp" />
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/tvEnergy"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Energy: 0.00 J"
-                android:textColor="@color/accent_gold"
+                android:text="Energy: 85.3 J"
+                android:textColor="@color/accent_green"
                 android:textStyle="bold"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:gravity="end" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvResult"
+        <!-- 30-Second Standardized Benchmark Button -->
+        <Button
+            android:id="@+id/btnRecord"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="Result: Scanning..."
-            android:textColor="@color/accent_green"
-            android:textSize="15sp"
+            android:layout_height="44dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_btn_action"
+            android:text="@string/start_bench"
+            android:textColor="@color/white"
+            android:textSize="12sp"
             android:textStyle="bold" />
     </LinearLayout>
-
-    <!-- 4. 30s Benchmark Trigger Button -->
-    <Button
-        android:id="@+id/btnRecord"
-        android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:layout_margin="12dp"
-        android:text="@string/start_bench"
-        android:textColor="@color/white"
-        android:textSize="15sp"
-        android:textStyle="bold"
-        android:backgroundTint="@color/accent_blue"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,204 +1,240 @@
-# Seeing Through the Glare: A Real-Time, Energy-Efficient Mobile Banknote Inspector for Visually Impaired Assistance
-Abstract - Autonomous banknote verification and physical defect inspection are vital for the financial independence of visually impaired individuals, yet reflective polymer substrates and adverse ambient lighting routinely defeat mobile vision pipelines. Existing assistive systems face a critical operational dilemma: continuous uniform-rate deep inference triggers rapid battery depletion and severe thermal throttling on mobile SoCs, while timer-based single-shot capture collapses to an 8.3% exact-match accuracy under continuous handheld video streams (52.8% in live on-device trials), exposing users to dangerous financial misclassifications. We present CashVision, an energy-aware, illumination-robust on-device mobile expert system for joint denomination recognition and tear defect localization. Supported by a standardized multi-condition benchmark (1,812 images, 36 continuous video streams across six adverse environments), CashVision incorporates MQTone—an ultra-lightweight (19,686 parameters, <0.1 MB) dual-branch tone-mapping network that adaptively suppresses specular glare and restores obscured contrast, outperforming existing learning-based enhancers (e.g., +13.3% over Zero-DCE++) under severe overexposure. To ensure safe, low-latency guidance, an adaptive cascade pipeline governed by an ultra-lightweight dual-tier Quality-Gate (1.7 ms on mobile CPU) and a 3-state temporal consensus finite state machine triggers deep dual-task YOLOv8n inference only upon confirmed optical stability. Evaluated across 36 continuous video streams (9,060 frames) and 36 live on-device smartphone field trials on a commercial Samsung Galaxy A54 (108 physical runs total, over 47,000 processed frames across paradigms), CashVision achieves a Pareto-optimal 83.3% on-device verification accuracy with zero monetary valuation errors (safely deferring sub-optimal presentations rather than risking misclassifications), boosting throughput to 20.5 FPS (6.32× speedup), slashing amortized frame latency by 97.9% (6.5 ms vs. 308.1 ms), and reducing active power draw by 36.5% (2.79 W vs. 4.39 W) without thermal throttling. In a human-in-the-loop user study with 16 blindfolded participants across 288 interactive trials under simulated visual impairment, CashVision elevated System Usability Scale scores to 78.2 (Grade B / "Good"), reduced NASA-TLX cognitive workload by 42.3% vs. uniform-rate processing (53.0% vs. single-shot capture), and suppressed the assistive financial hazard rate to 1.0%. CashVision provides a dependable, safe, and thermally sustainable mobile expert system for autonomous assistive cash handling.
+# CashVision: An On-Device Assistive Mobile Expert System for Autonomous Polymer Banknote Verification & Physical Defect Screening
 
-![Architectur](graphic.png)
+<p align="center">
+  <img src="graphic.png" alt="CashVision System Architecture Overview" width="90%">
+</p>
 
-A real-time, illumination-robust, and energy-efficient mobile computer vision system for joint denomination recognition and tear defect localization of Vietnamese polymer banknotes on handheld devices to assist visually impaired individuals.
+**CashVision** is a real-time, **100% offline** assistive mobile computer vision expert system designed to empower visually impaired and low-vision individuals to autonomously, safely, and independently verify Vietnamese polymer banknotes (VND) and inspect physical substrate damage (border tears and fractures).
 
----
-
-## 📌 Table of Contents
-1. [Project Overview](#1-project-overview)
-2. [Hardware Benchmark Setup](#2-hardware-benchmark-setup)
-3. [Environment Setup](#3-environment-setup)
-4. [Running Experiment C1 (Problem Characterization)](#4-running-experiment-c1-problem-characterization)
-5. [Running Experiment C2 (MQTone & Enhancement Comparison)](#5-running-experiment-c2-mqtone--enhancement-comparison)
-6. [Running Experiment Video (Continuous Streaming Benchmark)](#6-running-experiment-video-continuous-streaming-benchmark)
-7. [Exporting ONNX Models & Android Application](#7-exporting-onnx-models--android-application)
+CashVision comprehensively resolves severe specular glare and photometric degradation caused by non-porous polymer substrates (BOPP) under unconstrained ambient lighting, while strictly adhering to mobile SoC thermal ceilings ($<3.0$\,W) and interactive assistive response latency guidelines ($T_{\text{turnaround}} \le 1.5$\,s).
 
 ---
 
-## 1. Project Overview
+## Table of Contents
+1. [Problem Formulation & Core Solution](#1-problem-formulation--core-solution)
+2. [Expert System Architecture (Four Pillars)](#2-expert-system-architecture-four-pillars)
+3. [Declarative Knowledge Base & Formal Rule Set (R1–R8)](#3-declarative-knowledge-base--formal-rule-set-r1r8)
+4. [Integrated Deep Vision Models (100% Offline)](#4-integrated-deep-vision-models-100-offline)
+5. [Android Application Features & Assistive UX](#5-android-application-features--assistive-ux)
+6. [Application Codebase Structure](#6-application-codebase-structure)
+7. [Installation & Deployment Guide](#7-installation--deployment-guide)
 
-Polymer banknotes (BOPP substrate) feature smooth, non-porous surfaces and transparent diffractive optical windows that reflect intense specular flash glare, blinding camera sensors and obliterating denomination numerals and tactile security features. In everyday circulation, banknotes also suffer mechanical tear fractures along fold lines.
+---
 
-**CashVision** resolves these challenges through an integrated, energy-aware mobile architecture:
-* **MQTone (Micro-scale Quality Tone-mapping Network):** An ultra-lightweight dual-branch tone-mapping neural module ($19{,}686$ parameters, $<0.1$\,MB footprint) that selectively suppresses localized specular glare and recovers obscured contrast in $1.25$\,ms (GPU) / $23.2$\,ms (mobile CPU).
-![MQTone](mqtone.png)
-* **Quality-Gate:** A 2-tier optical monitoring module (Tier-1 Spatial Texture Filter $\sigma_{\text{gray}} > 15.0$ in $<0.05$\,ms + Tier-2 photometric CNN classifier in $1.70$\,ms) that filters incoming video frames before triggering heavy inference.
-![Quality-Gate](quality.png)
-* **Dual-Task Detector (YOLOv8n):** Simultaneously predicts 6 banknote denominations ($10\text{k}, 20\text{k}, 50\text{k}, 100\text{k}, 200\text{k}, 500\text{k}$ VND) and localizes physical tear defect bounding boxes.
-* **Temporal Consensus FSM:** A 3-state finite state machine that accumulates candidate detections across consecutive frames ($K_{\text{con}} = 3$), eliminating single-frame transient errors and saving battery power.
-![FSM](joint.png)
+## 1. Problem Formulation & Core Solution
+
+### Real-World Assistive Challenges
+* **Polymer Substrate Reflection (BOPP)**: Polymer banknotes feature ultra-smooth, specular surfaces and transparent diffractive optical windows. Under direct sunlight or indoor luminaires, intense localized glare blows out camera sensors, saturating pixels and obliterating typographic numerals and intaglio engravings.
+* **Unconstrained Ambient Environments**: Assistive users interact under adverse lighting regimes—such as high-intensity outdoor sunlight, strong directional window backlighting, or severe lamp glare—frequently compounded by natural handheld motor tremor.
+* **Severe Financial Valuation Hazards**: Polymer currency prone to fold fatigue often develops mechanical tears along borders that risk transaction rejection at points of sale. More critically, misclassifying denominations (e.g., mistaking 20,000 VND for 500,000 VND) inflicts irreversible monetary loss.
+* **Mobile Thermal and Energy Bottlenecks**: Continuously running heavy deep convolutional detectors uniformly across every incoming video frame induces rapid SoC thermal throttling ($>42.5^\circ\text{C}$), drops throughput below 3.5 FPS, and depletes battery autonomy.
+
+### CashVision's Breakthrough Solution
+CashVision decouples lightweight video buffer monitoring from compute-intensive neural inference via a **Rule-Governed Adaptive Cascade Expert System**:
+* **Zero-Inference Sensory Screening**: Discards featureless frames (pockets, blank tables) in $<0.05$\,ms and screens photometric readiness in $1.70$\,ms before triggering deep inference.
+* **Learnable Tone-Mapping Enhancement (MQTone)**: Adaptively suppresses localized specular glare highlights and recovers obscured contrast prior to detection.
+* **Temporal Consensus Multi-Frame Arbitration**: Enforces evidence accumulation across candidate verification bursts, eliminating single-frame fold crease false alarms and motion-blur hazards.
+* **Post-Confirmation Transactional Latching**: Once verified, the system suppresses further deep neural executions, slashing amortized frame latency by $97.9\%$ and saving over $34.6\%$ energy.
+
+---
+
+## 2. Expert System Architecture (Four Pillars)
+
+CashVision structurally decomposes into the four classical pillars of an expert system:
+
 ```
-Camera Stream (30 FPS)
+Incoming Camera Stream (Android CameraX @ 20.5 FPS)
          │
          ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Tier-1 Spatial Texture Filter (σ_gray > 15.0)  [< 0.05 ms]  │──► Blank / Hand Occluded (Drop)
+│ 1. KNOWLEDGE BASE & SENSORY SCREENING                       │
+│    • R1: Spatial Texture Gating (σ_gray > 15.0)    [<0.05ms]│──► Featureless / Occluded (Suppress)
+│    • R2: Photometric Readiness (q ≥ 0.60)           [1.70ms]│──► Specular Glare / Low-Light (Defer)
 └─────────────────────────────────────────────────────────────┘
-         │ (Pass)
+         │ (Accumulate K_opt = 3 consecutive stable frames - R3)
          ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Tier-2 Quality-Gate Light Classifier           [1.70 ms]    │──► Poor Lighting / Motion Blur (Defer)
+│ 2. TEMPORAL CONSENSUS INFERENCE ENGINE (3-STATE FSM)        │
+│    SEARCHING ──────► READY_TO_VERIFY ──────► CONFIRMED      │
 └─────────────────────────────────────────────────────────────┘
-         │ (Optical readiness q ≥ 0.60)
+         │ (Trigger bounded verification burst M_verify ≤ 2 - R4)
          ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Temporal Consensus FSM                                      │
-│ (SEARCHING ──► READY_TO_VERIFY ──► CONFIRMED)               │
+│ 3. META-LEVEL CONTROL & NEURAL RESTORATION                  │
+│    • MQTone: Glare suppression & contrast recovery [23.2ms] │
+│    • YOLOv8n: Joint denomination & tear detection   [180ms] │
+│    • R5: Post-NMS Candidate Filtering (conf ≥ 0.25)         │
+│    • R6: Multi-frame confidence consensus voting (c*)       │
+│    • R7: Two-frame defect persistence filter                │
 └─────────────────────────────────────────────────────────────┘
-         │ (Trigger conditionally)
+         │ (Consensus verified -> Latch confirmation - R8)
          ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ MQTone Photometric Tone-Mapping Network        [23.2 ms CPU]│
-│ Local Glare Suppression & Contrast Restoration              │
-└─────────────────────────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Dual-Task YOLOv8n Detector                     [~200 ms CPU]│
-│ Denomination Verification + Tear Localization               │
-└─────────────────────────────────────────────────────────────┘
-         │ (Reach consensus K_con = 3 consecutive frames)
-         ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Audio Speech (TTS) + Haptic Tactile Feedback (Vibration)    │
-│ Suppress deep inference to preserve battery autonomy        │
+│ 4. EXPLANATION FACILITY (TRANSLATIVE MULTIMODAL INTERFACE)   │
+│    • Natural Speech Synthesis (Android TTS: English & VN)   │
+│    • Structured Haptic Feedback (Single: Intact / Dual: Torn)│
+│    • Dynamic Bounding Box Overlay & Live Rules Monitor (R1-R8)│
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. Hardware Benchmark Setup
+## 3. Declarative Knowledge Base & Formal Rule Set (R1–R8)
 
-All experiments in this project were conducted and benchmarked on the following hardware environments:
-* **Mobile Handheld Device (Smartphone):** **Samsung Galaxy A54** (Octa-core Exynos 1380 SoC: 4$\times$ Cortex-A78 @ 2.4\,GHz + 4$\times$ Cortex-A55 @ 2.0\,GHz, 8\,GB RAM, Android 14). Used for dataset capture, 36 continuous video recordings, on-device Android execution, and live telemetry profiling (FPS, battery power, current, and temperature).
-* **Video Benchmark Computer (Host PC):** **Intel Core i7-1265U CPU @ 1.80\,GHz** (10 cores, 12 threads, 16\,GB RAM, Windows 11). Used to execute the continuous 36-video streaming benchmark and measure simulated latency/energy metrics.
-* **Training & Static Evaluation GPU:** **NVIDIA Tesla T4** (16\,GB VRAM, CUDA 12.2). Used for deterministic 5-fold model training and GPU inference latency benchmarking.
+All operational transitions, sensory triage, and safety arbitration are governed by 8 declarative rules:
+
+| Rule | Functional Role | Antecedent / Logical Condition | Consequent / Operational Action | Knowledge Source & Assistive Rationale |
+| :---: | :--- | :--- | :--- | :--- |
+| **$R_1$** | **Spatial Texture Gating** | $\sigma_{\text{gray}} \le \theta_{\text{texture}}$ <br> ($\theta_{\text{texture}} = 15.0$) | Assert `has_note = False`; suppress inference; remain in $\texttt{SEARCHING}$. | Featureless non-target frames (pockets, blank tabletops) exhibit negligible luminance variance ($<0.05$\,ms). |
+| **$R_2$** | **Photometric Readiness** | $q < \tau$ ($\tau = 0.60$) or <br> $\mathbb{I}_{\text{degraded}} = \text{True}$ ($q < 0.40$) | Invalidate optical readiness; reset $c_{\text{stable}} \leftarrow 0$; provide lighting cues. | Severe specular overexposure or underexposure degrades detector feature maps beyond operational safety. |
+| **$R_3$** | **Temporal Stability** | $(\sigma_{\text{gray}} > 15.0) \land (q \ge 0.60)$ sustained for $\ge K_{\text{opt}} = 3$ frames | Transition FSM: $\texttt{SEARCHING} \to \texttt{READY\_TO\_VERIFY}$; open burst window. | A 3-frame ($\approx 100$\,ms) dwell filters transient hand tremor while keeping latency well within interactive limits. |
+| **$R_4$** | **Verification Burst Budget** | Active attempts $m \ge M_{\text{verify}} = 2$ without consensus | Terminate burst; reset $c_{\text{stable}} \leftarrow 0$; safely return to $\texttt{SEARCHING}$. | Caps active compute per verification burst ($\le 2 \cdot T_{\text{Full}}$), preventing thermal surge and palm heating. |
+| **$R_5$** | **Candidate Filtering** | Bounding box confidence $\text{conf}(b) < \theta_{\text{conf}} = 0.25$ | Discard bounding box $b$ as noise; exclude from consensus voting. | Ultralytics standard post-NMS detection confidence threshold for YOLO architectures. |
+| **$R_6$** | **Denomination Consensus** | Candidates in burst yield: <br> $c^* = \arg\max_c \sum_{t} s_c^{(t)}$ | Finalize denomination $c^*$; transition FSM: $\texttt{READY\_TO\_VERIFY} \to \texttt{CONFIRMED}$. | Multi-frame confidence summation ensures consistent, high-certainty hypotheses override single-frame viewpoint jitter. |
+| **$R_7$** | **Two-Frame Defect Persistence** | Defect class $\texttt{torn}$ satisfies $\sum_{t} \mathbb{I}(\text{conf}_{\text{torn}} \ge \theta_{\text{conf}}) \ge 2$ | Confirm physical tear ($\hat{y}_{\text{torn}} = 1$); trigger dual-pulse haptic cue & tear alert. | **Suppresses False Alarms**: Transient specular highlights disperse across view angles, whereas genuine substrate tears persist across successive viewpoints. |
+| **$R_8$** | **Dual-Condition Latch Reset** | In $\texttt{CONFIRMED}$: <br> (a) $\sigma_{\text{gray}} \le 15.0$ <br> (b) $\|\bar{I}_t - \bar{I}_{\text{latched}}\| > 25.0$ <br> (c) Periodic 1.5s check fails | Reset latched hypothesis; transition FSM back to $\texttt{SEARCHING}$; unlock for next note. | Automatically unlocks the scanning session upon banknote withdrawal into pockets or replacement with a new note. |
 
 ---
 
-## 3. Environment Setup
+## 4. Integrated Deep Vision Models (100% Offline)
+
+All neural sub-networks are compiled to native **ONNX Runtime mobile format**, executing multi-threaded (2 threads) on the smartphone's ARM CPU without requiring any cloud or internet connection:
+
+<p align="center">
+  <img src="quality.png" alt="Quality-Gate Sensory Module" width="45%">
+  &nbsp;&nbsp;
+  <img src="mqtone.png" alt="MQTone Restoration Module" width="45%">
+</p>
+
+1. **Quality-Gate (`quality_gate.onnx` - 46 KB)**:
+   * **Input**: $64 \times 64 \times 3$ thumbnail.
+   * **Function**: 3-class photometric classification (`good`, `underexposed`, `overexposed`) paired with spatial texture standard deviation $\sigma_{\text{gray}}$.
+   * **Execution Latency**: $1.70 \pm 0.04$\,ms on mobile CPU.
+
+2. **MQTone (`mqtone.onnx` - 125 KB)**:
+   * **Input**: $640 \times 640 \times 3$ tensor.
+   * **Function**: Micro-scale Quality Tone-mapping Network ($19{,}686$ parameters). Predicts global illumination parameters $(\alpha_g, \beta_g, \gamma_g)$ and localized $8 \times 8$ residual grids to suppress localized polymer specular glare without distorting native banknote chromaticity.
+   * **Execution Latency**: $23.2$\,ms on mobile CPU.
+
+3. **Dual-Task YOLOv8n (`yolov8n_cashvision.onnx` - 12.8 MB)**:
+   * **Input**: Restored $640 \times 640 \times 3$ image.
+   * **Dual Function**:
+     * *Task 1*: Predicts bounding boxes and identifies all 6 Vietnamese polymer denominations (`10k`, `20k`, `50k`, `100k`, `200k`, `500k` VND).
+     * *Task 2*: Concurrently localizes physical substrate fractures and edge tears (`torn`).
+   * **Execution Latency**: $\approx 180 - 200$\,ms on mobile CPU.
+
+---
+
+## 5. Android Application Features & Assistive UX
+
+The CashVision mobile application is built in Kotlin with modern **Glassmorphism Dark Mode Aesthetics** compliant with international assistive accessibility standards:
+
+<p align="center">
+  <img src="joint.png" alt="CashVision Interface & FSM Overview" width="85%">
+</p>
+
+### Key User Interface Elements
+* **Viewfinder Scanner Reticle**: 1.85:1 aspect-ratio target guide tailored to Vietnamese polymer currency with breathing cyan laser corner brackets during search mode.
+* **Live Dynamic Bounding Box Overlay**:
+  * Glowing **Emerald Green** bounding box tracking the banknote with confidence score when intact.
+  * Pulsing **Coral Red** bounding box with localized dashed boxes and `[TORN DEFECT]` badges highlighting physical tear locations.
+* **FSM State Indicator**:
+  * `SEARCHING FOR BANKNOTE` (Low-power monitoring)
+  * `HOLD STEADY • VERIFYING` (Optical stability confirmed, burst active)
+  * `VERIFIED & CONFIRMED` (Transactional latch active, conserving energy)
+* **Prominent Hero Result Display**:
+  * High-contrast, large-format denomination display (e.g., `500,000 ₫`, `200,000 ₫`) with typography color dynamically matching the authentic banknote palette.
+  * Structural status pills: `BANKNOTE INTACT` or `TORN DEFECT DETECTED`.
+
+### Multimodal Assistive Features
+* **Natural Speech Synthesis (Android TTS)**: High-clarity vocal announcements communicating verified currency value and defect integrity (e.g., *"500 thousand Dong, banknote intact"* or *"20 thousand Dong, warning: torn defect detected"*).
+* **Differentiated Structured Haptic Feedback**:
+  * **Intact Banknote**: Single crisp vibrational pulse ($150$\,ms).
+  * **Torn Banknote**: Distinct dual-pulse pattern ($100$\,ms buzz – $80$\,ms pause – $150$\,ms buzz), enabling immediate tactile recognition without visual or auditory dependence.
+* **CameraX Flashlight Torch Toggle**: One-touch illumination assistance for dim and dark environments.
+* **Instant Bilingual Toggle**: Seamless one-tap language switching between **English (EN)** and **Vietnamese (VI)**.
+* **Manual Unlock Button**: Touch action to reset the FSM latch and scan a new banknote immediately.
+* **Knowledge Base & Telemetry Diagnostics Drawer**: Expandable diagnostic dashboard monitoring real-time evaluations of Rules $R_1 - R_8$, preview throughput (20.5 FPS), latency breakdown, SoC discharge current (mA), instantaneous power (W), and cumulative session energy (Joules).
+
+---
+
+## 6. Application Codebase Structure
+
+The `app_cashvision/` directory contains the complete native Android project:
+
+```
+app_cashvision/
+├── app/
+│   ├── src/
+│   │   └── main/
+│   │       ├── AndroidManifest.xml          # Camera, Vibration, and Hardware permissions
+│   │       ├── assets/                      # Bundled ONNX Runtime deep neural models
+│   │       │   ├── quality_gate.onnx        # Optical screening classifier (46 KB)
+│   │       │   ├── mqtone.onnx              # Photometric tone-mapping network (125 KB)
+│   │       │   └── yolov8n_cashvision.onnx  # Dual-task detector (12.8 MB)
+│   │       ├── java/com/cashvision/app/
+│   │       │   ├── MainActivity.kt          # CameraX stream, TTS dispatch, Haptics & UI orchestration
+│   │       │   ├── CascadeController.kt     # Temporal Consensus FSM & Rules Engine (R1–R8)
+│   │       │   ├── OverlayView.kt           # Viewfinder reticle, dynamic bounding boxes & tear highlights
+│   │       │   ├── OnnxInferenceEngine.kt   # Native C++ ONNX Runtime inference engine (2 threads)
+│   │       │   ├── BatteryMeter.kt          # BatteryManager current (mA), voltage (mV) & energy (J)
+│   │       │   └── SessionLogger.kt         # Live telemetry & field trial session logger
+│   │       └── res/
+│   │           ├── drawable/                # Glassmorphism rounded shapes, badges & action buttons
+│   │           ├── layout/activity_main.xml # Modern responsive accessibility layout
+│   │           └── values/                  # Currency color palettes, themes, and English/Vietnamese strings
+│   ├── build.gradle.kts                     # CameraX, ONNX Runtime, Material Design dependencies
+│   └── proguard-rules.pro
+├── gradle/wrapper/                          # Gradle Wrapper 8.4
+├── gradlew & gradlew.bat                    # Cross-platform Gradle automation scripts
+├── build.gradle.kts
+├── settings.gradle.kts
+└── gradle.properties                        # OpenJDK 17 and compilation JVM settings
+```
+
+---
+
+## 7. Installation & Deployment Guide
 
 ### System Requirements
-* Python 3.10 or higher
-* CUDA 12.1 / 12.2 (for GPU-accelerated model training)
-
-### Dependencies Installation
-```bash
-# Create and activate conda environment
-conda create -n cashvision python=3.10 -y
-conda activate cashvision
-
-# Install PyTorch with CUDA 12.1 support
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
-
-# Install required packages
-pip install ultralytics==8.3.0 opencv-python onnx onnxruntime-gpu pandas numpy scipy matplotlib seaborn tqdm
-```
+* Operating System: **Android 7.0 (API Level 24)** or higher (Recommended: Android 12 to 14+).
+* Rear camera with auto-focus support.
+* Storage: Minimum $150$\,MB free space.
+* **100% Offline**: No cellular data or Wi-Fi connection required.
 
 ---
 
-## 4. Running Experiment C1 (Problem Characterization)
-
-### Purpose
-Quantify the baseline performance degradation of standard detectors (YOLOv8n, YOLO11n) trained under nominal indoor conditions (`indoor`, `torn_clean`) when evaluated across adverse real-world lighting conditions (`outdoor`, `backlight`, `overexposed`, `torn_bright`).
-
-### Execution Commands
-```bash
-# Run 5-fold cross-validation on YOLOv8n and YOLO11n
-python run_e1.py --models yolov8n yolo11n --n_splits 5 --epochs 100 --batch 16 --device 0
-```
-
-Summary metrics (denomination recognition accuracy, tear mAP@50, and miss rates) are automatically recorded in `resultsc1/`.
-
----
-
-## 5. Running Experiment C2 (MQTone & Enhancement Comparison)
-
-### Purpose
-Train and evaluate **MQTone** against 9 enhancement/restoration methods (Uncorrected Baseline, Gamma Correction, CLAHE, RetinexNet, EnlightenGAN, Afifi et al. Laplacian, IAT, Zero-DCE, Zero-DCE++) under a rigorous 5-fold cross-validation protocol.
-
-### Execution Commands
-
-#### 1. Evaluate all methods across 5 folds:
-```bash
-# Train and evaluate all 10 enhancement methods across 5 folds
-python run_c2.py --model yolov8n.pt --methods all --epochs 100 --device auto
-```
-
-#### 2. Evaluate specific methods individually:
-```bash
-# Run MQTone only
-python run_c2.py --model yolov8n.pt --methods mqtone --epochs 100 --device auto
-
-# Run Zero-DCE++ only
-python run_c2.py --model yolov8n.pt --methods zerodce_pp --epochs 100 --device auto
-
-# Run RetinexNet only
-python run_c2.py --model yolov8n.pt --methods retinexnet --epochs 100 --device auto
-```
-
-#### 3. Export C2 summary tables:
-```bash
-# Export formatted summary CSV and LaTeX comparison table
-python export_tables.py
-```
-Detailed fold-by-fold results are saved under `resultv8n/` and `resultv11n/`.
-
----
-
-## 6. Running Experiment Video (Continuous Streaming Benchmark)
-
-### Purpose
-Benchmark **36 continuous handheld video streams** ($9{,}060$ frames @ 30 FPS, 7.0–9.5 seconds per session) located in `video_test/` covering all 6 denominations $\times$ 6 real-world conditions, comparing three operational paradigms:
-* **$B_0$ (Uniform-Rate):** Evaluates the full pipeline on 100% of incoming frames (30 FPS).
-* **$B_1$ (Single-Shot Blind Delay):** Waits a 1.0-second timer delay before capturing and evaluating a single static frame.
-* **Cascade:** Quality-Gate monitors frames, selectively invokes full inference only upon confirmed optical stability, and aggregates predictions via the FSM.
-
-### Execution Commands
-
-#### 1. Run all 36 video streams (108 independent runs):
-```bash
-python run_video_benchmark.py --fps 30.0 --cooldown 0.5
-```
-
-#### 2. Quick test run (2 video streams):
-```bash
-python run_video_benchmark.py --limit 2
-```
-
-## 7. Exporting ONNX Models & Android Application
-
-### 1. Export PyTorch Models to Mobile ONNX
-Convert trained PyTorch weights to optimized mobile ONNX format:
-```bash
-python export_mobile_onnx.py
-```
-Optimized ONNX files are generated in `models_mobile/`:
-* `quality_gate.onnx` ($46$\,KB): Input shape `[1, 3, 64, 64]`.
-* `mqtone.onnx` ($125$\,KB): Input shape `[1, 3, 64, 64]`.
-* `yolov8n_cashvision.onnx` ($12.8$\,MB): Input shape `[1, 3, 640, 640]`.
-
-### 2. Android Application (`app_cashvision`)
-The `app_cashvision/` directory contains the complete Android Studio project:
-* Runs **100% offline** on mobile CPU via **native ONNX Runtime C++** (`setInterOpNumThreads(2)`).
-* Integrates Android CameraX for real-time video frame acquisition.
-* Automatic Text-to-Speech (TTS) denomination announcement and haptic vibration upon tear detection.
-* Integrated `BatteryMeter.kt` for sampling real-time current, voltage, and hardware power draw.
-
-**Build and Deployment Steps:**
-1. Open the `app_cashvision` folder in **Android Studio**.
-2. Connect a **Samsung Galaxy A54** smartphone via USB with **USB Debugging** enabled.
-3. Ensure the three ONNX model files are located in `app/src/main/assets/`.
-4. Click **Run** (`Shift + F10`) or run from terminal:
-   ```bash
-   cd app_cashvision
-   ./gradlew assembleDebug
+### Option 1: Direct APK Installation (Fastest)
+1. Copy the pre-compiled debug APK to your Android device:
    ```
-5. Parse and audit live telemetry logs collected from the device:
-   ```bash
-   python audit_phone_logs.py
-   python parse_phone_logs.py
+   app_cashvision/app/build/outputs/apk/debug/app-debug.apk
    ```
+2. On your phone, tap `app-debug.apk` and grant permission to *Install unknown apps*.
+3. Launch **CashVision** and grant the **Camera** permission upon first launch.
+4. Position any polymer banknote before the camera to experience automated recognition.
+
+---
+
+### Option 2: Open and Run with Android Studio
+1. Launch **Android Studio** (Giraffe, Hedgehog, or newer).
+2. Select **Open** and navigate to `f:\CashVision\app_cashvision`.
+3. Allow Gradle to synchronize project dependencies (configured with JDK 17).
+4. Connect an Android device via USB with **USB Debugging** enabled.
+5. Press **Shift + F10** or click **Run** to compile and launch the application directly onto the device.
+
+---
+
+### Option 3: Command-Line Build
+To build a fresh APK from the terminal:
+
+```bash
+cd app_cashvision
+
+# Windows PowerShell:
+.\gradlew.bat assembleDebug
+
+# Linux / macOS:
+chmod +x gradlew
+./gradlew assembleDebug
+```
+The output APK will be generated at `app/build/outputs/apk/debug/app-debug.apk`.
