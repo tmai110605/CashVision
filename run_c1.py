@@ -96,12 +96,12 @@ def box_iou(box1, box2):
 # ─────────────────────────────────────────────────────────────────────────────
 def load_and_validate_metadata(metadata_path: Path, data_dir: Path):
     if not metadata_path.exists():
-        raise FileNotFoundError(f"❌ Metadata file not found: '{metadata_path}'!")
+        raise FileNotFoundError(f"Metadata file not found: '{metadata_path}'!")
 
     df = pd.read_csv(metadata_path)
     required_cols = {'filename', 'condition', 'is_torn'}
     if not required_cols.issubset(df.columns):
-        raise ValueError(f"❌ metadata.csv missing required columns. Required: {required_cols}")
+        raise ValueError(f"metadata.csv missing required columns. Required: {required_cols}")
 
     df['condition'] = df['condition'].astype(str).str.strip().str.lower()
     df['filename'] = df['filename'].astype(str).str.strip()
@@ -129,7 +129,7 @@ def load_and_validate_metadata(metadata_path: Path, data_dir: Path):
 
     missing_imgs = df[df['img_path'].isna()]
     if len(missing_imgs) > 0:
-        raise FileNotFoundError(f"❌ Found {len(missing_imgs)} images in metadata not found in '{data_dir}'!")
+        raise FileNotFoundError(f"Found {len(missing_imgs)} images in metadata not found in '{data_dir}'!")
 
     return df
 
@@ -148,7 +148,7 @@ def prepare_kfold_dataset(df: pd.DataFrame, experiment_dir: Path, n_splits: int 
     # 1. Indoor Train/Val pool
     normal_df = df[df['condition'].isin(['indoor', 'torn_clean'])].copy().reset_index(drop=True)
     if len(normal_df) == 0:
-        raise ValueError("❌ No indoor or torn_clean images found for training!")
+        raise ValueError("No indoor or torn_clean images found for training!")
 
     # Stratified key
     normal_df['strat_key'] = normal_df['denomination_class'].astype(str) + "_" + normal_df['is_torn'].astype(str)
@@ -474,7 +474,7 @@ def run_experiment_e1_kfold(data_dir: str, metadata: str, models: list, n_splits
     if device == 'auto':
         device = '0' if torch.cuda.is_available() else 'cpu'
 
-    print(f"🚀 [INIT] Launching Experiment E1 (5-Fold Cross-Validation) on device: {device}")
+    print(f"[INIT] Launching Experiment E1 (5-Fold Cross-Validation) on device: {device}")
 
     # Prepare K-Fold splits
     df = load_and_validate_metadata(metadata_path, data_path)
@@ -486,7 +486,7 @@ def run_experiment_e1_kfold(data_dir: str, metadata: str, models: list, n_splits
 
     for model_name in models:
         print("\n" + "=" * 80)
-        print(f"🔥 TRAINING AND EVALUATING MODEL: {model_name} (across {n_splits} Folds)")
+        print(f"TRAINING AND EVALUATING MODEL: {model_name} (across {n_splits} Folds)")
         print("=" * 80)
 
         model_out_dir = results_path / model_name
@@ -647,7 +647,7 @@ def run_experiment_e1_kfold(data_dir: str, metadata: str, models: list, n_splits
 
     # ── PRINT DETAILED TERMINAL TABLES ───────────────────────────────────────
     print("\n" + "=" * 135)
-    print("📋 TABLE 1 (E1): BANKNOTE DETECTION & CLASSIFICATION (5-FOLD MEAN ± STD)")
+    print("TABLE 1 (E1): BANKNOTE DETECTION & CLASSIFICATION (5-FOLD MEAN ± STD)")
     print("=" * 135)
     print(f"{'Model':<9} | {'Condition':<16} | {'Top-1 Acc (%)':<16} | {'Δ vs Indoor (%)':<18} | {'Banknote mAP50':<16} | {'Banknote IoU(%)':<17} | {'Miss Rate(%)'}")
     print("-" * 135)
@@ -656,7 +656,7 @@ def run_experiment_e1_kfold(data_dir: str, metadata: str, models: list, n_splits
     print("=" * 135)
 
     print("\n" + "=" * 155)
-    print("🩹 TABLE 2 (E1): TEAR DETECTION & LOCALIZATION (5-FOLD MEAN ± STD)")
+    print("TABLE 2 (E1): TEAR DETECTION & LOCALIZATION (5-FOLD MEAN ± STD)")
     print("=" * 155)
     print(f"{'Model':<9} | {'Condition':<16} | {'Data Type':<12} | {'Accuracy(%)':<16} | {'False Alarm(%)':<18} | {'Tear mAP50':<16} | {'Tear IoU(%)':<15} | {'Miss Rate(%)'}")
     print("-" * 155)
@@ -665,14 +665,14 @@ def run_experiment_e1_kfold(data_dir: str, metadata: str, models: list, n_splits
     print("=" * 155)
 
     print("\n" + "=" * 105)
-    print("📈 TABLE 3 (E3): TASK DEGRADATION COMPARISON UNDER SEVERE GLARE")
+    print("TABLE 3 (E3): TASK DEGRADATION COMPARISON UNDER SEVERE GLARE")
     print("=" * 105)
     print(f"{'Model':<9} | {'Test Condition':<24} | {'Denom Acc Degradation':<25} | {'Tear mAP50 Degradation':<25}")
     print("-" * 105)
     for _, r in e3_df.iterrows():
         print(f"{r['model']:<9} | {r['condition']:<24} | {r['task1_denom_acc_drop']:<25} | {r['task2_tear_mAP50_drop']:<25}")
     print("=" * 105)
-    print(f"\n📁 Successfully saved 3 detailed CSV files:")
+    print(f"\nSuccessfully saved 3 detailed CSV files:")
     print(f"  - Table 1: {denom_csv}")
     print(f"  - Table 2: {tear_csv}")
     print(f"  - Table 3: {e3_csv}\n")

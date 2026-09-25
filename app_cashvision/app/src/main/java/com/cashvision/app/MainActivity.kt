@@ -225,12 +225,12 @@ class MainActivity : AppCompatActivity() {
             try {
                 inferenceEngine.init()
                 runOnUiThread {
-                    Toast.makeText(this, "✅ CashVision AI Engine Ready!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "CashVision AI Engine Ready!", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
                 runOnUiThread {
-                    Toast.makeText(this, "❌ Model initialization error: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Model initialization error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         }.start()
@@ -415,17 +415,17 @@ class MainActivity : AppCompatActivity() {
         // Update State Badge
         when (state) {
             CascadeState.SEARCHING -> {
-                tvStateBadge.text = "🔍 SEARCHING FOR BANKNOTE"
+                tvStateBadge.text = "SEARCHING FOR BANKNOTE"
                 tvStateBadge.setTextColor(ContextCompat.getColor(this, R.color.accent_cyan))
                 tvStateBadge.setBackgroundResource(R.drawable.bg_badge_state)
             }
             CascadeState.READY_TO_VERIFY -> {
-                tvStateBadge.text = "⚡ HOLD STEADY • VERIFYING"
+                tvStateBadge.text = "HOLD STEADY - VERIFYING"
                 tvStateBadge.setTextColor(ContextCompat.getColor(this, R.color.accent_gold))
                 tvStateBadge.setBackgroundResource(R.drawable.bg_badge_state)
             }
             CascadeState.CONFIRMED -> {
-                tvStateBadge.text = "✔ VERIFIED & CONFIRMED"
+                tvStateBadge.text = "VERIFIED & CONFIRMED"
                 tvStateBadge.setTextColor(ContextCompat.getColor(this, R.color.accent_green))
                 tvStateBadge.setBackgroundResource(R.drawable.bg_badge_state)
             }
@@ -469,7 +469,7 @@ class MainActivity : AppCompatActivity() {
         } else if (state == CascadeState.READY_TO_VERIFY) {
             tvHeroDenomination.text = "..."
             tvHeroDenomination.setTextColor(ContextCompat.getColor(this, R.color.accent_gold))
-            tvDefectStatus.text = "⚡ VERIFYING"
+            tvDefectStatus.text = "VERIFYING"
             tvDefectStatus.setBackgroundResource(R.drawable.bg_rule_chip)
             tvDefectStatus.setTextColor(ContextCompat.getColor(this, R.color.accent_gold))
             tvVerificationNote.text = "Aggregating multi-frame temporal consensus (Rules R6/R7)..."
@@ -482,9 +482,9 @@ class MainActivity : AppCompatActivity() {
             val rule = controller.currentRuleStatus
             tvFps.text = String.format("Cadence: %.1f FPS", currentFps)
 
-            chipR1.text = String.format("R1 Texture: %.1f %s", rule.r1StdDev, if (rule.r1TexturePass) "✔" else "✖")
-            chipR2.text = String.format("R2 Light: %d%% %s", (rule.r2Score * 100).toInt(), if (rule.r2PhotoPass) "✔" else "✖")
-            chipR3.text = String.format("R3 Dwell: %d/3 %s", rule.r3Count, if (rule.r3StablePass) "✔" else "⏳")
+            chipR1.text = String.format("R1 Texture: %.1f %s", rule.r1StdDev, if (rule.r1TexturePass) "[PASS]" else "[FAIL]")
+            chipR2.text = String.format("R2 Light: %d%% %s", (rule.r2Score * 100).toInt(), if (rule.r2PhotoPass) "[PASS]" else "[FAIL]")
+            chipR3.text = String.format("R3 Dwell: %d/3 %s", rule.r3Count, if (rule.r3StablePass) "[PASS]" else "[WAIT]")
             chipR4.text = String.format("R4 Burst: %d/2", rule.r4BurstCount)
             chipR6.text = String.format("R6 Consensus: %s", rule.r6ConsensusWinner ?: "None")
             chipR7.text = String.format("R7 Torn: %s (%d)", if (rule.r7DefectConfirmed) "TORN" else "INTACT", rule.r7TornFrameCount)
@@ -513,7 +513,7 @@ class MainActivity : AppCompatActivity() {
     private fun updateSearchingUI() {
         tvHeroDenomination.text = "--- ₫"
         tvHeroDenomination.setTextColor(ContextCompat.getColor(this, R.color.white))
-        tvDefectStatus.text = "🔍 AWAITING BANKNOTE"
+        tvDefectStatus.text = "AWAITING BANKNOTE"
         tvDefectStatus.setBackgroundResource(R.drawable.bg_rule_chip)
         tvDefectStatus.setTextColor(ContextCompat.getColor(this, R.color.text_secondary))
         tvVerificationNote.text = "Present banknote before camera • Automated expert verification"
@@ -551,19 +551,19 @@ class MainActivity : AppCompatActivity() {
         batteryMeter.reset()
 
         val logFile = sessionLogger.startSession("cascade")
-        btnRecord.text = "⏳ STOP BENCHMARK (30S REMAINING)"
+        btnRecord.text = "STOP BENCHMARK (30S REMAINING)"
         btnRecord.setBackgroundColor(ContextCompat.getColor(this, R.color.accent_red))
 
         recordingTimer = object : CountDownTimer(30000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                btnRecord.text = "⏳ STOP BENCHMARK (${millisUntilFinished / 1000}S REMAINING)"
+                btnRecord.text = "STOP BENCHMARK (${millisUntilFinished / 1000}S REMAINING)"
             }
 
             override fun onFinish() {
                 stopBenchmarkSession()
                 Toast.makeText(
                     this@MainActivity,
-                    "🎉 30s benchmark finished!\nSaved: ${logFile.name}",
+                    "30s benchmark finished!\nSaved: ${logFile.name}",
                     Toast.LENGTH_LONG
                 ).show()
                 speakDirect("30-second benchmark telemetry session completed")

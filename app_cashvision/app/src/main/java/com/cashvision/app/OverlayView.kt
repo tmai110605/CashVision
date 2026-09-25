@@ -190,8 +190,8 @@ class OverlayView @JvmOverloads constructor(
 
         // Floating Title Badge
         val title = denomination?.let { "$it ₫" } ?: "Analyzing..."
-        val statusText = if (isTorn) "⚠️ TORN DEFECT • ${(confidence * 100).toInt()}%"
-                         else "✔ INTACT • ${(confidence * 100).toInt()}%"
+        val statusText = if (isTorn) "TORN DEFECT - ${(confidence * 100).toInt()}%"
+                         else "INTACT - ${(confidence * 100).toInt()}%"
 
         val titleW = textPaint.measureText(title)
         val statusW = subTextPaint.measureText(statusText)
@@ -222,7 +222,7 @@ class OverlayView @JvmOverloads constructor(
         canvas.drawRoundRect(rect, 10f, 10f, tearBoxPaint)
 
         // Mini warning tag
-        val tagText = "⚠️ TORN"
+        val tagText = "TORN"
         val tagW = subTextPaint.measureText(tagText) + 20f
         val tagH = 40f
         val tagRect = RectF(rect.left, max(8f, rect.top - tagH - 4f), rect.left + tagW, max(8f, rect.top - tagH - 4f) + tagH)

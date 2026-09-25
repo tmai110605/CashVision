@@ -8,8 +8,8 @@
     <string name="state_confirmed">VERIFIED &amp; CONFIRMED</string>
 
     <!-- Structural Integrity Status -->
-    <string name="defect_intact">✔ BANKNOTE INTACT</string>
-    <string name="defect_torn">⚠️ TORN DEFECT DETECTED</string>
+    <string name="defect_intact">BANKNOTE INTACT</string>
+    <string name="defect_torn">TORN DEFECT DETECTED</string>
 
     <!-- Assistive Lighting Guidance -->
     <string name="lighting_good">Optimal Lighting • Scanning Active</string>
@@ -17,11 +17,11 @@
     <string name="lighting_under">Warning: Low Light • Turn on Torch</string>
 
     <!-- Interactive Actions -->
-    <string name="action_repeat">🔊 Repeat Result</string>
-    <string name="action_reset">🔄 Scan New Note</string>
+    <string name="action_repeat">Repeat Result</string>
+    <string name="action_reset">Scan New Note</string>
     <string name="action_telemetry">Knowledge Base &amp; Telemetry</string>
 
     <!-- Benchmark Actions -->
-    <string name="start_bench">▶ START TELEMETRY BENCHMARK (30S)</string>
-    <string name="stop_bench">⏳ STOP BENCHMARK</string>
+    <string name="start_bench">START TELEMETRY BENCHMARK (30S)</string>
+    <string name="stop_bench">STOP BENCHMARK</string>
 </resources>

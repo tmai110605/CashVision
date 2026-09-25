@@ -239,39 +239,3 @@ chmod +x gradlew
 ```
 The output APK will be generated at `app/build/outputs/apk/debug/app-debug.apk`.
 
----
-
-## 8. Python Research Benchmarks (Contributions C1, C2, C3)
-
-The repository provides automated Python orchestration scripts for all three core scientific contributions in the manuscript:
-
-### Contribution C1: Problem Characterization & Cross-Condition Evaluation
-Evaluates dual-task YOLO detectors across 5-fold cross-validation under adverse illumination regimes:
-```bash
-python run_c1.py --model yolov8n.pt --folds 5
-```
-
-### Contribution C2: MQTone Adaptive Enhancement & Comparative Evaluation
-Benchmarks the proposed MQTone module against state-of-the-art illumination enhancers (Zero-DCE, IAT, RetinexNet, EnlightenGAN, Gamma, CLAHE):
-```bash
-# Fast ablation (Fold 1):
-python run_c2.py --stage ablation --config mqtone --device cpu
-
-# 5-fold cross-validation benchmark:
-python run_c2.py --stage final --methods mqtone,none --device cpu
-```
-
-### Contribution C3: Adaptive Cascade Video Stream Benchmark
-Executes continuous handheld video stream evaluation for the proposed **Adaptive Cascade Expert Pipeline** across 36 real-world test videos ($9{,}060$ frames, 6 denominations $\times$ 6 conditions):
-```bash
-# Full 36-video benchmark on host CPU:
-python run_c3.py --video_dir video_test --device cpu
-
-# Quick test on first 2 video sessions (fast mode):
-python run_c3.py --limit 2 --fast
-
-# Re-export summary tables and LaTeX code from existing raw results:
-python run_c3.py --export_only
-```
-The script evaluates the Tier-1 spatial variance filter ($\theta_{\text{texture}} = 15.0$), Tier-2 Quality-Gate ($\tau = 0.60$), 3-state FSM ($K_{\text{opt}} = 3, M_{\text{verify}} = 2$), MQTone enhancement, dual-task YOLOv8n detection ($\theta_{\text{conf}} = 0.25$), and multi-frame temporal consensus (Rules $R_6$ and $R_7$). Outputs include overall metrics, condition breakdowns, denomination breakdowns, and analytical host CPU energy decomposition ($E_{\text{session}} = E_{\text{overhead}} + E_{\text{QGate}} + E_{\text{infer}}$).
-

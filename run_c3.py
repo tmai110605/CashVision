@@ -222,7 +222,7 @@ class CascadeSensoryGate:
             self.loaded = True
         else:
             self.loaded = False
-            print(f"⚠️ [QualityGate] Warning: weights not found at {weights_path}")
+            print(f"[QualityGate] Warning: weights not found at {weights_path}")
 
     @torch.no_grad()
     def evaluate(self, frame_bgr: np.ndarray, tau: float = 0.60, theta_texture: float = 15.0) -> Dict[str, Any]:
@@ -293,7 +293,7 @@ class CascadeFullInspectionPipeline:
             self.loaded = True
         else:
             self.loaded = False
-            print(f"⚠️ [FullPipeline] Warning: weights not found at {weights_path}")
+            print(f"[FullPipeline] Warning: weights not found at {weights_path}")
 
     @torch.no_grad()
     def infer(self, frame_bgr: np.ndarray, conf_thresh: float = 0.25) -> Dict[str, Any]:
@@ -505,7 +505,7 @@ def discover_video_sessions(video_dir: Path) -> List[Dict[str, Any]]:
                 "is_torn": is_torn
             })
         else:
-            print(f"⚠️ Warning: Could not parse video filename pattern: {v.name}")
+            print(f"Warning: Could not parse video filename pattern: {v.name}")
 
     return sessions
 
@@ -931,7 +931,7 @@ def main():
     latex_path = output_dir / "cascade_table_latex.tex"
 
     print("=" * 88, flush=True)
-    print("🎬 CASHVISION CONTRIBUTION C3: ADAPTIVE CASCADE VIDEO STREAM BENCHMARK", flush=True)
+    print("CASHVISION CONTRIBUTION C3: ADAPTIVE CASCADE VIDEO STREAM BENCHMARK", flush=True)
     print("   Protocol: Offline Continuous Handheld Video Streaming (Intel Host CPU Proxy)", flush=True)
     print("   Pipeline: Tier-1 Texture Filter + Tier-2 Quality-Gate + 3-State FSM + MQTone + YOLOv8n", flush=True)
     print(f"   Parameters: tau={args.tau}, K_opt={args.k_opt}, M_verify={args.m_verify}, theta_conf={args.theta_conf}, TDP={args.tdp_watts}W", flush=True)
@@ -942,7 +942,7 @@ def main():
         if not raw_csv_path.exists():
             alt_path = output_dir / "video_benchmark_raw.csv"
             if alt_path.exists():
-                print(f"📄 Found legacy raw log at {alt_path}. Filtering for Cascade runs...")
+                print(f"Found legacy raw log at {alt_path}. Filtering for Cascade runs...")
                 df_all = pd.read_csv(alt_path)
                 df_raw = df_all[df_all["system"] == "cascade"].copy()
                 if "energy_joules" in df_raw.columns and "host_energy_proxy_j" not in df_raw.columns:
@@ -970,26 +970,26 @@ def main():
                     df_raw["session_duration_s"] = 12.49
                 df_raw.to_csv(raw_csv_path, index=False)
             else:
-                print(f"❌ Error: Raw CSV log not found at {raw_csv_path} for export-only mode.")
+                print(f"Error: Raw CSV log not found at {raw_csv_path} for export-only mode.")
                 sys.exit(1)
         else:
-            print(f"📄 Loading existing raw benchmark results from {raw_csv_path}...")
+            print(f"Loading existing raw benchmark results from {raw_csv_path}...")
             df_raw = pd.read_csv(raw_csv_path)
     else:
         video_dir = Path(args.video_dir)
         if not video_dir.exists():
-            print(f"❌ Error: Video directory not found at {video_dir}")
+            print(f"Error: Video directory not found at {video_dir}")
             sys.exit(1)
 
         sessions = discover_video_sessions(video_dir)
-        print(f"✅ Discovered {len(sessions)} continuous video sessions in {video_dir}")
+        print(f"Discovered {len(sessions)} continuous video sessions in {video_dir}")
 
         if args.limit:
-            print(f"⚠️ [TEST MODE] Limiting evaluation to first {args.limit} sessions.")
+            print(f"[TEST MODE] Limiting evaluation to first {args.limit} sessions.")
             sessions = sessions[:args.limit]
 
         # Initialize neural components
-        print(f"\n📦 Initializing neural modules on {args.device.upper()}...", flush=True)
+        print(f"\nInitializing neural modules on {args.device.upper()}...", flush=True)
         t0_load = time.time()
 
         sensory_gate = CascadeSensoryGate(
@@ -1004,7 +1004,7 @@ def main():
             device=args.device,
             img_size=640
         )
-        print(f"✅ Neural pipelines loaded in {time.time() - t0_load:.2f}s.\n", flush=True)
+        print(f"Neural pipelines loaded in {time.time() - t0_load:.2f}s.\n", flush=True)
 
         session_summaries: List[Dict[str, Any]] = []
         total_sessions = len(sessions)
@@ -1016,7 +1016,7 @@ def main():
             denom = s["denomination"]
             is_torn = s["is_torn"]
 
-            print(f"[{idx:02d}/{total_sessions:02d}] ▶ Replaying {sess_name:<24} | Denom: {denom:<4} | Cond: {cond:<11} | Torn: {str(is_torn):<5}", end="", flush=True)
+            print(f"[{idx:02d}/{total_sessions:02d}] Replaying {sess_name:<24} | Denom: {denom:<4} | Cond: {cond:<11} | Torn: {str(is_torn):<5}", end="", flush=True)
 
             t0_sess = time.time()
             res = execute_cascade_session(
@@ -1035,7 +1035,7 @@ def main():
             sess_wall_time = time.time() - t0_sess
             session_summaries.append(res)
 
-            status_symbol = "✅" if res["exact_match_pct"] == 100.0 else ("⚠️" if res["denom_accuracy_pct"] == 100.0 else "❌")
+            status_symbol = "[OK]" if res["exact_match_pct"] == 100.0 else ("[WARN]" if res["denom_accuracy_pct"] == 100.0 else "[FAIL]")
             print(f" -> {status_symbol} Exact: {res['exact_match_pct']:3.0f}% | Denom: {res['confirmed_denom']:<4} | Trig: {res['triggered_count']:2d}/{res['total_frames']:3d} ({res['trigger_rate_pct']:4.1f}%) | Energy: {res['host_energy_proxy_j']:5.1f}J | TTC: {res['time_to_confirm_s']:4.2f}s | Wall: {sess_wall_time:4.1f}s", flush=True)
 
             # Incremental save after each session
@@ -1047,7 +1047,7 @@ def main():
 
         total_elapsed = time.time() - t_bench_start
         print("\n" + "=" * 88, flush=True)
-        print(f"🎉 CASCADE BENCHMARK COMPLETED across {len(session_summaries)} sessions in {total_elapsed / 60:.2f} minutes!", flush=True)
+        print(f"CASCADE BENCHMARK COMPLETED across {len(session_summaries)} sessions in {total_elapsed / 60:.2f} minutes!", flush=True)
         print("=" * 88, flush=True)
 
         df_raw = pd.DataFrame(session_summaries)
@@ -1079,19 +1079,19 @@ def main():
     # ─────────────────────────────────────────────────────────────────────────
     # Console Summary Presentation
     # ─────────────────────────────────────────────────────────────────────────
-    print("\n📊 TABLE 1: OVERALL CASCADE BENCHMARK PERFORMANCE (N = 36 SESSIONS):")
+    print("\nTABLE 1: OVERALL CASCADE BENCHMARK PERFORMANCE (N = 36 SESSIONS):")
     print(t1_overall.to_string(index=False))
 
-    print("\n📊 TABLE 2: PERFORMANCE BREAKDOWN ACROSS ENVIRONMENTAL CONDITIONS:")
+    print("\nTABLE 2: PERFORMANCE BREAKDOWN ACROSS ENVIRONMENTAL CONDITIONS:")
     print(t2_conditions.to_string(index=False))
 
-    print("\n📊 TABLE 3: PERFORMANCE BREAKDOWN ACROSS BANKNOTE DENOMINATIONS:")
+    print("\nTABLE 3: PERFORMANCE BREAKDOWN ACROSS BANKNOTE DENOMINATIONS:")
     print(t3_denoms.to_string(index=False))
 
-    print("\n⚡ ANALYTICAL ENERGY PROXY DECOMPOSITION (HOST PC INTEL CPU @ 28W TDP):")
+    print("\nANALYTICAL ENERGY PROXY DECOMPOSITION (HOST PC INTEL CPU @ 28W TDP):")
     print(t_energy.to_string(index=False))
 
-    print(f"\n📁 All benchmark artifacts and summary tables exported successfully to: {output_dir.resolve()}/")
+    print(f"\nAll benchmark artifacts and summary tables exported successfully to: {output_dir.resolve()}/")
 
 
 if __name__ == "__main__":

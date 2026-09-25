@@ -107,7 +107,7 @@ def generate_metadata(data_dir: str, output_csv: str, include_splits: list = Non
         split_lbl_dir = data_path / split / "labels"
 
         if not split_img_dir.exists():
-            print(f"⚠️ Directory not found: {split_img_dir}, skipping.")
+            print(f"Directory not found: {split_img_dir}, skipping.")
             continue
 
         for img_file in sorted(split_img_dir.iterdir()):
@@ -125,7 +125,7 @@ def generate_metadata(data_dir: str, output_csv: str, include_splits: list = Non
             is_torn_final = "true" if (is_torn_by_name == "true" or has_torn_label) else "false"
 
             if cond is None or denom is None:
-                print(f"⚠️ Warning: Failed to parse file: {fname} (denom={denom}, cond={cond})")
+                print(f"Warning: Failed to parse file: {fname} (denom={denom}, cond={cond})")
                 skipped += 1
                 continue
 
@@ -145,7 +145,7 @@ def generate_metadata(data_dir: str, output_csv: str, include_splits: list = Non
 
     # Summary statistics
     print("\n" + "=" * 60)
-    print(f"✅ CATALOG GENERATED: {out_path}")
+    print(f"CATALOG GENERATED: {out_path}")
     print("=" * 60)
     print(f"  Total images indexed: {len(rows)}")
     print(f"  Skipped files:       {skipped}")
@@ -159,7 +159,7 @@ def generate_metadata(data_dir: str, output_csv: str, include_splits: list = Non
         if r['is_torn'] == 'true':
             torn_counts[c] = torn_counts.get(c, 0) + 1
 
-    print("\n📊 DISTRIBUTION BY CONDITION:")
+    print("\nDISTRIBUTION BY CONDITION:")
     for cond, count in sorted(cond_counts.items()):
         torn_c = torn_counts.get(cond, 0)
         print(f"  - {cond:<16}: {count:>4} images (torn: {torn_c:>3})")

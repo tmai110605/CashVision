@@ -199,7 +199,7 @@ def prepare_protocol_b_splits(df: pd.DataFrame, data_dir: Path, results_dir: Pat
         gen_val_df, remaining_excluded_df = carve_generalization_val_set(excluded_df, seed=seed)
         locked_test_df = pd.concat([locked_test_df, remaining_excluded_df], ignore_index=True)
 
-        print(f"  ⚠️  [RESTRICT] Restricting training pool to conditions: {sorted(restrict_set)}")
+        print(f"  [RESTRICT] Restricting training pool to conditions: {sorted(restrict_set)}")
         print(f"      -> {len(excluded_df)} images (other conditions) excluded from train")
         print(f"      -> {len(gen_val_df)} images reserved for Generalization Dev Set "
               f"(checkpoint selection only, NOT included in final test metrics)")
@@ -383,14 +383,14 @@ def train_and_eval_config(
     metrics_file = output_dir / "metrics_per_condition.csv"
     weights_file = output_dir / "full_pipeline_weights.pt"
     if metrics_file.exists() and weights_file.exists() and not force_retrain:
-        print(f"\n⚡ [CHECKPOINT FOUND] Results already exist at: {output_dir} -> Skipping training!")
+        print(f"\n[CHECKPOINT FOUND] Results already exist at: {output_dir} -> Skipping training!")
         metrics_df = pd.read_csv(metrics_file)
         pipeline = C2DetectionPipeline(weights_path=yolo_weights, correction_method=method).to(device)
         pipeline.load_state_dict(torch.load(weights_file, map_location=device))
         return metrics_df, pipeline
 
     print(f"\n{'='*75}")
-    print(f"🚀 Training Method: {METHOD_DISPLAY_NAMES.get(method, method)} "
+    print(f"Training Method: {METHOD_DISPLAY_NAMES.get(method, method)} "
           f"(Correction: {use_correction} | Learnable: {is_learnable})")
     print(f"{'='*75}")
 
@@ -416,7 +416,7 @@ def train_and_eval_config(
         if extra_val_df is not None and len(extra_val_df) > 0:
             n_before = len(val_df)
             val_df = pd.concat([val_df, extra_val_df], ignore_index=True)
-            print(f"  ℹ️  [VAL SET] Added {len(extra_val_df)} Generalization Dev Set images "
+            print(f"  [VAL SET] Added {len(extra_val_df)} Generalization Dev Set images "
                   f"into val set ({n_before} -> {len(val_df)} images) for checkpoint selection.")
         val_dataset = CashVisionDataset(val_df, img_size=640, load_clean_ref=False)
         val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=cashvision_collate_fn)
@@ -528,7 +528,7 @@ def train_and_eval_config(
                 val_str = f" | Val_Loss: {monitor_loss:.4f}" if val_loader is not None else ""
                 cur_lr = optimizer.param_groups[0]['lr']
                 print(f"  Epoch {epoch:02d}/{epochs:02d} | Loss_Det: {avg_det:.4f}{photo_str} | Total: {avg_total:.4f}{val_str} | NoImprove: {epochs_no_improve}/{early_stopping_patience} | LR: {cur_lr:.2e} ({t_epoch:.1f}s)")
-            print(f"  ⏹️  [EARLY STOPPING] Stopping training at epoch {epoch}/{epochs}: "
+            print(f"  [EARLY STOPPING] Stopping training at epoch {epoch}/{epochs}: "
                   f"{monitor_metric_name} did not improve for {early_stopping_patience} consecutive epochs "
                   f"(best: epoch {best_epoch}, {monitor_metric_name}={best_loss:.4f}).")
             stopped_early = True
@@ -537,7 +537,7 @@ def train_and_eval_config(
     # Restore best checkpoint (lowest monitor_loss) before saving and evaluation.
     if best_state is not None:
         pipeline.load_state_dict(best_state)
-        print(f"  ✅ [BEST CHECKPOINT] Restored epoch {best_epoch} ({monitor_metric_name}={best_loss:.4f}) for saving & evaluation.")
+        print(f"  [BEST CHECKPOINT] Restored epoch {best_epoch} ({monitor_metric_name}={best_loss:.4f}) for saving & evaluation.")
 
     # Save training curves (+ val curves if available)
     pd.DataFrame(training_curves).to_csv(output_dir / "training_curves.csv", index=False)
@@ -566,7 +566,7 @@ def train_and_eval_config(
     test_conditions = ['indoor', 'outdoor', 'backlight', 'overexposed', 'torn_clean', 'torn_bright']
     eval_records = []
 
-    print(f"\n🔍 [EVALUATION] Evaluating Method '{METHOD_DISPLAY_NAMES.get(method, method)}' across {len(test_conditions)} test conditions:")
+    print(f"\n[EVALUATION] Evaluating Method '{METHOD_DISPLAY_NAMES.get(method, method)}' across {len(test_conditions)} test conditions:")
     for cond in test_conditions:
         sub_df = eval_df[eval_df['condition'].str.lower() == cond].reset_index(drop=True)
         if len(sub_df) == 0:
@@ -574,7 +574,7 @@ def train_and_eval_config(
         m = evaluate_c2_pipeline(pipeline, sub_df, cond, device)
         eval_records.append(m)
         map_str = f"{m['mAP50_tear']:.1f}%" if m['mAP50_tear'] is not None else "N/A"
-        print(f"  ▶ {cond:<14} ({len(sub_df):>3} imgs) | Acc Denom: {m['accuracy_denom']:>5.1f}% | mAP50 Tear: {map_str:>5} | Torn F1: {m['torn_f1']:>5.1f}% | False Alarm: {m['false_alarm_rate']:.1f}%")
+        print(f"  > {cond:<14} ({len(sub_df):>3} imgs) | Acc Denom: {m['accuracy_denom']:>5.1f}% | mAP50 Tear: {map_str:>5} | Torn F1: {m['torn_f1']:>5.1f}% | False Alarm: {m['false_alarm_rate']:.1f}%")
 
     metrics_df = pd.DataFrame(eval_records)
     metrics_df.to_csv(output_dir / "metrics_per_condition.csv", index=False)
@@ -630,7 +630,7 @@ def main():
 
     device = '0' if (args.device == 'auto' and torch.cuda.is_available()) else args.device
     device = normalize_device(device)
-    print(f"🚀 [INIT] Starting C2 Pipeline on device: {device}")
+    print(f"[INIT] Starting C2 Pipeline on device: {device}")
 
     # Load metadata
     meta_file = Path(args.metadata).resolve()
@@ -687,10 +687,10 @@ def main():
         q_weights = results_path / "quality_gate_weights.pt"
         q_sweep_csv = results_path / "quality_gate_threshold_sweep.csv"
         if q_weights.exists() and q_sweep_csv.exists() and not args.force_retrain:
-            print("\n⚡ [QUALITY-GATE FOUND] Pretrained weights and threshold sweep found for Quality Gate -> Skipping training.")
+            print("\n[QUALITY-GATE FOUND] Pretrained weights and threshold sweep found for Quality Gate -> Skipping training.")
         else:
             print("\n" + "=" * 75)
-            print("🛡️ QUALITY-GATE: TRAINING & SWEEPING TAU THRESHOLD")
+            print("QUALITY-GATE: TRAINING & SWEEPING TAU THRESHOLD")
             print("=" * 75)
             gate_train_df = fold_data[0]['fold_test_df']  # Use split from fold 1
             q_model = train_quality_gate(gate_train_df, fold_data[0]['fold_test_df'], device=device, epochs=20)
@@ -706,7 +706,7 @@ def main():
     # ─────────────────────────────────────────────────────────────────────────
     if args.stage == "ablation":
         print("\n" + "=" * 85)
-        print("📊 STAGE 1: CORRECTION METHOD ABLATION (Running on Fold 1)")
+        print("STAGE 1: CORRECTION METHOD ABLATION (Running on Fold 1)")
         print("=" * 85)
 
         methods_to_run = CORRECTION_METHODS if args.config == "all" else [('mqtone' if args.config == 'icnet' else args.config)]
@@ -754,14 +754,14 @@ def main():
         summary_ablation_df.to_csv(ablation_csv, index=False)
 
         print("\n" + "=" * 130)
-        print("📋 METHOD ABLATION SUMMARY TABLE (STAGE 1 - FOLD 1)")
+        print("METHOD ABLATION SUMMARY TABLE (STAGE 1 - FOLD 1)")
         print("=" * 130)
         print(f"{'Method':<26} | {'Condition':<14} | {'Acc Denom (%)':<15} | {'mAP50 Tear':<12} | {'Torn F1':<9} | {'Params':<10} | {'Latency'}")
         print("-" * 130)
         for _, r in summary_ablation_df.iterrows():
             print(f"{r['method']:<26} | {r['condition']:<14} | {r['accuracy_denom']:<15} | {str(r['mAP50_tear']):<12} | {r['torn_f1']:<9} | {str(r['added_params']):<10} | {r['added_latency_ms']} ms")
         print("=" * 130)
-        print(f"📁 Ablation table saved to: {ablation_csv}\n")
+        print(f"Ablation table saved to: {ablation_csv}\n")
 
     # ─────────────────────────────────────────────────────────────────────────
     # STAGE 2: OFFICIAL 5-FOLD RESULTS — BENCHMARKING ALL METHODS (MEAN ± STD)
@@ -778,7 +778,7 @@ def main():
                               f"Valid options: {CORRECTION_METHODS}")
 
         print("\n" + "=" * 85)
-        print(f"🏆 STAGE 2: OFFICIAL 5-FOLD RESULTS — BENCHMARKING {len(methods_to_run)} METHODS")
+        print(f"STAGE 2: OFFICIAL 5-FOLD RESULTS — BENCHMARKING {len(methods_to_run)} METHODS")
         print(f"   {', '.join(METHOD_DISPLAY_NAMES.get(m, m) for m in methods_to_run)}")
         print(f"   (Evaluated on Locked Test Set: {len(locked_test_df)} images)")
         print("=" * 85)
@@ -862,7 +862,7 @@ def main():
         headline_df.to_csv(headline_csv, index=False)
 
         print("\n" + "=" * 150)
-        print("📊 OFFICIAL 5-FOLD RESULTS TABLE — BENCHMARKING MQTONE AGAINST BASELINES (MEAN ± STD)")
+        print("OFFICIAL 5-FOLD RESULTS TABLE — BENCHMARKING MQTONE AGAINST BASELINES (MEAN ± STD)")
         print("=" * 150)
         print(f"{'Method':<24} | {'Condition':<12} | {'Acc Denom (%)':<15} | {'Torn F1 (%)':<15} | {'Torn mAP50 (%)':<17} | {'False Alarm (%)':<17} | {'Params':<10} | {'Latency (ms)'}")
         print("-" * 150)
@@ -870,8 +870,8 @@ def main():
             print(f"{r['method']:<24} | {r['condition']:<12} | {r['accuracy_denom (%)']:<15} | {r['Torn_F1 (%)']:<15} | "
                   f"{r['Torn_mAP50 (%)']:<17} | {r['false_alarm_rate (%)']:<17} | {r['Params (added)']:<10} | {r['Latency_ms (added)']}")
         print("=" * 150)
-        print(f"📁 Full table (all columns) saved to: {headline_csv}")
-        print(f"📁 Raw per-fold/method metrics saved to: {results_path / 'final_all_methods_all_folds_raw.csv'}\n")
+        print(f"Full table (all columns) saved to: {headline_csv}")
+        print(f"Raw per-fold/method metrics saved to: {results_path / 'final_all_methods_all_folds_raw.csv'}\n")
 
 
 if __name__ == "__main__":
