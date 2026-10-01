@@ -4,10 +4,6 @@
   <img src="graphic.png" alt="CashVision System Architecture Overview" width="90%">
 </p>
 
-[![Journal](https://img.shields.io/badge/Journal-JRTIP%20(Springer)-007acc.svg)](https://www.springer.com/journal/11554)
-[![Platform](https://img.shields.io/badge/Platform-Android%20(CameraX%20%7C%20ONNX%20Runtime)-green.svg)](https://developer.android.com/)
-[![Execution](https://img.shields.io/badge/Inference-100%25%20Offline%20(ARM%20CPU)-orange.svg)]()
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 **CashVision** is an on-device, **100% offline real-time computer vision pipeline** engineered for commodity mobile SoCs. It empowers visually impaired individuals to autonomously verify Vietnamese polymer currency (VND) and screen physical substrate tears under severe specular glare, motion blur, and unconstrained ambient lighting.
 
